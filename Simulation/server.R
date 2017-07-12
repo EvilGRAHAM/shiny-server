@@ -813,74 +813,74 @@ function(input, output, session) {
     b_kern
     b_ecdf
 
-    c_base <-
-      ggplot(
-        fitted_actual_input_summary_tidy %>%
-          filter(
-            Model != "SD Predicted VP"
-            ,Model != "Median Predicted VP"
-          )
-        ,aes(
-          x = Month
-          ,y = VP
-          ,colour = Model
-        )
-      ) +
-      scale_x_discrete(
-        labels = Mth_comb
-      ) +
-      scale_colour_brewer(
-        type = "qual"
-        ,name = "Model:"
-        ,palette = "Dark2"
-      ) +
-      labs(
-        title = "Actual vs. Fitted VP by Month"
-        ,subtitle =
-          paste(
-            "For"
-            ,Crude_Breakdown_Cleaned[Crude_Breakdown_input]
-          )
-        ,x = ""
-        ,y = "VP (kPa)"
-      )
-
-
-    c_a_f <-
-      c_base +
-      geom_violin(
-        data = fitted_actual_input_tidy
-        ,aes(
-          y = VP
-        )
-        ,colour = "black"
-      ) +
-      stat_boxplot(
-        data = fitted_actual_input_tidy
-        ,aes(
-          y = VP
-        )
-        ,geom = "errorbar"
-        ,colour = "black"
-        ,width = 2/3
-      ) +
-      geom_boxplot(
-        data = fitted_actual_input_tidy
-        ,aes(
-          y = VP
-        )
-        ,colour = "black"
-        ,fill = "white"
-        ,width = 1/8
-      ) +
-      geom_line(
-        aes(
-          group = Model
-        )
-        ,size = 1
-      )
-
-    c_a_f
+    # c_base <-
+    #   ggplot(
+    #     fitted_actual_input_summary_tidy %>%
+    #       filter(
+    #         Model != "SD Predicted VP"
+    #         ,Model != "Median Predicted VP"
+    #       )
+    #     ,aes(
+    #       x = Month
+    #       ,y = VP
+    #       ,colour = Model
+    #     )
+    #   ) +
+    #   scale_x_discrete(
+    #     labels = Mth_comb
+    #   ) +
+    #   scale_colour_brewer(
+    #     type = "qual"
+    #     ,name = "Model:"
+    #     ,palette = "Dark2"
+    #   ) +
+    #   labs(
+    #     title = "Actual vs. Fitted VP by Month"
+    #     ,subtitle =
+    #       paste(
+    #         "For"
+    #         ,Crude_Breakdown_Cleaned[Crude_Breakdown_input]
+    #       )
+    #     ,x = ""
+    #     ,y = "VP (kPa)"
+    #   )
+    # 
+    # 
+    # c_a_f <-
+    #   c_base +
+    #   geom_violin(
+    #     data = fitted_actual_input_tidy
+    #     ,aes(
+    #       y = VP
+    #     )
+    #     ,colour = "black"
+    #   ) +
+    #   stat_boxplot(
+    #     data = fitted_actual_input_tidy
+    #     ,aes(
+    #       y = VP
+    #     )
+    #     ,geom = "errorbar"
+    #     ,colour = "black"
+    #     ,width = 2/3
+    #   ) +
+    #   geom_boxplot(
+    #     data = fitted_actual_input_tidy
+    #     ,aes(
+    #       y = VP
+    #     )
+    #     ,colour = "black"
+    #     ,fill = "white"
+    #     ,width = 1/8
+    #   ) +
+    #   geom_line(
+    #     aes(
+    #       group = Model
+    #     )
+    #     ,size = 1
+    #   )
+    # 
+    # c_a_f
 
     # Return ------------------------------
     return(
