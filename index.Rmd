@@ -1,5 +1,0 @@
----
-title: "Shiny Apps"
----
-
-Hi, this is a collection of apps I've developed using shiny or rmarkdown.
