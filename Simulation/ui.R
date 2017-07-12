@@ -1,19 +1,17 @@
 rm(list=ls())
 try(dev.off(), silent = TRUE)
 # Libraries -----------------------------
-library(glmnet, warn.conflicts = FALSE)
-library(tidyverse, warn.conflicts = FALSE)
-library(lubridate, warn.conflicts = FALSE)
-library(readxl, warn.conflicts = FALSE)
-library(ggfortify, warn.conflicts = FALSE)
-library(plotly, warn.conflicts = FALSE)
 library(shiny, warn.conflicts = FALSE)
 library(shinythemes, warn.conflicts = FALSE)
 library(shinyjs, warn.conflicts = FALSE)
+library(plotly, warn.conflicts = FALSE)
+library(DT, warn.conflicts = FALSE)
 
 fluidPage(
   theme = shinytheme("lumen")
+  
   ,headerPanel('Simulation Inputs:')
+  
   ,sidebarLayout(
     sidebarPanel(
       numericInput(
@@ -53,17 +51,18 @@ fluidPage(
         ,label = "Download"
       )
     )
+    
     ,mainPanel(
-      tableOutput("fitted_actual_input_summary")
+      dataTableOutput("fitted_actual_input_summary")
       ,tabsetPanel(type = "tabs"
         ,tabPanel("Distribution", plotOutput("b_kern"))
         ,tabPanel("ECDF", plotOutput("b_ecdf"))
       )
     )
   )
+  
   ,fluidRow(
     column(2, offset = 4
-           # ,tableOutput("LASSO_coef")
            ,tableOutput("LASSO_coef_1")
     )
     ,column(2

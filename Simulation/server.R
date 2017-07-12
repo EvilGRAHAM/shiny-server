@@ -7,7 +7,7 @@ library(readxl, warn.conflicts = FALSE)
 library(ggfortify, warn.conflicts = FALSE)
 library(plotly, warn.conflicts = FALSE)
 library(shiny, warn.conflicts = FALSE)
-library(shiny, warn.conflicts = FALSE)
+library(DT, warn.conflicts = FALSE)
 
 # Functions ----------------------------
 data.conversions <- function(data_file) {
@@ -90,15 +90,19 @@ count.num <- function(data_tibble) {
     as.numeric()
 }
 
-# fitted_actual_input_summary_initial <- tibble(
-#   Month = character()
-#   ,Density = as.numeric(character())
-#   ,Sulfur = as.numeric(character())
-#   ,`7 Day Temperature Average` = as.numeric(character())
-#   ,`Mean Predicted VP` = as.numeric(character())
-#   ,`Median Predicted VP` = as.numeric(character())
-#   ,`SD Predicted VP` = as.numeric(character())
-# )
+# Initializes one of the output tables.
+fitted_actual_input_summary_init <- tibble(
+  Month = NA
+  ,Density = as.numeric(NA)
+  ,Sulfur = as.numeric(NA)
+  ,`Crude Type` = NA
+  ,`7 Day Temperature Average` = as.numeric(NA)
+  ,`Mean Predicted VP` = as.numeric(NA)
+  ,`Median Predicted VP` = as.numeric(NA)
+  ,`SD Predicted VP` = as.numeric(NA)
+  ,`Min Predicted VP` = as.numeric(NA)
+  ,`Max Predicted VP` = as.numeric(NA)
+)
 
 # Page -----------------------------
 function(input, output, session) {
@@ -719,6 +723,8 @@ function(input, output, session) {
         `Mean Predicted VP` = mean(Fitted)
         ,`Median Predicted VP` = median(Fitted)
         ,`SD Predicted VP` = sd(Fitted)
+        ,`Min Predicted VP` = min(Fitted)
+        ,`Max Predicted VP` = max(Fitted)
       ) %>%
       # left_join(
       #   data_test_input %>%
@@ -731,6 +737,7 @@ function(input, output, session) {
       mutate(
         Density = Density_input
         ,Sulfur = Sulfur_input
+        ,`Crude Type` = Crude_Breakdown_Cleaned[Crude_Breakdown_input]
         ,`7 Day Temperature Average` = Temp.Roll_input
       ) %>% 
       select(
@@ -738,10 +745,13 @@ function(input, output, session) {
         # ,`WAVG VP`
         ,Density
         ,Sulfur
+        ,`Crude Type`
         ,`7 Day Temperature Average`
         ,`Mean Predicted VP`
         ,`Median Predicted VP`
         ,`SD Predicted VP`
+        ,`Min Predicted VP`
+        ,`Max Predicted VP`
       )
     fitted_actual_input_summary
     
@@ -895,11 +905,23 @@ function(input, output, session) {
   }
   
   # Output ------------------------------------
-
+  
+  fitted_actual_input_summary <- fitted_actual_input_summary_init
   # Creates an output when the action button is pressed.
   observeEvent(input$run_sim, {
     main_output <- main()
-    output$fitted_actual_input_summary <- renderTable(main_output[[1]])
+    fitted_actual_input_summary_new <- as.tibble(main_output[[1]])
+    # row.names(fitted_actual_input_summary) <- NULL
+    # row.names(fitted_actual_input_summary_new) <- NULL
+    # To get each button push to add a new row, I had to initialize the tibble with NA's,
+    # after we add a row, the NAs are removed.
+    fitted_actual_input_summary <<-
+      rbind(
+        fitted_actual_input_summary
+        ,fitted_actual_input_summary_new
+      ) %>% 
+      filter(!is.na(Month))
+    output$fitted_actual_input_summary <- renderDataTable(fitted_actual_input_summary)
     output$b_kern <- renderPlot(main_output[[2]])
     output$b_ecdf <- renderPlot(main_output[[3]])
     LASSO_coef <-
