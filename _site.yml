@@ -1,11 +1,11 @@
 name: "Shiny Apps"
 navbar:
-    title: "A collection of shiny applications I've developed."
+    title: "Menu"
     left:
         -   text: "Home"
             href: http://grahamst.at/
         -   text: "VP Simulation"
-            href: http://grahamst.at/shiny/Simulation/
+            href: ~/Simulation/
 output_dir: "."
 output:
     html_document:

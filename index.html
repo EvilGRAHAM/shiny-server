@@ -23,9 +23,6 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<script src="site_libs/navigation-1.1/codefolding.js"></script>
-<script src="site_libs/navigation-1.1/FileSaver.min.js"></script>
-<script src="site_libs/navigation-1.1/sourceembed.js"></script>
 <link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-1.1/highlight.js"></script>
 
@@ -69,9 +66,6 @@ h6 {
 }
 .table th:not([align]) {
   text-align: left;
-}
-#rmd-source-code {
-  display: none;
 }
 </style>
 
@@ -166,15 +160,6 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
-<style type="text/css">
-.code-folding-btn { margin-bottom: 4px; }
-</style>
-<script>
-$(document).ready(function () {
-  window.initializeSourceEmbed("index.Rmd");
-  window.initializeCodeFolding("hide" === "show");
-});
-</script>
 
 
 
@@ -284,7 +269,7 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">A collection of shiny applications I've developed.</a>
+      <a class="navbar-brand" href="index.html">Menu</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -292,7 +277,7 @@ div.tocify {
   <a href="http://grahamst.at/">Home</a>
 </li>
 <li>
-  <a href="http://grahamst.at/shiny/Simulation/">VP Simulation</a>
+  <a href="~/Simulation/">VP Simulation</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -304,16 +289,6 @@ div.tocify {
 
 <div class="fluid-row" id="header">
 
-<div class="btn-group pull-right">
-<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
-<ul class="dropdown-menu" style="min-width: 50px;">
-<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
-<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
-<li role="separator" class="divider"></li>
-<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
-</ul>
-</div>
-
 
 
 <h1 class="title toc-ignore">Shiny Apps</h1>
@@ -323,7 +298,6 @@ div.tocify {
 
 <p>Hi, this is a collection of apps I’ve developed using shiny or rmarkdown.</p>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlNoaW55IEFwcHMiDQpvdXRwdXQ6IGh0bWxfZG9jdW1lbnQNCi0tLQ0KDQpIaSwgdGhpcyBpcyBhIGNvbGxlY3Rpb24gb2YgYXBwcyBJJ3ZlIGRldmVsb3BlZCB1c2luZyBzaGlueSBvciBybWFya2Rvd24u</div>
 
 
 </div>
