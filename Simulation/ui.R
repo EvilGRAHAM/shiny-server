@@ -9,7 +9,7 @@ library(ggfortify, warn.conflicts = FALSE)
 library(plotly, warn.conflicts = FALSE)
 library(shiny, warn.conflicts = FALSE)
 library(shinythemes, warn.conflicts = FALSE)
-
+library(shinyjs, warn.conflicts = FALSE)
 
 fluidPage(
   theme = shinytheme("lumen")
@@ -59,7 +59,15 @@ fluidPage(
         ,tabPanel("Distribution", plotOutput("b_kern"))
         ,tabPanel("ECDF", plotOutput("b_ecdf"))
       )
-      ,tableOutput("LASSO_coef")
+    )
+  )
+  ,fluidRow(
+    column(2, offset = 4
+           # ,tableOutput("LASSO_coef")
+           ,tableOutput("LASSO_coef_1")
+    )
+    ,column(2
+            ,tableOutput("LASSO_coef_2")
     )
   )
 )

@@ -7,6 +7,8 @@ library(readxl, warn.conflicts = FALSE)
 library(ggfortify, warn.conflicts = FALSE)
 library(plotly, warn.conflicts = FALSE)
 library(shiny, warn.conflicts = FALSE)
+library(shiny, warn.conflicts = FALSE)
+
 # Functions ----------------------------
 data.conversions <- function(data_file) {
 
@@ -78,6 +80,16 @@ get_input <- function() {
   return(list(Density_input, Sulfur_input, Temp.Roll_input, mth_input))
 }
 
+# God I hate having to constantly use this set of pipes. 
+# Count normally outputs a tibble, so this converts it to a number so we can do
+# arithmetic and such with it.
+count.num <- function(data_tibble) {
+  n <- 
+    data_tibble %>% 
+    count %>% 
+    as.numeric()
+}
+
 # fitted_actual_input_summary_initial <- tibble(
 #   Month = character()
 #   ,Density = as.numeric(character())
@@ -92,15 +104,11 @@ get_input <- function() {
 function(input, output, session) {
 
   # Data Import -----------------------------------
-  # excel_path <- "C:/Users/scott.graham/OneDrive - Tundra Energy Marketing Limited/Documents/GitHub/simulation_applet/VP Simulation.xlsx"
-  # excel_sheet_complete <- "VP Data Complete"
-  # excel_sheet_reduced <- "VP Data"
-  # excel_sheet_weather <- "Weather Data"
   
   # Reads the data in from a xlsx, and converts it to a tibble.
   data_complete <-
     read_csv(
-      "https://raw.githubusercontent.com/EvilGRAHAM/simulation_applet/master/Data/VP_Data_Complete.csv"
+      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
     )
     # excel_path %>%
     # read_excel(
@@ -109,7 +117,7 @@ function(input, output, session) {
   
   data_reduced <-
     read_csv(
-      "https://raw.githubusercontent.com/EvilGRAHAM/simulation_applet/master/Data/VP_Data.csv"
+      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data.csv"
     )
     # excel_path %>%
     # read_excel(
@@ -118,7 +126,7 @@ function(input, output, session) {
   
   data_weather <-
     read_csv(
-      "https://raw.githubusercontent.com/EvilGRAHAM/simulation_applet/master/Data/Weather_Data.csv"
+      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/Weather_Data.csv"
     )
     # excel_path %>%
     # read_excel(
@@ -895,6 +903,7 @@ function(input, output, session) {
     output$b_kern <- renderPlot(main_output[[2]])
     output$b_ecdf <- renderPlot(main_output[[3]])
     LASSO_coef <-
+      # LASSO_coef %>% 
       main_output[[4]] %>%
       as.matrix() %>%
       as.data.frame() %>%
@@ -905,6 +914,31 @@ function(input, output, session) {
       )
     colnames(LASSO_coef) <- c("Variable", "Coefficient")
     output$LASSO_coef <- renderTable(LASSO_coef)
+    # Splits the  LASSO output into two tables for ease of display.
+    LASSO_coef_1 <-
+      LASSO_coef %>%
+      mutate(rowname = 1:count.num(LASSO_coef)) %>% 
+      filter(
+        rowname <=
+          count.num(LASSO_coef) / 2 %>%
+          ceiling()
+      ) %>% 
+      select(
+        -rowname
+      )
+    LASSO_coef_2 <-
+      LASSO_coef %>%
+      mutate(rowname = 1:count.num(LASSO_coef)) %>% 
+      filter(
+        rowname >
+          count.num(LASSO_coef) / 2 %>%
+          ceiling()
+      ) %>% 
+      select(
+        -rowname
+      )
+    output$LASSO_coef_1 <- renderTable(LASSO_coef_1)
+    output$LASSO_coef_2 <- renderTable(LASSO_coef_2)
     output$download <- 
       downloadHandler(
         filename = { paste("VP_data_", Sys.Date(), ".csv", sep = "") }
