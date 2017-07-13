@@ -787,18 +787,12 @@ function(input, output, session) {
         ,aes(
           x = VP
           ,colour = Result
-          ,fill = Result
         )
       ) +
       scale_colour_brewer(
         type = "qual"
         ,name = "Methodology"
-        ,palette = "Set2"
-      ) +
-      scale_fill_brewer(
-        type = "qual"
-        ,name = "Methodology"
-        ,palette = "Set2"
+        ,palette = "Dark2"
       ) +
       labs(
         title = "Distribution of VP in kPa"
@@ -824,9 +818,7 @@ function(input, output, session) {
       #   ,alpha = 0.5
       #   ,binwidth = function(x) {2 * IQR(x) * length(x)^(-1/3)}
       # ) +
-      geom_density(
-        fill = NA
-      ) +
+      geom_density() +
       labs(
         y = "Density"
       )
@@ -834,10 +826,7 @@ function(input, output, session) {
     b_ecdf <-
       b_base +
       stat_ecdf(
-        geom = "area"
-        # ,colour = "black"
-        # ,fill = "grey92"
-        ,alpha = 0.5
+        geom = "line"
       ) +
       labs(
         y = "P(< VP)"
