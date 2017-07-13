@@ -729,12 +729,12 @@ function(input, output, session) {
       fitted_actual_input %>%
       group_by(Month, Num_Month) %>%
       summarize(
-        `Mean Actual VP` = mean(Actual)
-        ,`Mean Predicted VP` = mean(Fitted)
-        ,`Median Predicted VP` = median(Fitted)
-        ,`SD Predicted VP` = sd(Fitted)
-        ,`Min Predicted VP` = min(Fitted)
-        ,`Max Predicted VP` = max(Fitted)
+        `Mean Actual VP` = round(mean(Actual), 4)
+        ,`Mean Predicted VP` = round(mean(Fitted), 4)
+        ,`Median Predicted VP` = round(median(Fitted), 4)
+        ,`SD Predicted VP` = round(sd(Fitted), 4)
+        ,`Min Predicted VP` = round(min(Fitted), 4)
+        ,`Max Predicted VP` = round(max(Fitted), 4)
         ,`Data Points` = length(Fitted)
       ) %>%
       ungroup() %>%
@@ -979,12 +979,21 @@ function(input, output, session) {
     output$LASSO_coef_1 <- renderTable(LASSO_coef_1)
     output$LASSO_coef_2 <- renderTable(LASSO_coef_2)
     
-    # Lets you download  the data used in the model.
+    # Lets you download the data used in the model.
     output$downloadData <- 
       downloadHandler(
         filename = { paste("VP_Data_", Sys.Date(), ".csv", sep = "") }
         ,content = function(file) {
           write.csv(main_output[[5]], file)
+        }
+      )
+    
+    # Lets you download the simulation results
+    output$downloadResult <- 
+      downloadHandler(
+        filename = { paste("VP_Simulation_Results_", Sys.Date(), ".csv", sep = "") }
+        ,content = function(file) {
+          write.csv(fitted_actual_input_summary %>% as.matrix, file)
         }
       )
     

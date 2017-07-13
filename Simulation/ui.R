@@ -57,27 +57,38 @@ fluidPage(
         ,label = "Download Data"
       )
       ,downloadButton(
+        outputId = "downloadResult"
+        ,label = "Download Results"
+      )
+      ,downloadButton(
         outputId = "downloadModel"
         ,label = "Download Model Coefficients"
       )
     )
     
     ,mainPanel(
-      dataTableOutput("fitted_actual_input_summary")
-      ,tabsetPanel(type = "tabs"
+      # dataTableOutput("fitted_actual_input_summary")
+      tabsetPanel(type = "tabs"
                    ,tabPanel("Distribution", plotOutput("b_kern"))
                    ,tabPanel("ECDF", plotOutput("b_ecdf"))
       )
     )
   )
-  
   ,fluidRow(
-    column(2, offset = 4
-           ,tableOutput("LASSO_coef_1")
+    column(
+      2
+      ,offset = 0
+      ,tableOutput("LASSO_coef_1")
     )
-    ,column(2
-            ,tableOutput("LASSO_coef_2")
+    ,column(
+      2
+      ,offset = 0
+      ,tableOutput("LASSO_coef_2")
+    )
+    ,column(
+      8
+      ,offset = 0
+      ,dataTableOutput("fitted_actual_input_summary")
     )
   )
 )
-
