@@ -90,6 +90,7 @@ count.num <- function(data_tibble) {
     as.numeric()
 }
 
+# Initialize ---------------------------------------------
 # Initializes one of the output tables.
 fitted_actual_input_summary_init <- tibble(
   Month = NA
@@ -97,11 +98,13 @@ fitted_actual_input_summary_init <- tibble(
   ,Sulfur = as.numeric(NA)
   ,`Crude Type` = NA
   ,`7 Day Temperature Average` = as.numeric(NA)
+  ,`Mean Actual VP` = as.numeric(NA)
   ,`Mean Predicted VP` = as.numeric(NA)
   ,`Median Predicted VP` = as.numeric(NA)
   ,`SD Predicted VP` = as.numeric(NA)
   ,`Min Predicted VP` = as.numeric(NA)
   ,`Max Predicted VP` = as.numeric(NA)
+  ,`Data Points` = as.numeric(NA)
 )
 
 # Page -----------------------------
@@ -308,7 +311,7 @@ function(input, output, session) {
 
 
     # How many times we multiply the SD by to get our input rows.
-    multiplier <- 1
+    multiplier <- input$multiplier_input
 
 
     # Setup -------------------------------------------------------------------
@@ -580,7 +583,12 @@ function(input, output, session) {
           )
         ) %>%
         filter(
+          # You can uncomment the first line if you want to force the simulated data set to only
+          # contain crude of the same type as the inputted.
+          # As well if you uncomment the second line, only those entries of the same month as 
+          # the inputted are used.
           # Crude_Breakdown == Crude_Breakdown_input &
+          mth == as.numeric(mth_input[i, ]) &
           Dens >= Density_input[i, ] %>% as.numeric() - multiplier * (
             crude_bd_stats %>%
               select(Density_SD) %>%
@@ -620,7 +628,8 @@ function(input, output, session) {
           )
         ) %>%
         mutate(
-          Jan = if_else(mth == 1, 1, 0)
+          mth = as.numeric(mth_input[i, ])
+          ,Jan = if_else(mth == 1, 1, 0)
           ,Feb = if_else(mth == 2, 1, 0)
           ,Mar = if_else(mth == 3, 1, 0)
           ,Apr = if_else(mth == 4, 1, 0)
@@ -675,7 +684,7 @@ function(input, output, session) {
                 ,s = "lambda.1se"
               ) %>%
               as.vector()
-            # ,Actual = data_input$VP
+            ,Actual = data_input$VP
           )
         )
     }
@@ -720,19 +729,14 @@ function(input, output, session) {
       fitted_actual_input %>%
       group_by(Month, Num_Month) %>%
       summarize(
-        `Mean Predicted VP` = mean(Fitted)
+        `Mean Actual VP` = mean(Actual)
+        ,`Mean Predicted VP` = mean(Fitted)
         ,`Median Predicted VP` = median(Fitted)
         ,`SD Predicted VP` = sd(Fitted)
         ,`Min Predicted VP` = min(Fitted)
         ,`Max Predicted VP` = max(Fitted)
+        ,`Data Points` = length(Fitted)
       ) %>%
-      # left_join(
-      #   data_test_input %>%
-      #     select(
-      #       Num_Month
-      #       ,`WAVG VP`
-      #     )
-      # ) %>%
       ungroup() %>%
       mutate(
         Density = Density_input
@@ -742,42 +746,59 @@ function(input, output, session) {
       ) %>% 
       select(
         Month
-        # ,`WAVG VP`
         ,Density
         ,Sulfur
         ,`Crude Type`
         ,`7 Day Temperature Average`
+        ,`Mean Actual VP`
         ,`Mean Predicted VP`
         ,`Median Predicted VP`
         ,`SD Predicted VP`
         ,`Min Predicted VP`
         ,`Max Predicted VP`
+        ,`Data Points`
       )
     fitted_actual_input_summary
     
     
-    fitted_actual_input_summary_tidy <-
-      fitted_actual_input_summary %>%
-      gather(
-        Model
-        ,VP
-        ,-Month
-      )
+    # fitted_actual_input_summary_tidy <-
+    #   fitted_actual_input_summary %>%
+    #   gather(
+    #     Model
+    #     ,VP
+    #     ,-Month
+    #   )
     # Adds back the column names for the prediction matrix so it can be downloaded to a csv.
     colnames(pred_matrix_input) <- var.pred
+    
+    # Creates a list of the data used in the simulation to be downloaded by the user.
     data_output <- 
       pred_matrix_input %>% 
       as.data.frame() %>% 
       mutate(
         `Predicted VP` = fitted_actual_input$Fitted
+        ,`Actual VP` = fitted_actual_input$Actual
       )
+    
     # Simulation Graphs ------------------------------------------
     b_base <-
       ggplot(
         data = fitted_actual_input_tidy
         ,aes(
           x = VP
+          ,colour = Result
+          ,fill = Result
         )
+      ) +
+      scale_colour_brewer(
+        type = "qual"
+        ,name = "Methodology"
+        ,palette = "Set2"
+      ) +
+      scale_fill_brewer(
+        type = "qual"
+        ,name = "Methodology"
+        ,palette = "Set2"
       ) +
       labs(
         title = "Distribution of VP in kPa"
@@ -794,16 +815,18 @@ function(input, output, session) {
 
     b_kern <-
       b_base +
-      geom_histogram(
-        aes(
-          y = ..density..
-        )
-        ,colour = "black"
-        ,fill = "grey92"
-        ,alpha = 0.5
-        ,binwidth = function(x) {2 * IQR(x) * length(x)^(-1/3)}
+      # geom_histogram(
+      #   aes(
+      #     y = ..density..
+      #   )
+      #   # ,colour = "black"
+      #   # ,fill = "grey92"
+      #   ,alpha = 0.5
+      #   ,binwidth = function(x) {2 * IQR(x) * length(x)^(-1/3)}
+      # ) +
+      geom_density(
+        fill = NA
       ) +
-      geom_density() +
       labs(
         y = "Density"
       )
@@ -812,8 +835,8 @@ function(input, output, session) {
       b_base +
       stat_ecdf(
         geom = "area"
-        ,colour = "black"
-        ,fill = "grey92"
+        # ,colour = "black"
+        # ,fill = "grey92"
         ,alpha = 0.5
       ) +
       labs(
@@ -910,6 +933,7 @@ function(input, output, session) {
   # Creates an output when the action button is pressed.
   observeEvent(input$run_sim, {
     main_output <- main()
+    
     fitted_actual_input_summary_new <- as.tibble(main_output[[1]])
     # row.names(fitted_actual_input_summary) <- NULL
     # row.names(fitted_actual_input_summary_new) <- NULL
@@ -922,8 +946,12 @@ function(input, output, session) {
       ) %>% 
       filter(!is.na(Month))
     output$fitted_actual_input_summary <- renderDataTable(fitted_actual_input_summary)
+    
+    # Plots the kernel density estimator and the ECDF
     output$b_kern <- renderPlot(main_output[[2]])
     output$b_ecdf <- renderPlot(main_output[[3]])
+    
+    # Grabs the variables and coefficients of the LASSO regression.
     LASSO_coef <-
       # LASSO_coef %>% 
       main_output[[4]] %>%
@@ -961,11 +989,29 @@ function(input, output, session) {
       )
     output$LASSO_coef_1 <- renderTable(LASSO_coef_1)
     output$LASSO_coef_2 <- renderTable(LASSO_coef_2)
-    output$download <- 
+    
+    # Lets you download  the data used in the model.
+    output$downloadData <- 
       downloadHandler(
-        filename = { paste("VP_data_", Sys.Date(), ".csv", sep = "") }
+        filename = { paste("VP_Data_", Sys.Date(), ".csv", sep = "") }
         ,content = function(file) {
           write.csv(main_output[[5]], file)
+        }
+      )
+    
+    # Downloads the coefficients of the LASSO regression.
+    output$downloadModel <- 
+      downloadHandler(
+        filename = { paste("VP_Model_", Sys.Date(), ".csv", sep = "") }
+        ,content = function(file) {
+          write.csv(
+            main_output[[4]] %>%
+              as.matrix() %>%
+              as.data.frame() %>%
+              rownames_to_column() %>%
+              as.tibble()
+            , file
+          )
         }
       )
   })

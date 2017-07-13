@@ -42,13 +42,23 @@ fluidPage(
         ,min = 1
         ,max = 12
       )
+      ,numericInput(
+        inputId = "multiplier_input"
+        ,label = "SD Multiplier"
+        ,value = 2
+        ,step = 0.5
+      )
       ,actionButton(
         "run_sim"
         ,"Run Simulation"
       )
       ,downloadButton(
-        outputId = "download"
-        ,label = "Download"
+        outputId = "downloadData"
+        ,label = "Download Data"
+      )
+      ,downloadButton(
+        outputId = "downloadModel"
+        ,label = "Download Model Coefficients"
       )
     )
     
