@@ -11,7 +11,7 @@ library(DT, warn.conflicts = FALSE)
 
 # Functions ----------------------------
 data.conversions <- function(data_file) {
-  
+
   # Converts SDate to date format, and Producer + Battery to factors
   # Grabs the year and the month for each entry.
   # Arranges the entries chronologically
@@ -46,11 +46,11 @@ data.conversions <- function(data_file) {
       ,!is.na(Sulf)
       ,!is.na(Dens)
     )
-  
+
   # Re-orders the factors so unknown comes first.
   data_file$Crude_Breakdown <- factor(data_file$Crude_Breakdown, levels(data_file$Crude_Breakdown)[c(7, 1:6)])
   data_file
-  
+
 }
 
 
@@ -109,7 +109,7 @@ fitted_actual_input_summary_init <- tibble(
 
 # Page -----------------------------
 function(input, output, session) {
-  
+
   # Data Import -----------------------------------
   
   # Reads the data in from a xlsx, and converts it to a tibble.
@@ -117,28 +117,28 @@ function(input, output, session) {
     read_csv(
       "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
     )
-  # excel_path %>%
-  # read_excel(
-  #   sheet = excel_sheet_complete
-  # )
+    # excel_path %>%
+    # read_excel(
+    #   sheet = excel_sheet_complete
+    # )
   
   data_reduced <-
     read_csv(
       "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data.csv"
     )
-  # excel_path %>%
-  # read_excel(
-  #   sheet = excel_sheet_reduced
-  # )
+    # excel_path %>%
+    # read_excel(
+    #   sheet = excel_sheet_reduced
+    # )
   
   data_weather <-
     read_csv(
       "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/Weather_Data.csv"
     )
-  # excel_path %>%
-  # read_excel(
-  #   sheet = excel_sheet_weather
-  # )
+    # excel_path %>%
+    # read_excel(
+    #   sheet = excel_sheet_weather
+    # )
   # Main Function ------------------------------
   main <- function(data_complete, data_reduced, data_weather){
     rm(list=ls())
@@ -158,7 +158,7 @@ function(input, output, session) {
       ,`12` = "Dec"
       ,`13` = "Ann"
     )
-    
+
     Mth_long <- c(
       `1` = "January"
       ,`2` = "February"
@@ -174,9 +174,9 @@ function(input, output, session) {
       ,`12` = "December"
       ,`13` = "Annual"
     )
-    
+
     Mth_comb <- cbind(Mth, Mth_long)
-    
+
     Crude_Breakdown_Cleaned <- c(
       `Unknown` = "Unknown"
       ,`C5` = "C5+"
@@ -188,8 +188,8 @@ function(input, output, session) {
       ,`Heavy_Sour` = "Heavy Sour"
       ,`Heavy_SW` = "Heavy SW"
     )
-    
-    
+
+
     # This is a list of all the variables we wish to include in the LASSO.
     var.pred <- c(
       "Sulf"
@@ -249,7 +249,7 @@ function(input, output, session) {
       ,"Temp.Roll.H_Sour"
       ,"Temp.Roll.H_SW"
     )
-    
+
     lasso_var_names <- c(
       "Sulfur"
       ,"Density"
@@ -308,16 +308,16 @@ function(input, output, session) {
       ,"Temp.Roll:Heavy Sour"
       ,"Temp.Roll:Heavy SW"
     )
-    
-    
+
+
     # How many times we multiply the SD by to get our input rows.
     multiplier <- input$multiplier_input
-    
-    
+
+
     # Setup -------------------------------------------------------------------
-    
+
     set.seed(19)
-    
+
     # Updates them_minimal so that there is borders around the graphs and the facet headings.
     theme_minimal2 <- theme_minimal() %>%  theme_set()
     theme_minimal2 <-
@@ -333,15 +333,15 @@ function(input, output, session) {
           ,fill = NA
         )
       )
-    
-    
+
+
     data_complete <- data_complete %>% data.conversions()
     data_reduced <- data_reduced %>% data.conversions()
-    
+
     data_weather <-
       data_weather %>%
       mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
-    
+
     # Adding interaction effects to data_complete.
     # As well it splits the mth variable into 12 dummy variables.
     data_complete <-
@@ -384,11 +384,11 @@ function(input, output, session) {
         ,Temp.Roll.H_Sour = Temp.Roll * Heavy_Sour
         ,Temp.Roll.H_SW = Temp.Roll * Heavy_SW
       )
-    
+
     # LASSO -------------------------------------------------------------------
-    
-    
-    
+
+
+
     # We generate a matrix from the complete data set using the list of variables defined above.
     # Generates a Matrix containing the predictor variables.
     lasso.pred <-
@@ -403,7 +403,7 @@ function(input, output, session) {
     # Names the columns in the two matrices so they read nicer.
     colnames(lasso.pred) <- lasso_var_names
     colnames(lasso.result) <- "VP"
-    
+
     # 0 => keep in model, 1 => perform normally
     # Keeps all dummy variables
     # We aren't using the Midale + Heavy vars as this way when you fit the regression model,
@@ -435,16 +435,16 @@ function(input, output, session) {
     autoplot(cvfit_penalty_dummy) + labs(title = "LASSO + C5 + Split + Dummy + Keep - Midale + Spec")
     LASSO_coef <- coef(cvfit_penalty_dummy, s = "lambda.1se", exact = TRUE)
     LASSO_coef
-    
-    
+
+
     # Simulation Setup ---------------------------------------------
-    
+
     # Figures out how many predictions to make.
     num_tests <- 1
     # data_test_input %>%
     # count() %>%
     # as.numeric()
-    
+
     # Grabs each of the input variables, and saves them to their own variable.
     # Density_input <-
     #   data_test_input %>%
@@ -466,7 +466,7 @@ function(input, output, session) {
     Sulfur_input <- tibble(Input = input$sulf_input)
     Temp.Roll_input <- tibble(Input = input$temp.roll_input)
     mth_input <- tibble(Input = input$mth_input)
-    
+
     # Creates an empty tibble to be filled with the results of the predictions.
     fitted_actual_input <- tibble(
       Num_Month = as.numeric(character())
@@ -474,10 +474,10 @@ function(input, output, session) {
       ,Crude_Breakdown = character()
       ,Fitted = as.numeric(character())
     )
-    
-    
+
+
     # Simulation Loop -----------------------------------
-    
+
     for (i in 1:num_tests) {
       set.seed(4815609)
       # Any input with a density <= 770 we call C5 regardless of sulfur
@@ -507,7 +507,7 @@ function(input, output, session) {
             "Heavy_Sour"
           }
         }
-      
+
       # This finds the standard deviation for the crude type inputed.
       crude_bd_stats <-
         data_complete %>%
@@ -519,7 +519,7 @@ function(input, output, session) {
           ,Sulfur_SD = sd(Sulf)
         )
       crude_bd_stats
-      
+
       # As well as the mean and sd for Temp.Roll for the month inputted
       weather_stats <-
         data_weather %>%
@@ -538,7 +538,7 @@ function(input, output, session) {
           )
       }
       weather_stats
-      
+
       # Grabs all temperature entries whose entries are within +- multiplier*sd
       data_weather_input <-
         data_weather %>%
@@ -563,7 +563,7 @@ function(input, output, session) {
                 as.numeric()
             ) %>% as.numeric()
         )
-      
+
       # Filters the data that will be inputed into the simulation s.t. the crude type matches,
       # and the density and sulfur fall within a range of values.
       # As well we remove any of the temperature data, as we will randomly insert them
@@ -589,11 +589,11 @@ function(input, output, session) {
           # the inputted are used.
           # Crude_Breakdown == Crude_Breakdown_input &
           mth == as.numeric(mth_input[i, ]) &
-            Dens >= Density_input[i, ] %>% as.numeric() - multiplier * (
-              crude_bd_stats %>%
-                select(Density_SD) %>%
-                as.numeric()
-            ) &
+          Dens >= Density_input[i, ] %>% as.numeric() - multiplier * (
+            crude_bd_stats %>%
+              select(Density_SD) %>%
+              as.numeric()
+          ) &
             Dens <= Density_input[i, ] %>% as.numeric() + multiplier * (
               crude_bd_stats %>%
                 select(Density_SD) %>%
@@ -610,7 +610,7 @@ function(input, output, session) {
                 as.numeric()
             )
         )
-      
+
       # Instead of using the given temperature value from the data,
       # we instead bootstrap in values from our filtered list of weather data.
       # There isn't that strong of a relationship between temperature and crude qualities,
@@ -669,7 +669,7 @@ function(input, output, session) {
         select(var.pred) %>%
         as.matrix()
       colnames(pred_matrix_input) <- NULL
-      
+
       fitted_actual_input <-
         fitted_actual_input %>%
         rbind(
@@ -688,9 +688,9 @@ function(input, output, session) {
           )
         )
     }
-    
-    
-    
+
+
+
     # Simulation Outputs --------------------------------------
     # Reorders the months to be in calendar-esque order.
     fitted_actual_input$Month <-
@@ -714,7 +714,7 @@ function(input, output, session) {
         )
         ]
       )
-    
+
     fitted_actual_input_tidy <-
       fitted_actual_input %>%
       gather(
@@ -806,7 +806,7 @@ function(input, output, session) {
       facet_wrap(
         ~ Month
       )
-    
+
     b_kern <-
       b_base +
       # geom_histogram(
@@ -822,7 +822,7 @@ function(input, output, session) {
       labs(
         y = "Density"
       )
-    
+
     b_ecdf <-
       b_base +
       stat_ecdf(
@@ -831,10 +831,10 @@ function(input, output, session) {
       labs(
         y = "P(< VP)"
       )
-    
+
     b_kern
     b_ecdf
-    
+
     # c_base <-
     #   ggplot(
     #     fitted_actual_input_summary_tidy %>%
@@ -903,7 +903,7 @@ function(input, output, session) {
     #   )
     # 
     # c_a_f
-    
+
     # Return ------------------------------
     return(
       list(
@@ -1004,6 +1004,6 @@ function(input, output, session) {
         }
       )
   })
-  
+
 }
 
