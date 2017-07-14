@@ -249,6 +249,7 @@ function(input, output, session) {
       ,"Oct"
       ,"Nov"
       ,"Dec"
+      ,"Post_Aquisition"
       ,"Sulf.C5"
       ,"Sulf.L_LSB"
       ,"Sulf.L_SW"
@@ -308,6 +309,7 @@ function(input, output, session) {
       ,"Oct"
       ,"Nov"
       ,"Dec"
+      ,"Post Aquisition"
       ,"Sulfur:C5+"
       ,"Sulfur:Light LSB"
       ,"Sulfur:Light SW"
@@ -615,7 +617,7 @@ function(input, output, session) {
           ,Sep = if_else(mth == 9, 1, 0)
           ,Oct = if_else(mth == 10, 1, 0)
           ,Nov = if_else(mth == 11, 1, 0)
-          ,Dec = if_else(mth == 12, 1, 0)
+          ,Dec = if_else(mth == 12, 1, 0) 
           ,Sulf.C5 = Sulf * C5
           ,Sulf.L_LSB = Sulf * Light_LSB
           ,Sulf.L_SW = Sulf * Light_SW
