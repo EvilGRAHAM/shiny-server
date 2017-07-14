@@ -6,7 +6,7 @@ library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(shinyjs, warn.conflicts = FALSE, quietly = TRUE)
 library(plotly, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
-library(RJSONIO, warn.conflicts = FALSE, quietly = TRUE)
+# library(RJSONIO, warn.conflicts = FALSE, quietly = TRUE)
 
 fluidPage(
   theme = shinytheme("lumen")

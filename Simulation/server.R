@@ -7,7 +7,6 @@ library(ggfortify, warn.conflicts = FALSE, quietly = TRUE)
 library(plotly, warn.conflicts = FALSE, quietly = TRUE)
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
-library(RJSONIO, warn.conflicts = FALSE, quietly = TRUE)
 
 # Functions ----------------------------
 data.conversions <- function(data_file) {
