@@ -1013,7 +1013,7 @@ function(input, output, session) {
       downloadHandler(
         filename = { paste("VP_Data_", Sys.Date(), ".csv", sep = "") }
         ,content = function(file) {
-          write.csv(main_output[[5]], file)
+          write.csv(main_output[[6]], file)
         }
       )
     
@@ -1032,7 +1032,7 @@ function(input, output, session) {
         filename = { paste("VP_Model_", Sys.Date(), ".csv", sep = "") }
         ,content = function(file) {
           write.csv(
-            main_output[[4]] %>%
+            main_output[[5]] %>%
               as.matrix() %>%
               as.data.frame() %>%
               rownames_to_column() %>%
