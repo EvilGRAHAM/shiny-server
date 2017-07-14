@@ -112,34 +112,60 @@ function(input, output, session) {
   # Data Import -----------------------------------
   
   # Reads the data in from a xlsx, and converts it to a tibble.
+  # Adding interaction effects to data_complete.
+  # As well it splits the mth variable into 12 dummy variables.
   data_complete <-
     read_csv(
       "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
+    ) %>% 
+    data.conversions() %>% 
+    mutate(
+      Jan = if_else(mth == 1, 1, 0)
+      ,Feb = if_else(mth == 2, 1, 0)
+      ,Mar = if_else(mth == 3, 1, 0)
+      ,Apr = if_else(mth == 4, 1, 0)
+      ,May = if_else(mth == 5, 1, 0)
+      ,Jun = if_else(mth == 6, 1, 0)
+      ,Jul = if_else(mth == 7, 1, 0)
+      ,Aug = if_else(mth == 8, 1, 0)
+      ,Sep = if_else(mth == 9, 1, 0)
+      ,Oct = if_else(mth == 10, 1, 0)
+      ,Nov = if_else(mth == 11, 1, 0)
+      ,Dec = if_else(mth == 12, 1, 0)
+      ,Sulf.C5 = Sulf * C5
+      ,Sulf.L_LSB = Sulf * Light_LSB
+      ,Sulf.L_SW = Sulf * Light_SW
+      ,Sulf.M_LSB = Sulf * Medium_LSB
+      ,Sulf.M_SW = Sulf * Medium_SW
+      ,Sulf.Midale = Sulf * Midale
+      ,Sulf.H_Sour = Sulf * Heavy_Sour
+      ,Sulf.H_SW = Sulf * Heavy_SW
+      ,Dens.C5 = Dens * C5
+      ,Dens.L_LSB = Dens * Light_LSB
+      ,Dens.L_SW = Dens * Light_SW
+      ,Dens.M_LSB = Dens * Medium_LSB
+      ,Dens.M_SW = Dens * Medium_SW
+      ,Dens.Midale = Dens * Midale
+      ,Dens.H_Sour = Dens * Heavy_Sour
+      ,Dens.H_SW = Dens * Heavy_SW
+      ,Temp.Roll.C5 = Temp.Roll * C5
+      ,Temp.Roll.L_LSB = Temp.Roll * Light_LSB
+      ,Temp.Roll.L_SW = Temp.Roll * Light_SW
+      ,Temp.Roll.M_LSB = Temp.Roll * Medium_LSB
+      ,Temp.Roll.M_SW = Temp.Roll * Medium_SW
+      ,Temp.Roll.Midale = Temp.Roll * Midale
+      ,Temp.Roll.H_Sour = Temp.Roll * Heavy_Sour
+      ,Temp.Roll.H_SW = Temp.Roll * Heavy_SW
     )
-  # excel_path %>%
-  # read_excel(
-  #   sheet = excel_sheet_complete
-  # )
-  
-  data_reduced <-
-    read_csv(
-      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data.csv"
-    )
-  # excel_path %>%
-  # read_excel(
-  #   sheet = excel_sheet_reduced
-  # )
   
   data_weather <-
     read_csv(
       "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/Weather_Data.csv"
-    )
-  # excel_path %>%
-  # read_excel(
-  #   sheet = excel_sheet_weather
-  # )
+    ) %>% 
+    mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
+  
   # Main Function ------------------------------
-  main <- function(data_complete, data_reduced, data_weather){
+  main <- function(data_complete, data_weather){
     rm(list=ls())
     # Variables ----------------------------------
     Mth <- c(
@@ -333,56 +359,6 @@ function(input, output, session) {
         )
       )
     
-    
-    data_complete <- data_complete %>% data.conversions()
-    data_reduced <- data_reduced %>% data.conversions()
-    
-    data_weather <-
-      data_weather %>%
-      mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
-    
-    # Adding interaction effects to data_complete.
-    # As well it splits the mth variable into 12 dummy variables.
-    data_complete <-
-      data_complete %>%
-      mutate(
-        Jan = if_else(mth == 1, 1, 0)
-        ,Feb = if_else(mth == 2, 1, 0)
-        ,Mar = if_else(mth == 3, 1, 0)
-        ,Apr = if_else(mth == 4, 1, 0)
-        ,May = if_else(mth == 5, 1, 0)
-        ,Jun = if_else(mth == 6, 1, 0)
-        ,Jul = if_else(mth == 7, 1, 0)
-        ,Aug = if_else(mth == 8, 1, 0)
-        ,Sep = if_else(mth == 9, 1, 0)
-        ,Oct = if_else(mth == 10, 1, 0)
-        ,Nov = if_else(mth == 11, 1, 0)
-        ,Dec = if_else(mth == 12, 1, 0)
-        ,Sulf.C5 = Sulf * C5
-        ,Sulf.L_LSB = Sulf * Light_LSB
-        ,Sulf.L_SW = Sulf * Light_SW
-        ,Sulf.M_LSB = Sulf * Medium_LSB
-        ,Sulf.M_SW = Sulf * Medium_SW
-        ,Sulf.Midale = Sulf * Midale
-        ,Sulf.H_Sour = Sulf * Heavy_Sour
-        ,Sulf.H_SW = Sulf * Heavy_SW
-        ,Dens.C5 = Dens * C5
-        ,Dens.L_LSB = Dens * Light_LSB
-        ,Dens.L_SW = Dens * Light_SW
-        ,Dens.M_LSB = Dens * Medium_LSB
-        ,Dens.M_SW = Dens * Medium_SW
-        ,Dens.Midale = Dens * Midale
-        ,Dens.H_Sour = Dens * Heavy_Sour
-        ,Dens.H_SW = Dens * Heavy_SW
-        ,Temp.Roll.C5 = Temp.Roll * C5
-        ,Temp.Roll.L_LSB = Temp.Roll * Light_LSB
-        ,Temp.Roll.L_SW = Temp.Roll * Light_SW
-        ,Temp.Roll.M_LSB = Temp.Roll * Medium_LSB
-        ,Temp.Roll.M_SW = Temp.Roll * Medium_SW
-        ,Temp.Roll.Midale = Temp.Roll * Midale
-        ,Temp.Roll.H_Sour = Temp.Roll * Heavy_Sour
-        ,Temp.Roll.H_SW = Temp.Roll * Heavy_SW
-      )
     
     # LASSO -------------------------------------------------------------------
     
