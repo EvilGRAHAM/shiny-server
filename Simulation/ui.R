@@ -1,16 +1,17 @@
 rm(list=ls())
 try(dev.off(), silent = TRUE)
 # Libraries -----------------------------
-library(shiny, warn.conflicts = FALSE)
-library(shinythemes, warn.conflicts = FALSE)
-library(shinyjs, warn.conflicts = FALSE)
-library(plotly, warn.conflicts = FALSE)
-library(DT, warn.conflicts = FALSE)
+library(shiny, warn.conflicts = FALSE, quietly = TRUE)
+library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
+library(shinyjs, warn.conflicts = FALSE, quietly = TRUE)
+library(plotly, warn.conflicts = FALSE, quietly = TRUE)
+library(DT, warn.conflicts = FALSE, quietly = TRUE)
+library(RJSONIO, warn.conflicts = FALSE, quietly = TRUE)
 
 fluidPage(
   theme = shinytheme("lumen")
   
-  ,headerPanel('Simulation Inputs:')
+  ,headerPanel("VP Simulation")
   
   ,sidebarLayout(
     sidebarPanel(
@@ -65,15 +66,14 @@ fluidPage(
         ,label = "Download Model Coefficients"
       )
     )
-    
     ,mainPanel(
-      # dataTableOutput("fitted_actual_input_summary")
       tabsetPanel(type = "tabs"
         ,tabPanel("Distribution", plotOutput("b_kern"))
         ,tabPanel("ECDF", plotOutput("b_ecdf"))
         ,tabPanel("Results", plotOutput("result_chart"))
       )
     )
+
   )
   ,fluidRow(
     column(

@@ -1,13 +1,13 @@
-# rm(list=ls())
 # Libraries -----------------------------
-library(glmnet, warn.conflicts = FALSE)
-library(tidyverse, warn.conflicts = FALSE)
-library(lubridate, warn.conflicts = FALSE)
-library(readxl, warn.conflicts = FALSE)
-library(ggfortify, warn.conflicts = FALSE)
-library(plotly, warn.conflicts = FALSE)
-library(shiny, warn.conflicts = FALSE)
-library(DT, warn.conflicts = FALSE)
+library(glmnet, warn.conflicts = FALSE, quietly = TRUE)
+library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
+library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
+library(readxl, warn.conflicts = FALSE, quietly = TRUE)
+library(ggfortify, warn.conflicts = FALSE, quietly = TRUE)
+library(plotly, warn.conflicts = FALSE, quietly = TRUE)
+library(shiny, warn.conflicts = FALSE, quietly = TRUE)
+library(DT, warn.conflicts = FALSE, quietly = TRUE)
+library(RJSONIO, warn.conflicts = FALSE, quietly = TRUE)
 
 # Functions ----------------------------
 data.conversions <- function(data_file) {
@@ -109,6 +109,8 @@ fitted_actual_input_summary_init <- tibble(
 # Page -----------------------------
 function(input, output, session) {
   
+  # When the tab closes, the session ends.
+  # session$onSessionEnded(stopApp)
   # Data Import -----------------------------------
   
   # Reads the data in from a xlsx, and converts it to a tibble.
@@ -418,27 +420,7 @@ function(input, output, session) {
     
     # Figures out how many predictions to make.
     num_tests <- 1
-    # data_test_input %>%
-    # count() %>%
-    # as.numeric()
-    
-    # Grabs each of the input variables, and saves them to their own variable.
-    # Density_input <-
-    #   data_test_input %>%
-    #   select(Density)
-    # Sulfur_input <-
-    #   data_test_input %>%
-    #   select(Sulfur)
-    # Temp.Roll_input <-
-    #   data_test_input %>%
-    #   select(Temp.Roll)
-    # mth_input <-
-    #   data_test_input %>%
-    #   select(Num_Month)
-    # Density_input <- tibble(Input = user_input[[1]])
-    # Sulfur_input <- tibble(Input = user_input[[2]])
-    # Temp.Roll_input <- tibble(Input = user_input[[3]])
-    # mth_input <- tibble(Input = user_input[[4]])
+
     Density_input <- tibble(Input = input$dens_input)
     Sulfur_input <- tibble(Input = input$sulf_input)
     Temp.Roll_input <- tibble(Input = input$temp.roll_input)
@@ -506,7 +488,7 @@ function(input, output, session) {
           ,Temp.Roll_SD = sd(Temp.Roll)
         )
       # If we have an annual "month", we pull the total standard deviation.
-      if(i == 13) {
+      if(i == 13){
         weather_stats <-
           data_weather %>%
           summarize(
@@ -588,6 +570,19 @@ function(input, output, session) {
             )
         )
       
+      # Stops the main function if no data is returned.
+      if(count(data_input) == 0){
+        return(list(
+          returned_data <- FALSE
+            ,data.frame(x = numeric())
+            ,ggplot(data = data.frame(x = numeric())) + geom_blank()
+            ,ggplot(data = data.frame(x = numeric())) + geom_blank()
+            ,LASSO_coef
+            ,data.frame(x = numeric())
+          )
+        )
+        stopifnot(TRUE)
+      }
       # Instead of using the given temperature value from the data,
       # we instead bootstrap in values from our filtered list of weather data.
       # There isn't that strong of a relationship between temperature and crude qualities,
@@ -884,7 +879,8 @@ function(input, output, session) {
     # Return ------------------------------
     return(
       list(
-        fitted_actual_input_summary
+        returned_data <- TRUE
+        ,fitted_actual_input_summary
         ,b_kern
         ,b_ecdf
         ,LASSO_coef
@@ -898,29 +894,74 @@ function(input, output, session) {
   fitted_actual_input_summary <- fitted_actual_input_summary_init
   # Creates an output when the action button is pressed.
   observeEvent(input$run_sim, {
-    main_output <- main()
     
-    fitted_actual_input_summary_new <- as.tibble(main_output[[1]])
-    # row.names(fitted_actual_input_summary) <- NULL
-    # row.names(fitted_actual_input_summary_new) <- NULL
-    # To get each button push to add a new row, I had to initialize the tibble with NA's,
-    # after we add a row, the NAs are removed.
-    fitted_actual_input_summary <<-
-      rbind(
-        fitted_actual_input_summary
-        ,fitted_actual_input_summary_new
+    # Adds a progress bar to show the simulation is running.
+    withProgress(
+      message = "Running Simulation"
+      ,value = NULL
+      ,main_output <- main()
+    )
+    
+    # Data Cleaning ----------------------
+    # Checks to see if any data, as if we don't these cause the application to crash.
+    if(main_output[[1]]){
+      fitted_actual_input_summary_new <- as.tibble(main_output[[2]])
+      # To get each button push to add a new row, I had to initialize the tibble with NA's,
+      # after we add a row, the NAs are removed.
+      fitted_actual_input_summary <<-
+        rbind(
+          fitted_actual_input_summary
+          ,fitted_actual_input_summary_new
+        ) %>% 
+        filter(!is.na(Month))
+    } else{
+      showNotification("No data was found")
+    }
+    
+    # Charts the results from each successive simulation.
+    result_chart <-
+      fitted_actual_input_summary %>% 
+      mutate(Iteration = 1:count.num(fitted_actual_input_summary)) %>%
+      select(
+        -c(
+          # Month
+          Density
+          ,Sulfur
+          ,`Crude Type`
+          ,`7 Day Temperature Average`
+          ,`SD Predicted VP`
+          ,`Data Points`
+        )
       ) %>% 
-      filter(!is.na(Month))
-    output$fitted_actual_input_summary <- renderDataTable(fitted_actual_input_summary)
-    
-    # Plots the kernel density estimator and the ECDF
-    output$b_kern <- renderPlot(main_output[[2]])
-    output$b_ecdf <- renderPlot(main_output[[3]])
+      gather(
+        Result
+        ,VP
+        ,-Iteration
+        ,-Month
+      ) %>% 
+      ggplot(
+        aes(
+          x = Iteration
+          ,y = `VP`
+          ,colour = Result
+        )
+      ) +
+      scale_colour_brewer(
+        type = "qual"
+        ,name = "Result:"
+        ,palette = "Set2"
+      ) +
+      labs(
+        title = "Simulation Results"
+        ,y = "VP (kPa)"
+      ) +
+      geom_line() +
+      geom_point()
     
     # Grabs the variables and coefficients of the LASSO regression.
     LASSO_coef <-
       # LASSO_coef %>% 
-      main_output[[4]] %>%
+      main_output[[5]] %>%
       as.matrix() %>%
       as.data.frame() %>%
       rownames_to_column() %>%
@@ -953,6 +994,15 @@ function(input, output, session) {
       select(
         -rowname
       )
+    
+    # Outputs -----------------------------------
+    # Plots the kernel density estimator and the ECDF and the results
+    output$b_kern <- renderPlot(main_output[[3]])
+    output$b_ecdf <- renderPlot(main_output[[4]])
+    output$result_chart <- renderPlot(result_chart)
+    
+    output$fitted_actual_input_summary <- renderDataTable(fitted_actual_input_summary)
+    
     output$LASSO_coef_1 <- renderTable(LASSO_coef_1)
     output$LASSO_coef_2 <- renderTable(LASSO_coef_2)
     
@@ -990,48 +1040,8 @@ function(input, output, session) {
         }
       )
     
-    # Charts the results from each successive simulation.
-    result_chart <-
-      fitted_actual_input_summary %>% 
-      mutate(Iteration = 1:count.num(fitted_actual_input_summary)) %>%
-      select(
-        -c(
-          # Month
-          Density
-          ,Sulfur
-          ,`Crude Type`
-          ,`7 Day Temperature Average`
-          ,`SD Predicted VP`
-          ,`Data Points`
-        )
-      ) %>% 
-      gather(
-        Result
-        ,VP
-        ,-Iteration
-        ,-Month
-      ) %>% 
-      ggplot(
-        aes(
-          x = Iteration
-          ,y = `VP`
-          ,colour = Result
-        )
-      ) +
-      scale_colour_brewer(
-        type = "qual"
-        ,name = "Result:"
-        ,palette = "Set2"
-      ) +
-        labs(
-          title = "Simulation Results"
-          ,y = "VP (kPa)"
-        ) +
-      geom_line() +
-      geom_point()
-    
-    output$result_chart <- 
-      renderPlot(result_chart)
+
   })
+  
 }
 
