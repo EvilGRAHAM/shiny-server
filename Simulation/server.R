@@ -915,7 +915,10 @@ function(input, output, session) {
         ) %>% 
         filter(!is.na(Month))
     } else{
-      showNotification("No data was found")
+      showNotification(
+        "No data was found"
+        ,type = "error"
+      )
     }
     
     # Charts the results from each successive simulation.
