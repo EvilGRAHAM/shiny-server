@@ -15,8 +15,7 @@ data.conversions <- function(data_file) {
   # Converts SDate to date format, and Producer + Battery to factors
   # Grabs the year and the month for each entry.
   # Arranges the entries chronologically
-  data_file <-
-    data_file %>%
+  data_file %<>%
     mutate(
       SDate = as.Date(SDate, format = "%m/%d/%Y")
     ) %>%
@@ -98,7 +97,7 @@ fitted_actual_input_summary_init <- tibble(
   ,Sulfur = as.numeric(NA)
   ,`Crude Type` = NA
   ,`7 Day Temperature Average` = as.numeric(NA)
-  ,`Mean Actual VP` = as.numeric(NA)
+  ,`Mean Historical VP` = as.numeric(NA)
   ,`Mean Predicted VP` = as.numeric(NA)
   ,`Median Predicted VP` = as.numeric(NA)
   ,`SD Predicted VP` = as.numeric(NA)
@@ -684,7 +683,7 @@ function(input, output, session) {
                 ,s = "lambda.1se"
               ) %>%
               as.vector()
-            ,Actual = data_input$VP
+            ,Historical = data_input$VP
           )
         )
     }
@@ -729,7 +728,7 @@ function(input, output, session) {
       fitted_actual_input %>%
       group_by(Month, Num_Month) %>%
       summarize(
-        `Mean Actual VP` = round(mean(Actual), 4)
+        `Mean Historical VP` = round(mean(Historical), 4)
         ,`Mean Predicted VP` = round(mean(Fitted), 4)
         ,`Median Predicted VP` = round(median(Fitted), 4)
         ,`SD Predicted VP` = round(sd(Fitted), 4)
@@ -750,7 +749,7 @@ function(input, output, session) {
         ,Sulfur
         ,`Crude Type`
         ,`7 Day Temperature Average`
-        ,`Mean Actual VP`
+        ,`Mean Historical VP`
         ,`Mean Predicted VP`
         ,`Median Predicted VP`
         ,`SD Predicted VP`
@@ -777,7 +776,7 @@ function(input, output, session) {
       as.data.frame() %>% 
       mutate(
         `Predicted VP` = fitted_actual_input$Fitted
-        ,`Actual VP` = fitted_actual_input$Actual
+        ,`Historical VP` = fitted_actual_input$Historical
       )
     
     # Simulation Graphs ------------------------------------------
@@ -1012,7 +1011,49 @@ function(input, output, session) {
           )
         }
       )
+    
+    # Charts the results from each successive simulation.
+    result_chart <-
+      fitted_actual_input_summary %>% 
+      mutate(Iteration = 1:count.num(fitted_actual_input_summary)) %>%
+      select(
+        -c(
+          # Month
+          Density
+          ,Sulfur
+          ,`Crude Type`
+          ,`7 Day Temperature Average`
+          ,`SD Predicted VP`
+          ,`Data Points`
+        )
+      ) %>% 
+      gather(
+        Result
+        ,VP
+        ,-Iteration
+        ,-Month
+      ) %>% 
+      ggplot(
+        aes(
+          x = Iteration
+          ,y = `VP`
+          ,colour = Result
+        )
+      ) +
+      scale_colour_brewer(
+        type = "qual"
+        ,name = "Result:"
+        ,palette = "Set2"
+      ) +
+        labs(
+          title = "Simulation Results"
+          ,y = "VP (kPa)"
+        ) +
+      geom_line() +
+      geom_point()
+    
+    output$result_chart <- 
+      renderPlot(result_chart)
   })
-  
 }
 

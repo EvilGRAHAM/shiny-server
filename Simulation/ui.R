@@ -69,8 +69,9 @@ fluidPage(
     ,mainPanel(
       # dataTableOutput("fitted_actual_input_summary")
       tabsetPanel(type = "tabs"
-                   ,tabPanel("Distribution", plotOutput("b_kern"))
-                   ,tabPanel("ECDF", plotOutput("b_ecdf"))
+        ,tabPanel("Distribution", plotOutput("b_kern"))
+        ,tabPanel("ECDF", plotOutput("b_ecdf"))
+        ,tabPanel("Results", plotOutput("result_chart"))
       )
     )
   )
