@@ -57,7 +57,7 @@ Crude_Breakdown_Cleaned <- c(
 )
 
 
-excel_path <- "C:/Users/scott.graham/OneDrive - Tundra Energy Marketing Limited/Documents/Marketing/VP/Post Split/VP Simulation.xlsx"
+excel_path <- "C:/Users/scott.graham/OneDrive - Tundra Energy Marketing Limited/Documents/GitHub/shiny-server/Simulation/Data/VP Simulation.xlsx"
 excel_sheet_complete <- "VP Data Complete"
 excel_sheet_reduced <- "VP Data"
 excel_sheet_weather <- "Weather Data"
@@ -99,6 +99,7 @@ var.pred <- c(
   ,"Oct"
   ,"Nov"
   ,"Dec"
+  ,"Post_Aquisition"
   ,"Sulf.C5"
   ,"Sulf.L_LSB"
   ,"Sulf.L_SW"
@@ -123,6 +124,14 @@ var.pred <- c(
   ,"Temp.Roll.Midale"
   ,"Temp.Roll.H_Sour"
   ,"Temp.Roll.H_SW"
+  ,"Post_Aquisition.C5"
+  ,"Post_Aquisition.L_LSB"
+  ,"Post_Aquisition.L_SW"
+  ,"Post_Aquisition.M_LSB"
+  ,"Post_Aquisition.M_SW"
+  ,"Post_Aquisition.Midale"
+  ,"Post_Aquisition.H_Sour"
+  ,"Post_Aquisition.H_SW"
 )
 
 lasso_var_names <- c(
@@ -158,6 +167,7 @@ lasso_var_names <- c(
   ,"Oct"
   ,"Nov"
   ,"Dec"
+  ,"Post Aquisition"
   ,"Sulfur:C5+"
   ,"Sulfur:Light LSB"
   ,"Sulfur:Light SW"
@@ -182,6 +192,14 @@ lasso_var_names <- c(
   ,"Temp.Roll:Midale"
   ,"Temp.Roll:Heavy Sour"
   ,"Temp.Roll:Heavy SW"
+  ,"Post_Aquisition:C5+"
+  ,"Post_Aquisition:Light LSB"
+  ,"Post_Aquisition:Light SW"
+  ,"Post_Aquisition:Medium LSB"
+  ,"Post_Aquisition:Medium SW"
+  ,"Post_Aquisition:Midale"
+  ,"Post_Aquisition:Heavy Sour"
+  ,"Post_Aquisition:Heavy SW"
 )
 
 
@@ -360,12 +378,20 @@ data_complete <-
     ,Temp.Roll.Midale = Temp.Roll * Midale
     ,Temp.Roll.H_Sour = Temp.Roll * Heavy_Sour
     ,Temp.Roll.H_SW = Temp.Roll * Heavy_SW
+    ,Post_Aquisition.C5 = Post_Aquisition * C5
+    ,Post_Aquisition.L_LSB = Post_Aquisition * Light_LSB
+    ,Post_Aquisition.L_SW = Post_Aquisition * Light_SW
+    ,Post_Aquisition.M_LSB = Post_Aquisition * Medium_LSB
+    ,Post_Aquisition.M_SW = Post_Aquisition * Medium_SW
+    ,Post_Aquisition.Midale = Post_Aquisition * Midale
+    ,Post_Aquisition.H_Sour = Post_Aquisition * Heavy_Sour
+    ,Post_Aquisition.H_SW = Post_Aquisition * Heavy_SW
   )
 
 # LASSO -------------------------------------------------------------------
 
 
-
+ 
 # We generate a matrix from the complete data set using the list of variables defined above.
 # Generates a Matrix containing the predictor variables.
 lasso.pred <- 
@@ -817,6 +843,7 @@ fitted_actual_input_summary_tidy <-
     Model
     ,VP
     ,-Month
+    ,-`Data Points`
   )
 
 # Simulation Graphs ------------------------------------------

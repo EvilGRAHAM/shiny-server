@@ -117,7 +117,8 @@ function(input, output, session) {
   # As well it splits the mth variable into 12 dummy variables.
   data_complete <-
     read_csv(
-      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
+      "C:/Users/scott.graham/OneDrive - Tundra Energy Marketing Limited/Documents/GitHub/shiny-server/Simulation/Data/VP_Data_Complete.csv"
+      # "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
     ) %>% 
     data.conversions() %>% 
     mutate(
@@ -157,6 +158,14 @@ function(input, output, session) {
       ,Temp.Roll.Midale = Temp.Roll * Midale
       ,Temp.Roll.H_Sour = Temp.Roll * Heavy_Sour
       ,Temp.Roll.H_SW = Temp.Roll * Heavy_SW
+      ,Post_Aquisition.C5 = Post_Aquisition * C5
+      ,Post_Aquisition.L_LSB = Post_Aquisition * Light_LSB
+      ,Post_Aquisition.L_SW = Post_Aquisition * Light_SW
+      ,Post_Aquisition.M_LSB = Post_Aquisition * Medium_LSB
+      ,Post_Aquisition.M_SW = Post_Aquisition * Medium_SW
+      ,Post_Aquisition.Midale = Post_Aquisition * Midale
+      ,Post_Aquisition.H_Sour = Post_Aquisition * Heavy_Sour
+      ,Post_Aquisition.H_SW = Post_Aquisition * Heavy_SW
     )
   
   data_weather <-
@@ -275,6 +284,14 @@ function(input, output, session) {
       ,"Temp.Roll.Midale"
       ,"Temp.Roll.H_Sour"
       ,"Temp.Roll.H_SW"
+      ,"Post_Aquisition.C5"
+      ,"Post_Aquisition.L_LSB"
+      ,"Post_Aquisition.L_SW"
+      ,"Post_Aquisition.M_LSB"
+      ,"Post_Aquisition.M_SW"
+      ,"Post_Aquisition.Midale"
+      ,"Post_Aquisition.H_Sour"
+      ,"Post_Aquisition.H_SW"
     )
     
     lasso_var_names <- c(
@@ -335,6 +352,14 @@ function(input, output, session) {
       ,"Temp.Roll:Midale"
       ,"Temp.Roll:Heavy Sour"
       ,"Temp.Roll:Heavy SW"
+      ,"Post Aquisition:C5+"
+      ,"Post Aquisition:Light LSB"
+      ,"Post Aquisition:Light SW"
+      ,"Post Aquisition:Medium LSB"
+      ,"Post Aquisition:Medium SW"
+      ,"Post Aquisition:Midale"
+      ,"Post Aquisition:Heavy Sour"
+      ,"Post Aquisition:Heavy SW"
     )
     
     
@@ -636,6 +661,14 @@ function(input, output, session) {
           ,Temp.Roll.Midale = Temp.Roll * Midale
           ,Temp.Roll.H_Sour = Temp.Roll * Heavy_Sour
           ,Temp.Roll.H_SW = Temp.Roll * Heavy_SW
+          ,Post_Aquisition.C5 = Post_Aquisition * C5
+          ,Post_Aquisition.L_LSB = Post_Aquisition * Light_LSB
+          ,Post_Aquisition.L_SW = Post_Aquisition * Light_SW
+          ,Post_Aquisition.M_LSB = Post_Aquisition * Medium_LSB
+          ,Post_Aquisition.M_SW = Post_Aquisition * Medium_SW
+          ,Post_Aquisition.Midale = Post_Aquisition * Midale
+          ,Post_Aquisition.H_Sour = Post_Aquisition * Heavy_Sour
+          ,Post_Aquisition.H_SW = Post_Aquisition * Heavy_SW
         ) %>%
         select(var.pred) %>%
         as.matrix()
