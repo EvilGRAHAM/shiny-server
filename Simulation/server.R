@@ -117,8 +117,7 @@ function(input, output, session) {
   # As well it splits the mth variable into 12 dummy variables.
   data_complete <-
     read_csv(
-      "C:/Users/scott.graham/OneDrive - Tundra Energy Marketing Limited/Documents/GitHub/shiny-server/Simulation/Data/VP_Data_Complete.csv"
-      # "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
+      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
     ) %>% 
     data.conversions() %>% 
     mutate(
