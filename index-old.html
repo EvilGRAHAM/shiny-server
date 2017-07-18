@@ -54,12 +54,12 @@
 				  width: 512px;
 				}
 				.demo-card-wide > .mdl-card__title {
-				  color: #fff;
+				  color: #000000;
 				  height: 176px;
-				  background: url('/Simulation/preview.png') center / cover;
+				  background: url('https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/preview.PNG') center / cover;
 				}
 				.demo-card-wide > .mdl-card__menu {
-				  color: #fff;
+				  color: #000000;
 				}
 			</style>
 			<div class="demo-card-wide mdl-card mdl-shadow--2dp">
@@ -70,7 +70,11 @@
 					Simulate and Predict Vapour Pressure based on Density, Sulfur and Temperature.
 				</div>
 				<div class="mdl-card__actions mdl-card--border">
-					<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+					<a 
+						class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" 
+						href = "http://grahamst.at/shiny/Simulation"
+						target = "_blank"
+					>
 						Get Started
 					</a>
 				</div>
@@ -80,31 +84,6 @@
 					</button>
 				</div>
 			</div>
-			<!-- Image card -->
-<style>
-.demo-card-image.mdl-card {
-  width: 256px;
-  height: 256px;
-  background: url('/Simulation/preview.png') center / cover;
-}
-.demo-card-image > .mdl-card__actions {
-  height: 52px;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.2);
-}
-.demo-card-image__filename {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-}
-</style>
-
-<div class="demo-card-image mdl-card mdl-shadow--2dp">
-  <div class="mdl-card__title mdl-card--expand"></div>
-  <div class="mdl-card__actions">
-    <span class="demo-card-image__filename">Image.jpg</span>
-  </div>
-</div>
 		</div>
 	</body>
 </html>
