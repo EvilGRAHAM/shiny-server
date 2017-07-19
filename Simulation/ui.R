@@ -65,6 +65,7 @@ fluidPage(
         ,label = "Download Model Coefficients"
       )
     )
+    
     ,mainPanel(
       tabsetPanel(type = "tabs"
         ,tabPanel("Distribution", plotOutput("b_kern"))

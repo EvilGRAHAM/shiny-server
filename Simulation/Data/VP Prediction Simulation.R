@@ -278,7 +278,63 @@ get_input <- function() {
   return(list(Density_input, Sulfur_input, Temp.Roll_input, mth_input))
 }
 
+crude_type_check_old <- function(density, sulfur){
+  # Any input with a density <= 770 we call C5 regardless of sulfur
+  # If Sulfur is <= 0.5 it is deemed Sweet vs. a Sour w/ sulfur > 0.5
+  # Lights have a density <= 825, Mediums have a density (825, 900] for SW, (825, 870] for Sours
+  # A Midale is a sour w/ density in (870, 900]
+  # Heavy's have a density > 900
+  if(density <= 770) {
+    "C5"
+  } else if(sulfur <= 0.5) {
+    if(density <= 825) {
+      "Light_SW"
+    } else if(density > 825 & density <= 900) {
+      "Medium_SW"
+    } else {
+      "Heavy_SW"
+    }
+  } else {
+    if(density <= 825) {
+      "Light_LSB"
+    } else if(density > 825 & density <= 870) {
+      "Medium_LSB"
+    } else if(density > 870 & density <= 900) {
+      "Midale"
+    } else {
+      "Heavy_Sour"
+    }
+  }
+}
 
+crude_type_check <- function(density, sulfur){
+  # Any input with a density <= 770 we call C5 regardless of sulfur
+  # If Sulfur is <= 0.5 it is deemed Sweet vs. a Sour w/ sulfur > 0.5
+  # Lights have a density <= 825, Mediums have a density (825, 900]
+  # A Midale is a sour w/ density in (865, 900] and sulfur > 2
+  # Heavy's have a density > 900
+  if(density <= 770) {
+    "C5"
+  } else if(sulfur <= 0.5) {
+    if(density <= 825) {
+      "Light_SW"
+    } else if(density > 825 & density <= 900) {
+      "Medium_SW"
+    } else {
+      "Heavy_SW"
+    }
+  } else {
+    if(density <= 825) {
+      "Light_LSB"
+    } else if(density > 865 & density <= 900 & sulfur >= 2) {
+      "Midale"
+    } else if(density > 825 & density <= 900) {
+      "Medium_LSB"
+    } else {
+      "Heavy_Sour"
+    }
+  }
+}
 
 # Data Import -----------------------------------
 
@@ -552,34 +608,8 @@ fitted_actual_input <- tibble(
 
 for (i in 1:num_tests) {
 set.seed(4815609)
-# Any input with a density <= 770 we call C5 regardless of sulfur
-# If Sulfur is <= 0.5 it is deemed Sweet vs. a Sour w/ sulfur > 0.5
-# Lights have a density <= 825, Mediums have a density (825, 900] for SW, (825, 870] for Sours
-# A Midale is a sour w/ density in (870, 900]
-# Heavy's have a density > 900
-Crude_Breakdown_input <- 
-  if(Density_input[i, ] <= 770) {
-    "C5"
-  } else if(Sulfur_input[i, ] <= 0.5) {
-    if(Density_input <= 825) {
-      "Light_SW"
-    } else if(Density_input[i, ] > 825 & Density_input[i, ] <= 900) {
-      "Medium_SW"
-    } else {
-      "Heavy_SW"
-    }
-  } else {
-    if(Density_input[i, ] <= 825) {
-      "Light_LSB"
-    } else if(Density_input[i, ] > 825 & Density_input[i, ] <= 870) {
-      "Medium_LSB"
-    } else if(Density_input[i, ] > 870 & Density_input[i, ] <= 900) {
-      "Midale"
-    } else {
-      "Heavy_Sour"
-    }
-  }
-
+# Determines the crude type based on the inputted data.
+Crude_Breakdown_input <- crude_type_check(Density_input[i, ], Sulfur_input[i, ])
 # This finds the standard deviation for the crude type inputed.
 crude_bd_stats <- 
   data_complete %>% 
