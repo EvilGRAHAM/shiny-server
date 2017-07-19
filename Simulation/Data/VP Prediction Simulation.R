@@ -204,7 +204,7 @@ lasso_var_names <- c(
 
 
 # How many times we multiply the SD by to get our input rows.
-multiplier <- 1
+multiplier <- 2
 
 
 # Functions ----------------------------

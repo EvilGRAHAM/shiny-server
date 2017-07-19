@@ -48,6 +48,14 @@ fluidPage(
         ,value = 2
         ,step = 0.5
       )
+      ,numericInput(
+        inputId = "alpha_input"
+        ,label = "Alpha for Elastic net regularization (0 ⇒ More like Ridge, 1 ⇒ More like LASSO)"
+        ,value = 1
+        ,min = 0
+        ,step = 0.1
+        ,max = 1
+      )
       ,actionButton(
         "run_sim"
         ,"Run Simulation"

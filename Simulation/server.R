@@ -446,8 +446,6 @@ function(input, output, session) {
     
     # LASSO -------------------------------------------------------------------
     
-    
-    
     # We generate a matrix from the complete data set using the list of variables defined above.
     # Generates a Matrix containing the predictor variables.
     lasso.pred <-
@@ -473,7 +471,7 @@ function(input, output, session) {
       cv.glmnet(
         x = lasso.pred#[, 1:16]
         ,y = lasso.result
-        ,alpha = 1
+        ,alpha = input$alpha_input
         # ,penalty.factor =
         #   c(
         #     rep(
@@ -603,7 +601,7 @@ function(input, output, session) {
           # As well if you uncomment the second line, only those entries of the same month as 
           # the inputted are used.
           # Crude_Breakdown == Crude_Breakdown_input &
-          # mth == as.numeric(mth_input[i, ]) &
+          mth == as.numeric(mth_input[i, ]) &
             Dens >= Density_input[i, ] %>% as.numeric() - multiplier * (
               crude_bd_stats %>%
                 select(Density_SD) %>%
@@ -1045,7 +1043,7 @@ function(input, output, session) {
       filter(
         rowname <=
           count.num(LASSO_coef) / 2 %>%
-          ceiling()
+          ceiling() + 1
       ) %>% 
       select(
         -rowname
@@ -1056,7 +1054,7 @@ function(input, output, session) {
       filter(
         rowname >
           count.num(LASSO_coef) / 2 %>%
-          ceiling()
+          ceiling() + 1
       ) %>% 
       select(
         -rowname
