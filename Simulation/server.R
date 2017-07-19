@@ -603,7 +603,7 @@ function(input, output, session) {
           # As well if you uncomment the second line, only those entries of the same month as 
           # the inputted are used.
           # Crude_Breakdown == Crude_Breakdown_input &
-          mth == as.numeric(mth_input[i, ]) &
+          # mth == as.numeric(mth_input[i, ]) &
             Dens >= Density_input[i, ] %>% as.numeric() - multiplier * (
               crude_bd_stats %>%
                 select(Density_SD) %>%
