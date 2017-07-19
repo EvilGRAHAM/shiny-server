@@ -1043,7 +1043,7 @@ function(input, output, session) {
       filter(
         rowname <=
           count.num(LASSO_coef) / 2 %>%
-          ceiling() + 1
+          ceiling()
       ) %>% 
       select(
         -rowname
@@ -1054,7 +1054,7 @@ function(input, output, session) {
       filter(
         rowname >
           count.num(LASSO_coef) / 2 %>%
-          ceiling() + 1
+          ceiling()
       ) %>% 
       select(
         -rowname
