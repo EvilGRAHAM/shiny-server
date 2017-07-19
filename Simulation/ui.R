@@ -43,9 +43,15 @@ fluidPage(
         ,max = 12
       )
       ,numericInput(
-        inputId = "multiplier_input"
-        ,label = "SD Multiplier"
+        inputId = "multiplier_crude_input"
+        ,label = "SD Multiplier fro Crude Quality"
         ,value = 2
+        ,step = 0.5
+      )
+      ,numericInput(
+        inputId = "multiplier_weather_input"
+        ,label = "SD Multiplier for Temperature"
+        ,value = 1
         ,step = 0.5
       )
       ,numericInput(

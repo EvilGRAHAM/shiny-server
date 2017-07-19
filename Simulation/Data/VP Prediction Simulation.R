@@ -204,7 +204,8 @@ lasso_var_names <- c(
 
 
 # How many times we multiply the SD by to get our input rows.
-multiplier <- 2
+crude_multiplier <- 2
+weather_multiplier <- 1
 
 
 # Functions ----------------------------
@@ -641,7 +642,7 @@ if(i == 13) {
 }
 weather_stats
 
-# Grabs all temperature entries whose entries are within +- multiplier*sd
+# Grabs all temperature entries whose entries are within +- crude_multiplier*sd
 data_weather_input <- 
   data_weather %>% 
   select(
@@ -654,12 +655,12 @@ data_weather_input <-
     )
   ) %>% 
   filter(
-    Temp.Roll >= Temp.Roll_input[i, ] %>% as.numeric() - multiplier * (
+    Temp.Roll >= Temp.Roll_input[i, ] %>% as.numeric() - weather_multiplier * (
                                                         weather_stats %>% 
                                                         select(Temp.Roll_SD) %>% 
                                                         as.numeric()
                                                       ) &
-    Temp.Roll <= Temp.Roll_input[i, ] %>% as.numeric() + multiplier * (
+    Temp.Roll <= Temp.Roll_input[i, ] %>% as.numeric() + weather_multiplier * (
                                                         weather_stats %>% 
                                                         select(Temp.Roll_SD) %>% 
                                                         as.numeric()
@@ -691,22 +692,22 @@ data_input <-
     # the inputted are used.
     # Crude_Breakdown == Crude_Breakdown_input &
     # mth == as.numeric(mth_input[i, ]) &
-    Dens >= Density_input[i, ] %>% as.numeric() - multiplier * (
+    Dens >= Density_input[i, ] %>% as.numeric() - crude_multiplier * (
                                                 crude_bd_stats %>% 
                                                 select(Density_SD) %>% 
                                                 as.numeric()
                                               ) &
-    Dens <= Density_input[i, ] %>% as.numeric() + multiplier * (
+    Dens <= Density_input[i, ] %>% as.numeric() + crude_multiplier * (
                                                 crude_bd_stats %>% 
                                                 select(Density_SD) %>% 
                                                 as.numeric()
                                               ) &
-    Sulf >= Sulfur_input[i, ] %>% as.numeric() - multiplier * (
+    Sulf >= Sulfur_input[i, ] %>% as.numeric() - crude_multiplier * (
                                                 crude_bd_stats %>% 
                                                 select(Sulfur_SD) %>% 
                                                 as.numeric()
                                               ) &
-    Sulf <= Sulfur_input[i, ] %>% as.numeric() + multiplier * (
+    Sulf <= Sulfur_input[i, ] %>% as.numeric() + crude_multiplier * (
                                                 crude_bd_stats %>% 
                                                 select(Sulfur_SD) %>% 
                                                 as.numeric()
