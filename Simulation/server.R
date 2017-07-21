@@ -592,12 +592,12 @@ function(input, output, session) {
           # the inputted are used.
           # Crude_Breakdown == Crude_Breakdown_input &
           # mth == as.numeric(mth_input[i, ]) &
-          Temp.Roll >= Temp.Roll_input[i, ] %>% as.numeric() - weather_multiplier * (
+          Temp.Roll >= Temp.Roll_input[i, ] %>% as.numeric() - crude_multiplier * (
             weather_stats %>%
               select(Temp.Roll_SD) %>%
               as.numeric()
           ) &
-          Temp.Roll <= Temp.Roll_input[i, ] %>% as.numeric() + weather_multiplier * (
+          Temp.Roll <= Temp.Roll_input[i, ] %>% as.numeric() + crude_multiplier * (
             weather_stats %>%
               select(Temp.Roll_SD) %>%
               as.numeric()
