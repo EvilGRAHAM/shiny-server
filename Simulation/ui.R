@@ -44,7 +44,7 @@ fluidPage(
       )
       ,numericInput(
         inputId = "multiplier_crude_input"
-        ,label = "SD Multiplier fro Crude Quality"
+        ,label = "SD Multiplier for Crude Quality"
         ,value = 2
         ,step = 0.5
       )
