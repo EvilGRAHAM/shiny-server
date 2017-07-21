@@ -91,15 +91,20 @@ fluidPage(
   )
   ,fluidRow(
     column(
-      2
+      4
       ,offset = 0
-      ,tableOutput("LASSO_coef_1")
+      ,dataTableOutput("LASSO_coef")
     )
-    ,column(
-      2
-      ,offset = 0
-      ,tableOutput("LASSO_coef_2")
-    )
+    # column(
+    #   2
+    #   ,offset = 0
+    #   ,tableOutput("LASSO_coef_1")
+    # )
+    # ,column(
+    #   2
+    #   ,offset = 0
+    #   ,tableOutput("LASSO_coef_2")
+    # )
     ,column(
       8
       ,offset = 0

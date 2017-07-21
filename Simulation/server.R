@@ -1040,6 +1040,7 @@ function(input, output, session) {
       # LASSO_coef %>% 
       main_output[[5]] %>%
       as.matrix() %>%
+      round(4) %>% 
       as.data.frame() %>%
       rownames_to_column() %>%
       as.tibble() %>%
@@ -1047,30 +1048,30 @@ function(input, output, session) {
         `1` != 0
       )
     colnames(LASSO_coef) <- c("Variable", "Coefficient")
-    output$LASSO_coef <- renderTable(LASSO_coef)
+
     # Splits the  LASSO output into two tables for ease of display.
-    LASSO_coef_1 <-
-      LASSO_coef %>%
-      mutate(rowname = 1:count.num(LASSO_coef)) %>% 
-      filter(
-        rowname <=
-          count.num(LASSO_coef) / 2 %>%
-          ceiling()
-      ) %>% 
-      select(
-        -rowname
-      )
-    LASSO_coef_2 <-
-      LASSO_coef %>%
-      mutate(rowname = 1:count.num(LASSO_coef)) %>% 
-      filter(
-        rowname >
-          count.num(LASSO_coef) / 2 %>%
-          ceiling()
-      ) %>% 
-      select(
-        -rowname
-      )
+    # LASSO_coef_1 <-
+    #   LASSO_coef %>%
+    #   mutate(rowname = 1:count.num(LASSO_coef)) %>% 
+    #   filter(
+    #     rowname <=
+    #       count.num(LASSO_coef) / 2 %>%
+    #       ceiling()
+    #   ) %>% 
+    #   select(
+    #     -rowname
+    #   )
+    # LASSO_coef_2 <-
+    #   LASSO_coef %>%
+    #   mutate(rowname = 1:count.num(LASSO_coef)) %>% 
+    #   filter(
+    #     rowname >
+    #       count.num(LASSO_coef) / 2 %>%
+    #       ceiling()
+    #   ) %>% 
+    #   select(
+    #     -rowname
+    #   )
     
     # Outputs -----------------------------------
     # Plots the kernel density estimator and the ECDF and the results
@@ -1079,9 +1080,10 @@ function(input, output, session) {
     output$result_chart <- renderPlot(result_chart)
     
     output$fitted_actual_input_summary <- renderDataTable(fitted_actual_input_summary)
-    
-    output$LASSO_coef_1 <- renderTable(LASSO_coef_1)
-    output$LASSO_coef_2 <- renderTable(LASSO_coef_2)
+
+    output$LASSO_coef <- renderDataTable(LASSO_coef)
+    # output$LASSO_coef_1 <- renderTable(LASSO_coef_1)
+    # output$LASSO_coef_2 <- renderTable(LASSO_coef_2)
     
     # Lets you download the data used in the model.
     output$downloadData <- 
