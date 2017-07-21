@@ -584,6 +584,45 @@ function(input, output, session) {
       # from a different weather table for the simulation.
       data_input <-
         data_complete %>%
+        filter(
+          # You can uncomment the first line if you want to force the simulated data set to only
+          # contain crude of the same type as the inputted.
+          # We filter out any crudes that don't exist within the inputed temperature range.
+          # As well if you uncomment the second line, only those entries of the same month as 
+          # the inputted are used.
+          # Crude_Breakdown == Crude_Breakdown_input &
+          # mth == as.numeric(mth_input[i, ]) &
+          Temp.Roll >= Temp.Roll_input[i, ] %>% as.numeric() - weather_multiplier * (
+            weather_stats %>%
+              select(Temp.Roll_SD) %>%
+              as.numeric()
+          ) &
+          Temp.Roll <= Temp.Roll_input[i, ] %>% as.numeric() + weather_multiplier * (
+            weather_stats %>%
+              select(Temp.Roll_SD) %>%
+              as.numeric()
+          ) &
+          Dens >= Density_input[i, ] %>% as.numeric() - crude_multiplier * (
+            crude_bd_stats %>%
+              select(Density_SD) %>%
+              as.numeric()
+          ) &
+          Dens <= Density_input[i, ] %>% as.numeric() + crude_multiplier * (
+            crude_bd_stats %>%
+              select(Density_SD) %>%
+              as.numeric()
+          ) &
+          Sulf >= Sulfur_input[i, ] %>% as.numeric() - crude_multiplier * (
+            crude_bd_stats %>%
+              select(Sulfur_SD) %>%
+               as.numeric()
+          ) &
+          Sulf <= Sulfur_input[i, ] %>% as.numeric() + crude_multiplier * (
+            crude_bd_stats %>%
+              select(Sulfur_SD) %>%
+              as.numeric()
+          )
+        ) %>% 
         select(
           -c(
             Temp.Mean
@@ -595,34 +634,6 @@ function(input, output, session) {
             ,Melita
             ,Kipling
           )
-        ) %>%
-        filter(
-          # You can uncomment the first line if you want to force the simulated data set to only
-          # contain crude of the same type as the inputted.
-          # As well if you uncomment the second line, only those entries of the same month as 
-          # the inputted are used.
-          # Crude_Breakdown == Crude_Breakdown_input &
-          mth == as.numeric(mth_input[i, ]) &
-            Dens >= Density_input[i, ] %>% as.numeric() - crude_multiplier * (
-              crude_bd_stats %>%
-                select(Density_SD) %>%
-                as.numeric()
-            ) &
-            Dens <= Density_input[i, ] %>% as.numeric() + crude_multiplier * (
-              crude_bd_stats %>%
-                select(Density_SD) %>%
-                as.numeric()
-            ) &
-            Sulf >= Sulfur_input[i, ] %>% as.numeric() - crude_multiplier * (
-              crude_bd_stats %>%
-                select(Sulfur_SD) %>%
-                as.numeric()
-            ) &
-            Sulf <= Sulfur_input[i, ] %>% as.numeric() + crude_multiplier * (
-              crude_bd_stats %>%
-                select(Sulfur_SD) %>%
-                as.numeric()
-            )
         )
       
       # Stops the main function if no data is returned.
