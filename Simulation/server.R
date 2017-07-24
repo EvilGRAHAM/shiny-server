@@ -1029,7 +1029,6 @@ function(input, output, session) {
       mutate(Iteration = 1:count.num(fitted_actual_input_summary)) %>%
       select(
         -c(
-          # Month
           Density
           ,Sulfur
           ,`Crude Type`
