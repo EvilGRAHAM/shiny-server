@@ -242,7 +242,7 @@ function(input, output, session) {
         ,Crude_Breakdown
       ) %>% 
       summarize(
-        Mean = mean(VP_unadjusted)
+        Mean = mean(VP)
       )
     post_aquisition_bd_spread <- 
       post_aquisition_bd %>% 
@@ -254,18 +254,19 @@ function(input, output, session) {
         Change_in_VP = `1` - `0`
       )
     colnames(post_aquisition_bd_spread) <- c("Crude_Breakdown", "Pre_Aquisition_VP", "Post_Aquisition_VP", "Change_in_VP")
-    
-    data_complete <-
-      data_complete %>% 
-      left_join(
-        post_aquisition_bd_spread
-      ) %>% 
-      mutate(
-        VP = if_else(.$Post_Aquisition == 0
-          ,VP + Change_in_VP
-          ,VP
+    if (input$post_aquisition_adjustment){
+      data_complete %<>%
+        left_join(
+          post_aquisition_bd_spread
+        ) %>% 
+        mutate(
+          VP = if_else(.$Post_Aquisition == 0
+            ,VP + Change_in_VP
+            ,VP
+          )
         )
-      )
+    }
+    
     # Variables ----------------------------------
     Mth <- c(
       `1` = "Jan"
@@ -318,7 +319,6 @@ function(input, output, session) {
     var.pred <- c(
       "Sulf"
       ,"Dens"
-      # ,"mth"
       ,"Temp.Mean"
       ,"Temp.Roll"
       ,"Estevan"
@@ -386,7 +386,6 @@ function(input, output, session) {
     lasso_var_names <- c(
       "Sulfur"
       ,"Density"
-      # ,"Month"
       ,"Mean Temperature"
       ,"7 Day Rolling Temperature"
       ,"Estevan"

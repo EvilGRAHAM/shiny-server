@@ -14,7 +14,12 @@ fluidPage(
   
   ,sidebarLayout(
     sidebarPanel(
-      numericInput(
+      checkboxInput(
+        inputId = "post_aquisition_adjustment"
+        ,label = "Use adjustment for changes post-aquisition:"
+        ,value = TRUE
+      )
+      ,numericInput(
         inputId = "dens_input"
         ,label = "Density (kg/m3)"
         ,value = 825
@@ -63,8 +68,8 @@ fluidPage(
         ,max = 1
       )
       ,actionButton(
-        "run_sim"
-        ,"Run Simulation"
+        inputId = "run_sim"
+        ,label = "Run Simulation"
       )
       ,downloadButton(
         outputId = "downloadData"
