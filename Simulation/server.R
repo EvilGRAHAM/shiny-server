@@ -230,9 +230,27 @@ function(input, output, session) {
     ) %>% 
     mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
   
+
+  
   # Main Function ------------------------------
   main <- function(data_complete, data_weather){
     rm(list=ls())
+    post_aquisition_bd <- 
+      data_complete %>% 
+      group_by(
+        Post_Aquisition
+        ,mth
+        ,Crude_Breakdown
+      ) %>% 
+      summarize(
+        Mean = mean(VP)
+      )
+    post_aquisition_bd_spread <- 
+      post_aquisition_bd %>% 
+      spread(
+        Post_Aquisition
+        ,Mean
+      )
     # Variables ----------------------------------
     Mth <- c(
       `1` = "Jan"
