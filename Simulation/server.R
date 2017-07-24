@@ -885,13 +885,13 @@ function(input, output, session) {
     
     b_kern <-
       b_base +
-      geom_histogram(
-        aes(
-          y = ..density..
-        )
-        ,alpha = 0.5
-        ,binwidth = function(x) {2 * IQR(x) * length(x)^(-1/3)}
-      ) +
+      # geom_histogram(
+      #   aes(
+      #     y = ..density..
+      #   )
+      #   ,alpha = 0.5
+      #   ,binwidth = function(x) {2 * IQR(x) * length(x)^(-1/3)}
+      # ) +
       geom_density() +
       labs(
         y = "Density"
