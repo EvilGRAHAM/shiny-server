@@ -235,37 +235,6 @@ function(input, output, session) {
   # Main Function ------------------------------
   main <- function(data_complete, data_weather){
     rm(list=ls())
-    post_aquisition_bd <- 
-      data_complete %>% 
-      group_by(
-        Post_Aquisition
-        ,Crude_Breakdown
-      ) %>% 
-      summarize(
-        Mean = mean(VP)
-      )
-    post_aquisition_bd_spread <- 
-      post_aquisition_bd %>% 
-      spread(
-        Post_Aquisition
-        ,Mean
-      ) %>% 
-      mutate(
-        Change_in_VP = `1` - `0`
-      )
-    colnames(post_aquisition_bd_spread) <- c("Crude_Breakdown", "Pre_Aquisition_VP", "Post_Aquisition_VP", "Change_in_VP")
-    if (input$post_aquisition_adjustment){
-      data_complete %<>%
-        left_join(
-          post_aquisition_bd_spread
-        ) %>% 
-        mutate(
-          VP = if_else(.$Post_Aquisition == 0
-            ,VP + Change_in_VP
-            ,VP
-          )
-        )
-    }
     
     # Variables ----------------------------------
     Mth <- c(
@@ -450,6 +419,38 @@ function(input, output, session) {
       # ,"Post Aquisition:Heavy SW"
     )
     
+    # Looks at how the VP changes by crude type pre and post aquisition.
+    post_aquisition_bd <- 
+      data_complete %>% 
+      group_by(
+        Post_Aquisition
+        ,Crude_Breakdown
+      ) %>% 
+      summarize(
+        Mean = mean(VP)
+      )
+    post_aquisition_bd_spread <- 
+      post_aquisition_bd %>% 
+      spread(
+        Post_Aquisition
+        ,Mean
+      ) %>% 
+      mutate(
+        Change_in_VP = `1` - `0`
+      )
+    colnames(post_aquisition_bd_spread) <- c("Crude_Breakdown", "Pre_Aquisition_VP", "Post_Aquisition_VP", "Change_in_VP")
+    if (input$post_aquisition_adjustment){
+      data_complete %<>%
+        left_join(
+          post_aquisition_bd_spread
+        ) %>% 
+        mutate(
+          VP = if_else(.$Post_Aquisition == 0
+                       ,VP + Change_in_VP
+                       ,VP
+          )
+        )
+    }
     
     # How many times we multiply the SD by to get our input rows.
     crude_multiplier <- input$multiplier_crude_input
