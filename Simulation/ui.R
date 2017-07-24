@@ -67,6 +67,7 @@ fluidPage(
         ,step = 0.1
         ,max = 1
       )
+      ,verbatimTextOutput("data_points")
       ,actionButton(
         inputId = "run_sim"
         ,label = "Run Simulation"

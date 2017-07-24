@@ -230,194 +230,195 @@ function(input, output, session) {
     ) %>% 
     mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
   
-
+  # Variables ----------------------------------
+  Mth <- c(
+    `1` = "Jan"
+    ,`2` = "Feb"
+    ,`3` = "Mar"
+    ,`4` = "Apr"
+    ,`5` = "May"
+    ,`6` = "Jun"
+    ,`7` = "Jul"
+    ,`8` = "Aug"
+    ,`9` = "Sep"
+    ,`10` = "Oct"
+    ,`11` = "Nov"
+    ,`12` = "Dec"
+    ,`13` = "Ann"
+  )
+  
+  Mth_long <- c(
+    `1` = "January"
+    ,`2` = "February"
+    ,`3` = "March"
+    ,`4` = "April"
+    ,`5` = "May"
+    ,`6` = "June"
+    ,`7` = "July"
+    ,`8` = "August"
+    ,`9` = "September"
+    ,`10` = "October"
+    ,`11` = "November"
+    ,`12` = "December"
+    ,`13` = "Annual"
+  )
+  
+  Mth_comb <- cbind(Mth, Mth_long)
+  
+  Crude_Breakdown_Cleaned <- c(
+    `Unknown` = "Unknown"
+    ,`C5` = "C5+"
+    ,`Light_LSB` = "Light LSB"
+    ,`Light_SW` = "Light SW"
+    ,`Medium_LSB` = "Medium LSB"
+    ,`Medium_SW` = "Medium SW"
+    ,`Midale` = "Midale"
+    ,`Heavy_Sour` = "Heavy Sour"
+    ,`Heavy_SW` = "Heavy SW"
+  )
+  
+  
+  # This is a list of all the variables we wish to include in the LASSO.
+  var.pred <- c(
+    "Sulf"
+    ,"Dens"
+    ,"Temp.Mean"
+    ,"Temp.Roll"
+    ,"Estevan"
+    ,"Weyburn"
+    ,"Oxbow"
+    ,"Yellow Grass North"
+    ,"Melita"
+    ,"Kipling"
+    # ,"VP_95_Spec"
+    ,"C5"
+    ,"Light_LSB"
+    ,"Light_SW"
+    ,"Medium_LSB"
+    ,"Medium_SW"
+    ,"Midale"
+    ,"Heavy_Sour"
+    ,"Heavy_SW"
+    ,"Jan"
+    ,"Feb"
+    ,"Mar"
+    ,"Apr"
+    ,"May"
+    ,"Jun"
+    ,"Jul"
+    ,"Aug"
+    ,"Sep"
+    ,"Oct"
+    ,"Nov"
+    ,"Dec"
+    # ,"Post_Aquisition"
+    ,"Sulf.C5"
+    ,"Sulf.L_LSB"
+    ,"Sulf.L_SW"
+    ,"Sulf.M_LSB"
+    ,"Sulf.M_SW"
+    ,"Sulf.Midale"
+    ,"Sulf.H_Sour"
+    ,"Sulf.H_SW"
+    ,"Dens.C5"
+    ,"Dens.L_LSB"
+    ,"Dens.L_SW"
+    ,"Dens.M_LSB"
+    ,"Dens.M_SW"
+    ,"Dens.Midale"
+    ,"Dens.H_Sour"
+    ,"Dens.H_SW"
+    ,"Temp.Roll.C5"
+    ,"Temp.Roll.L_LSB"
+    ,"Temp.Roll.L_SW"
+    ,"Temp.Roll.M_LSB"
+    ,"Temp.Roll.M_SW"
+    ,"Temp.Roll.Midale"
+    ,"Temp.Roll.H_Sour"
+    ,"Temp.Roll.H_SW"
+    # ,"Post_Aquisition.C5"
+    # ,"Post_Aquisition.L_LSB"
+    # ,"Post_Aquisition.L_SW"
+    # ,"Post_Aquisition.M_LSB"
+    # ,"Post_Aquisition.M_SW"
+    # ,"Post_Aquisition.Midale"
+    # ,"Post_Aquisition.H_Sour"
+    # ,"Post_Aquisition.H_SW"
+  )
+  
+  lasso_var_names <- c(
+    "Sulfur"
+    ,"Density"
+    ,"Mean Temperature"
+    ,"7 Day Rolling Temperature"
+    ,"Estevan"
+    ,"Weyburn"
+    ,"Oxbow"
+    ,"Yellow Grass"
+    ,"Melita"
+    ,"Kipling"
+    # ,"VP 95 Spec"
+    ,"C5+"
+    ,"Light LSB"
+    ,"Light SW"
+    ,"Medium LSB"
+    ,"Medium SW"
+    ,"Midale"
+    ,"Heavy Sour"
+    ,"Heavy SW"
+    ,"Jan"
+    ,"Feb"
+    ,"Mar"
+    ,"Apr"
+    ,"May"
+    ,"Jun"
+    ,"Jul"
+    ,"Aug"
+    ,"Sep"
+    ,"Oct"
+    ,"Nov"
+    ,"Dec"
+    # ,"Post Aquisition"
+    ,"Sulfur:C5+"
+    ,"Sulfur:Light LSB"
+    ,"Sulfur:Light SW"
+    ,"Sulfur:Medium LSB"
+    ,"Sulfur:Medium SW"
+    ,"Sulfur:Midale"
+    ,"Sulfur:Heavy Sour"
+    ,"Sulfur:Heavy SW"
+    ,"Density:C5+"
+    ,"Density:Light LSB"
+    ,"Density:Light SW"
+    ,"Density:Medium LSB"
+    ,"Density:Medium SW"
+    ,"Density:Midale"
+    ,"Density:Heavy Sour"
+    ,"Density:Heavy SW"
+    ,"Temp.Roll:C5+"
+    ,"Temp.Roll:Light LSB"
+    ,"Temp.Roll:Light SW"
+    ,"Temp.Roll:Medium LSB"
+    ,"Temp.Roll:Medium SW"
+    ,"Temp.Roll:Midale"
+    ,"Temp.Roll:Heavy Sour"
+    ,"Temp.Roll:Heavy SW"
+    # ,"Post Aquisition:C5+"
+    # ,"Post Aquisition:Light LSB"
+    # ,"Post Aquisition:Light SW"
+    # ,"Post Aquisition:Medium LSB"
+    # ,"Post Aquisition:Medium SW"
+    # ,"Post Aquisition:Midale"
+    # ,"Post Aquisition:Heavy Sour"
+    # ,"Post Aquisition:Heavy SW"
+  )
   
   # Main Function ------------------------------
-  main <- function(data_complete, data_weather){
-    rm(list=ls())
+  main <- function(){
+
+    # Setup -------------------------------------------------------------------
     
-    # Variables ----------------------------------
-    Mth <- c(
-      `1` = "Jan"
-      ,`2` = "Feb"
-      ,`3` = "Mar"
-      ,`4` = "Apr"
-      ,`5` = "May"
-      ,`6` = "Jun"
-      ,`7` = "Jul"
-      ,`8` = "Aug"
-      ,`9` = "Sep"
-      ,`10` = "Oct"
-      ,`11` = "Nov"
-      ,`12` = "Dec"
-      ,`13` = "Ann"
-    )
-    
-    Mth_long <- c(
-      `1` = "January"
-      ,`2` = "February"
-      ,`3` = "March"
-      ,`4` = "April"
-      ,`5` = "May"
-      ,`6` = "June"
-      ,`7` = "July"
-      ,`8` = "August"
-      ,`9` = "September"
-      ,`10` = "October"
-      ,`11` = "November"
-      ,`12` = "December"
-      ,`13` = "Annual"
-    )
-    
-    Mth_comb <- cbind(Mth, Mth_long)
-    
-    Crude_Breakdown_Cleaned <- c(
-      `Unknown` = "Unknown"
-      ,`C5` = "C5+"
-      ,`Light_LSB` = "Light LSB"
-      ,`Light_SW` = "Light SW"
-      ,`Medium_LSB` = "Medium LSB"
-      ,`Medium_SW` = "Medium SW"
-      ,`Midale` = "Midale"
-      ,`Heavy_Sour` = "Heavy Sour"
-      ,`Heavy_SW` = "Heavy SW"
-    )
-    
-    
-    # This is a list of all the variables we wish to include in the LASSO.
-    var.pred <- c(
-      "Sulf"
-      ,"Dens"
-      ,"Temp.Mean"
-      ,"Temp.Roll"
-      ,"Estevan"
-      ,"Weyburn"
-      ,"Oxbow"
-      ,"Yellow Grass North"
-      ,"Melita"
-      ,"Kipling"
-      # ,"VP_95_Spec"
-      ,"C5"
-      ,"Light_LSB"
-      ,"Light_SW"
-      ,"Medium_LSB"
-      ,"Medium_SW"
-      ,"Midale"
-      ,"Heavy_Sour"
-      ,"Heavy_SW"
-      ,"Jan"
-      ,"Feb"
-      ,"Mar"
-      ,"Apr"
-      ,"May"
-      ,"Jun"
-      ,"Jul"
-      ,"Aug"
-      ,"Sep"
-      ,"Oct"
-      ,"Nov"
-      ,"Dec"
-      # ,"Post_Aquisition"
-      ,"Sulf.C5"
-      ,"Sulf.L_LSB"
-      ,"Sulf.L_SW"
-      ,"Sulf.M_LSB"
-      ,"Sulf.M_SW"
-      ,"Sulf.Midale"
-      ,"Sulf.H_Sour"
-      ,"Sulf.H_SW"
-      ,"Dens.C5"
-      ,"Dens.L_LSB"
-      ,"Dens.L_SW"
-      ,"Dens.M_LSB"
-      ,"Dens.M_SW"
-      ,"Dens.Midale"
-      ,"Dens.H_Sour"
-      ,"Dens.H_SW"
-      ,"Temp.Roll.C5"
-      ,"Temp.Roll.L_LSB"
-      ,"Temp.Roll.L_SW"
-      ,"Temp.Roll.M_LSB"
-      ,"Temp.Roll.M_SW"
-      ,"Temp.Roll.Midale"
-      ,"Temp.Roll.H_Sour"
-      ,"Temp.Roll.H_SW"
-      # ,"Post_Aquisition.C5"
-      # ,"Post_Aquisition.L_LSB"
-      # ,"Post_Aquisition.L_SW"
-      # ,"Post_Aquisition.M_LSB"
-      # ,"Post_Aquisition.M_SW"
-      # ,"Post_Aquisition.Midale"
-      # ,"Post_Aquisition.H_Sour"
-      # ,"Post_Aquisition.H_SW"
-    )
-    
-    lasso_var_names <- c(
-      "Sulfur"
-      ,"Density"
-      ,"Mean Temperature"
-      ,"7 Day Rolling Temperature"
-      ,"Estevan"
-      ,"Weyburn"
-      ,"Oxbow"
-      ,"Yellow Grass"
-      ,"Melita"
-      ,"Kipling"
-      # ,"VP 95 Spec"
-      ,"C5+"
-      ,"Light LSB"
-      ,"Light SW"
-      ,"Medium LSB"
-      ,"Medium SW"
-      ,"Midale"
-      ,"Heavy Sour"
-      ,"Heavy SW"
-      ,"Jan"
-      ,"Feb"
-      ,"Mar"
-      ,"Apr"
-      ,"May"
-      ,"Jun"
-      ,"Jul"
-      ,"Aug"
-      ,"Sep"
-      ,"Oct"
-      ,"Nov"
-      ,"Dec"
-      # ,"Post Aquisition"
-      ,"Sulfur:C5+"
-      ,"Sulfur:Light LSB"
-      ,"Sulfur:Light SW"
-      ,"Sulfur:Medium LSB"
-      ,"Sulfur:Medium SW"
-      ,"Sulfur:Midale"
-      ,"Sulfur:Heavy Sour"
-      ,"Sulfur:Heavy SW"
-      ,"Density:C5+"
-      ,"Density:Light LSB"
-      ,"Density:Light SW"
-      ,"Density:Medium LSB"
-      ,"Density:Medium SW"
-      ,"Density:Midale"
-      ,"Density:Heavy Sour"
-      ,"Density:Heavy SW"
-      ,"Temp.Roll:C5+"
-      ,"Temp.Roll:Light LSB"
-      ,"Temp.Roll:Light SW"
-      ,"Temp.Roll:Medium LSB"
-      ,"Temp.Roll:Medium SW"
-      ,"Temp.Roll:Midale"
-      ,"Temp.Roll:Heavy Sour"
-      ,"Temp.Roll:Heavy SW"
-      # ,"Post Aquisition:C5+"
-      # ,"Post Aquisition:Light LSB"
-      # ,"Post Aquisition:Light SW"
-      # ,"Post Aquisition:Medium LSB"
-      # ,"Post Aquisition:Medium SW"
-      # ,"Post Aquisition:Midale"
-      # ,"Post Aquisition:Heavy Sour"
-      # ,"Post Aquisition:Heavy SW"
-    )
+    set.seed(19)
     
     # Looks at how the VP changes by crude type pre and post aquisition.
     post_aquisition_bd <- 
@@ -456,10 +457,6 @@ function(input, output, session) {
     crude_multiplier <- input$multiplier_crude_input
     weather_multiplier <- input$multiplier_weather_input
     
-    
-    # Setup -------------------------------------------------------------------
-    
-    set.seed(19)
     
     # Updates them_minimal so that there is borders around the graphs and the facet headings.
     theme_minimal2 <- theme_minimal() %>%  theme_set()
@@ -888,15 +885,13 @@ function(input, output, session) {
     
     b_kern <-
       b_base +
-      # geom_histogram(
-      #   aes(
-      #     y = ..density..
-      #   )
-      #   # ,colour = "black"
-      #   # ,fill = "grey92"
-      #   ,alpha = 0.5
-      #   ,binwidth = function(x) {2 * IQR(x) * length(x)^(-1/3)}
-      # ) +
+      geom_histogram(
+        aes(
+          y = ..density..
+        )
+        ,alpha = 0.5
+        ,binwidth = function(x) {2 * IQR(x) * length(x)^(-1/3)}
+      ) +
       geom_density() +
       labs(
         y = "Density"
