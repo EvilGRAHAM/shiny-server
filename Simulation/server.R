@@ -239,17 +239,32 @@ function(input, output, session) {
       data_complete %>% 
       group_by(
         Post_Aquisition
-        ,mth
         ,Crude_Breakdown
       ) %>% 
       summarize(
-        Mean = mean(VP)
+        Mean = mean(VP_unadjusted)
       )
     post_aquisition_bd_spread <- 
       post_aquisition_bd %>% 
       spread(
         Post_Aquisition
         ,Mean
+      ) %>% 
+      mutate(
+        Change_in_VP = `1` - `0`
+      )
+    colnames(post_aquisition_bd_spread) <- c("Crude_Breakdown", "Pre_Aquisition_VP", "Post_Aquisition_VP", "Change_in_VP")
+    
+    data_complete <-
+      data_complete %>% 
+      left_join(
+        post_aquisition_bd_spread
+      ) %>% 
+      mutate(
+        VP = if_else(.$Post_Aquisition == 0
+          ,VP + Change_in_VP
+          ,VP
+        )
       )
     # Variables ----------------------------------
     Mth <- c(
@@ -333,7 +348,7 @@ function(input, output, session) {
       ,"Oct"
       ,"Nov"
       ,"Dec"
-      ,"Post_Aquisition"
+      # ,"Post_Aquisition"
       ,"Sulf.C5"
       ,"Sulf.L_LSB"
       ,"Sulf.L_SW"
@@ -358,14 +373,14 @@ function(input, output, session) {
       ,"Temp.Roll.Midale"
       ,"Temp.Roll.H_Sour"
       ,"Temp.Roll.H_SW"
-      ,"Post_Aquisition.C5"
-      ,"Post_Aquisition.L_LSB"
-      ,"Post_Aquisition.L_SW"
-      ,"Post_Aquisition.M_LSB"
-      ,"Post_Aquisition.M_SW"
-      ,"Post_Aquisition.Midale"
-      ,"Post_Aquisition.H_Sour"
-      ,"Post_Aquisition.H_SW"
+      # ,"Post_Aquisition.C5"
+      # ,"Post_Aquisition.L_LSB"
+      # ,"Post_Aquisition.L_SW"
+      # ,"Post_Aquisition.M_LSB"
+      # ,"Post_Aquisition.M_SW"
+      # ,"Post_Aquisition.Midale"
+      # ,"Post_Aquisition.H_Sour"
+      # ,"Post_Aquisition.H_SW"
     )
     
     lasso_var_names <- c(
@@ -401,7 +416,7 @@ function(input, output, session) {
       ,"Oct"
       ,"Nov"
       ,"Dec"
-      ,"Post Aquisition"
+      # ,"Post Aquisition"
       ,"Sulfur:C5+"
       ,"Sulfur:Light LSB"
       ,"Sulfur:Light SW"
@@ -426,14 +441,14 @@ function(input, output, session) {
       ,"Temp.Roll:Midale"
       ,"Temp.Roll:Heavy Sour"
       ,"Temp.Roll:Heavy SW"
-      ,"Post Aquisition:C5+"
-      ,"Post Aquisition:Light LSB"
-      ,"Post Aquisition:Light SW"
-      ,"Post Aquisition:Medium LSB"
-      ,"Post Aquisition:Medium SW"
-      ,"Post Aquisition:Midale"
-      ,"Post Aquisition:Heavy Sour"
-      ,"Post Aquisition:Heavy SW"
+      # ,"Post Aquisition:C5+"
+      # ,"Post Aquisition:Light LSB"
+      # ,"Post Aquisition:Light SW"
+      # ,"Post Aquisition:Medium LSB"
+      # ,"Post Aquisition:Medium SW"
+      # ,"Post Aquisition:Midale"
+      # ,"Post Aquisition:Heavy Sour"
+      # ,"Post Aquisition:Heavy SW"
     )
     
     
