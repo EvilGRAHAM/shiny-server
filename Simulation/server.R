@@ -7,6 +7,7 @@ library(ggfortify, warn.conflicts = FALSE, quietly = TRUE)
 library(plotly, warn.conflicts = FALSE, quietly = TRUE)
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
+library(zeallot, warn.conflicts = FALSE, quietly = TRUE)
 
 # Functions ----------------------------
 data.conversions <- function(data_file) {
@@ -165,8 +166,6 @@ fitted_actual_input_summary_init <- tibble(
 # Page -----------------------------
 function(input, output, session) {
   
-  # When the tab closes, the session ends.
-  # session$onSessionEnded(stopApp)
   # Data Import -----------------------------------
   
   # Reads the data in from a xlsx, and converts it to a tibble.
@@ -244,7 +243,6 @@ function(input, output, session) {
     ,`10` = "Oct"
     ,`11` = "Nov"
     ,`12` = "Dec"
-    ,`13` = "Ann"
   )
   
   Mth_long <- c(
@@ -260,7 +258,6 @@ function(input, output, session) {
     ,`10` = "October"
     ,`11` = "November"
     ,`12` = "December"
-    ,`13` = "Annual"
   )
   
   Mth_comb <- cbind(Mth, Mth_long)
@@ -299,18 +296,18 @@ function(input, output, session) {
     ,"Midale"
     ,"Heavy_Sour"
     ,"Heavy_SW"
-    ,"Jan"
-    ,"Feb"
-    ,"Mar"
-    ,"Apr"
-    ,"May"
-    ,"Jun"
-    ,"Jul"
-    ,"Aug"
-    ,"Sep"
-    ,"Oct"
-    ,"Nov"
-    ,"Dec"
+    # ,"Jan"
+    # ,"Feb"
+    # ,"Mar"
+    # ,"Apr"
+    # ,"May"
+    # ,"Jun"
+    # ,"Jul"
+    # ,"Aug"
+    # ,"Sep"
+    # ,"Oct"
+    # ,"Nov"
+    # ,"Dec"
     # ,"Post_Aquisition"
     ,"Sulf.C5"
     ,"Sulf.L_LSB"
@@ -366,18 +363,18 @@ function(input, output, session) {
     ,"Midale"
     ,"Heavy Sour"
     ,"Heavy SW"
-    ,"Jan"
-    ,"Feb"
-    ,"Mar"
-    ,"Apr"
-    ,"May"
-    ,"Jun"
-    ,"Jul"
-    ,"Aug"
-    ,"Sep"
-    ,"Oct"
-    ,"Nov"
-    ,"Dec"
+    # ,"Jan"
+    # ,"Feb"
+    # ,"Mar"
+    # ,"Apr"
+    # ,"May"
+    # ,"Jun"
+    # ,"Jul"
+    # ,"Aug"
+    # ,"Sep"
+    # ,"Oct"
+    # ,"Nov"
+    # ,"Dec"
     # ,"Post Aquisition"
     ,"Sulfur:C5+"
     ,"Sulfur:Light LSB"
@@ -415,7 +412,7 @@ function(input, output, session) {
   
   # Main Function ------------------------------
   main <- function(){
-
+    
     # Setup -------------------------------------------------------------------
     
     set.seed(19)
@@ -440,6 +437,8 @@ function(input, output, session) {
         Change_in_VP = `1` - `0`
       )
     colnames(post_aquisition_bd_spread) <- c("Crude_Breakdown", "Pre_Aquisition_VP", "Post_Aquisition_VP", "Change_in_VP")
+    
+    # Only use the adjusted values if the checkbox is set to true.
     if (input$post_aquisition_adjustment){
       data_complete %<>%
         left_join(
@@ -527,13 +526,11 @@ function(input, output, session) {
     
     # Simulation Setup ---------------------------------------------
     
-    # Figures out how many predictions to make.
-    num_tests <- 1
-
-    Density_input <- tibble(Input = input$dens_input)
-    Sulfur_input <- tibble(Input = input$sulf_input)
-    Temp.Roll_input <- tibble(Input = input$temp.roll_input)
-    mth_input <- tibble(Input = input$mth_input)
+    
+    Density_input <- input$dens_input
+    Sulfur_input <- input$sulf_input
+    Temp.Roll_input <- input$temp.roll_input
+    mth_input <- input$mth_input
     
     # Creates an empty tibble to be filled with the results of the predictions.
     fitted_actual_input <- tibble(
@@ -544,227 +541,216 @@ function(input, output, session) {
     )
     
     
-    # Simulation Loop -----------------------------------
+    # Simulation Run -----------------------------------
     
-    for (i in 1:num_tests) {
-      set.seed(4815609)
-
-      # Determines the crude type based on the inputted data.
-      Crude_Breakdown_input <- crude_type_check(Density_input[i, ], Sulfur_input[i, ])
-      
-      # This finds the standard deviation for the crude type inputed.
-      crude_bd_stats <-
-        data_complete %>%
-        filter(Crude_Breakdown == Crude_Breakdown_input) %>%
-        summarize(
-          Density_Mean = mean(Dens)
-          ,Density_SD = sd(Dens)
-          ,Sulfur_Mean = mean(Sulf)
-          ,Sulfur_SD = sd(Sulf)
+    set.seed(4815609)
+    
+    # Determines the crude type based on the inputted data.
+    Crude_Breakdown_input <- crude_type_check(Density_input, Sulfur_input)
+    
+    # This finds the standard deviation for the crude type inputed.
+    crude_bd_stats <-
+      data_complete %>%
+      filter(Crude_Breakdown == Crude_Breakdown_input) %>%
+      summarize(
+        Density_Mean = mean(Dens)
+        ,Density_SD = sd(Dens)
+        ,Sulfur_Mean = mean(Sulf)
+        ,Sulfur_SD = sd(Sulf)
+      )
+    crude_bd_stats
+    
+    # As well as the mean and sd for Temp.Roll for the month inputted
+    weather_stats <-
+      data_weather %>%
+      filter(mth == mth_input %>% as.numeric()) %>%
+      summarize(
+        Temp.Roll_Mean = mean(Temp.Roll)
+        ,Temp.Roll_SD = sd(Temp.Roll)
+      )
+    weather_stats
+    
+    # Grabs all temperature entries whose entries are within +- multiplier*sd
+    data_weather_input <-
+      data_weather %>%
+      select(
+        -c(
+          Date
+          ,SD
+          ,day
+          ,mth
+          ,yr
         )
-      crude_bd_stats
-      
-      # As well as the mean and sd for Temp.Roll for the month inputted
-      weather_stats <-
-        data_weather %>%
-        filter(mth == mth_input[i, ] %>% as.numeric()) %>%
-        summarize(
-          Temp.Roll_Mean = mean(Temp.Roll)
-          ,Temp.Roll_SD = sd(Temp.Roll)
-        )
-      # If we have an annual "month", we pull the total standard deviation.
-      if(i == 13){
-        weather_stats <-
-          data_weather %>%
-          summarize(
-            Temp.Roll_Mean = mean(Temp.Roll)
-            ,Temp.Roll_SD = sd(Temp.Roll)
-          )
-      }
-      weather_stats
-      
-      # Grabs all temperature entries whose entries are within +- multiplier*sd
-      data_weather_input <-
-        data_weather %>%
-        select(
-          -c(
-            Date
-            ,SD
-            ,day
-            ,mth
-            ,yr
-          )
-        ) %>%
-        filter(
-          Temp.Roll >= Temp.Roll_input[i, ] %>% as.numeric() - weather_multiplier * (
+      ) %>%
+      filter(
+        Temp.Roll >= Temp.Roll_input %>% as.numeric() - weather_multiplier * (
+          weather_stats %>%
+            select(Temp.Roll_SD) %>%
+            as.numeric()
+        ) &
+          Temp.Roll <= Temp.Roll_input %>% as.numeric() + weather_multiplier * (
+            weather_stats %>%
+              select(Temp.Roll_SD) %>%
+              as.numeric()
+          ) %>% as.numeric()
+      )
+    
+    # Filters the data that will be inputed into the simulation s.t. the crude type matches,
+    # and the density and sulfur fall within a range of values.
+    # As well we remove any of the temperature data, as we will randomly insert them
+    # from a different weather table for the simulation.
+    data_input <-
+      data_complete %>%
+      filter(
+        # You can uncomment the first line if you want to force the simulated data set to only
+        # contain crude of the same type as the inputted.
+        # We filter out any crudes that don't exist within the inputed temperature range.
+        # As well if you uncomment the second line, only those entries of the same month as 
+        # the inputted are used.
+        # Crude_Breakdown == Crude_Breakdown_input &
+        # mth == as.numeric(mth_input) &
+        Temp.Roll >= Temp.Roll_input %>% as.numeric() - crude_multiplier * (
+          weather_stats %>%
+            select(Temp.Roll_SD) %>%
+            as.numeric()
+        ) &
+          Temp.Roll <= Temp.Roll_input %>% as.numeric() + crude_multiplier * (
             weather_stats %>%
               select(Temp.Roll_SD) %>%
               as.numeric()
           ) &
-            Temp.Roll <= Temp.Roll_input[i, ] %>% as.numeric() + weather_multiplier * (
-              weather_stats %>%
-                select(Temp.Roll_SD) %>%
-                as.numeric()
-            ) %>% as.numeric()
-        )
-      
-      # Filters the data that will be inputed into the simulation s.t. the crude type matches,
-      # and the density and sulfur fall within a range of values.
-      # As well we remove any of the temperature data, as we will randomly insert them
-      # from a different weather table for the simulation.
-      data_input <-
-        data_complete %>%
-        filter(
-          # You can uncomment the first line if you want to force the simulated data set to only
-          # contain crude of the same type as the inputted.
-          # We filter out any crudes that don't exist within the inputed temperature range.
-          # As well if you uncomment the second line, only those entries of the same month as 
-          # the inputted are used.
-          # Crude_Breakdown == Crude_Breakdown_input &
-          # mth == as.numeric(mth_input[i, ]) &
-          Temp.Roll >= Temp.Roll_input[i, ] %>% as.numeric() - crude_multiplier * (
-            weather_stats %>%
-              select(Temp.Roll_SD) %>%
-              as.numeric()
-          ) &
-          Temp.Roll <= Temp.Roll_input[i, ] %>% as.numeric() + crude_multiplier * (
-            weather_stats %>%
-              select(Temp.Roll_SD) %>%
-              as.numeric()
-          ) &
-          Dens >= Density_input[i, ] %>% as.numeric() - crude_multiplier * (
+          Dens >= Density_input %>% as.numeric() - crude_multiplier * (
             crude_bd_stats %>%
               select(Density_SD) %>%
               as.numeric()
           ) &
-          Dens <= Density_input[i, ] %>% as.numeric() + crude_multiplier * (
+          Dens <= Density_input %>% as.numeric() + crude_multiplier * (
             crude_bd_stats %>%
               select(Density_SD) %>%
               as.numeric()
           ) &
-          Sulf >= Sulfur_input[i, ] %>% as.numeric() - crude_multiplier * (
+          Sulf >= Sulfur_input %>% as.numeric() - crude_multiplier * (
             crude_bd_stats %>%
               select(Sulfur_SD) %>%
-               as.numeric()
+              as.numeric()
           ) &
-          Sulf <= Sulfur_input[i, ] %>% as.numeric() + crude_multiplier * (
+          Sulf <= Sulfur_input %>% as.numeric() + crude_multiplier * (
             crude_bd_stats %>%
               select(Sulfur_SD) %>%
               as.numeric()
           )
-        ) %>% 
-        select(
-          -c(
-            Temp.Mean
-            ,Temp.Roll
-            ,Estevan
-            ,Weyburn
-            ,Oxbow
-            ,`Yellow Grass North`
-            ,Melita
-            ,Kipling
-          )
+      ) %>% 
+      select(
+        -c(
+          Temp.Mean
+          ,Temp.Roll
+          ,Estevan
+          ,Weyburn
+          ,Oxbow
+          ,`Yellow Grass North`
+          ,Melita
+          ,Kipling
         )
-      
-      # Stops the main function if no data is returned.
-      if(count(data_input) == 0){
-        return(list(
-          returned_data <- FALSE
-            ,data.frame(x = numeric())
-            ,ggplot(data = data.frame(x = numeric())) + geom_blank()
-            ,ggplot(data = data.frame(x = numeric())) + geom_blank()
-            ,LASSO_coef
-            ,data.frame(x = numeric())
-          )
-        )
-        stopifnot(TRUE)
-      }
-      # Instead of using the given temperature value from the data,
-      # we instead bootstrap in values from our filtered list of weather data.
-      # There isn't that strong of a relationship between temperature and crude qualities,
-      # so we just randomly insert them into the prediction matrix
-      pred_matrix_input <-
-        data_input %>%
-        cbind(
-          sample_n(
-            data_weather_input
-            ,size =
-              data_input %>%
-              count() %>%
-              as.numeric()
-            ,replace = TRUE
-          )
-        ) %>%
-        mutate(
-          mth = as.numeric(mth_input[i, ])
-          ,Jan = if_else(mth == 1, 1, 0)
-          ,Feb = if_else(mth == 2, 1, 0)
-          ,Mar = if_else(mth == 3, 1, 0)
-          ,Apr = if_else(mth == 4, 1, 0)
-          ,May = if_else(mth == 5, 1, 0)
-          ,Jun = if_else(mth == 6, 1, 0)
-          ,Jul = if_else(mth == 7, 1, 0)
-          ,Aug = if_else(mth == 8, 1, 0)
-          ,Sep = if_else(mth == 9, 1, 0)
-          ,Oct = if_else(mth == 10, 1, 0)
-          ,Nov = if_else(mth == 11, 1, 0)
-          ,Dec = if_else(mth == 12, 1, 0) 
-          ,Sulf.C5 = Sulf * C5
-          ,Sulf.L_LSB = Sulf * Light_LSB
-          ,Sulf.L_SW = Sulf * Light_SW
-          ,Sulf.M_LSB = Sulf * Medium_LSB
-          ,Sulf.M_SW = Sulf * Medium_SW
-          ,Sulf.Midale = Sulf * Midale
-          ,Sulf.H_Sour = Sulf * Heavy_Sour
-          ,Sulf.H_SW = Sulf * Heavy_SW
-          ,Dens.C5 = Dens * C5
-          ,Dens.L_LSB = Dens * Light_LSB
-          ,Dens.L_SW = Dens * Light_SW
-          ,Dens.M_LSB = Dens * Medium_LSB
-          ,Dens.M_SW = Dens * Medium_SW
-          ,Dens.Midale = Dens * Midale
-          ,Dens.H_Sour = Dens * Heavy_Sour
-          ,Dens.H_SW = Dens * Heavy_SW
-          ,Temp.Roll.C5 = Temp.Roll * C5
-          ,Temp.Roll.L_LSB = Temp.Roll * Light_LSB
-          ,Temp.Roll.L_SW = Temp.Roll * Light_SW
-          ,Temp.Roll.M_LSB = Temp.Roll * Medium_LSB
-          ,Temp.Roll.M_SW = Temp.Roll * Medium_SW
-          ,Temp.Roll.Midale = Temp.Roll * Midale
-          ,Temp.Roll.H_Sour = Temp.Roll * Heavy_Sour
-          ,Temp.Roll.H_SW = Temp.Roll * Heavy_SW
-          ,Post_Aquisition.C5 = Post_Aquisition * C5
-          ,Post_Aquisition.L_LSB = Post_Aquisition * Light_LSB
-          ,Post_Aquisition.L_SW = Post_Aquisition * Light_SW
-          ,Post_Aquisition.M_LSB = Post_Aquisition * Medium_LSB
-          ,Post_Aquisition.M_SW = Post_Aquisition * Medium_SW
-          ,Post_Aquisition.Midale = Post_Aquisition * Midale
-          ,Post_Aquisition.H_Sour = Post_Aquisition * Heavy_Sour
-          ,Post_Aquisition.H_SW = Post_Aquisition * Heavy_SW
-        ) %>%
-        select(var.pred) %>%
-        as.matrix()
-      colnames(pred_matrix_input) <- NULL
-      
-      fitted_actual_input <-
-        fitted_actual_input %>%
-        rbind(
-          tibble(
-            Num_Month = mth_input[[i]]
-            ,Month = Mth_long[mth_input[[i]]]
-            ,Crude_Breakdown = data_input$Crude_Breakdown
-            ,Fitted =
-              predict(
-                cvfit_penalty_dummy
-                ,newx = pred_matrix_input
-                ,s = "lambda.1se"
-              ) %>%
-              as.vector()
-            ,Historical = data_input$VP
-          )
-        )
+      )
+    
+    # Stops the main function if no data is returned.
+    if(count(data_input) == 0){
+      return(list(
+        returned_data <- FALSE
+        ,data.frame(x = numeric())
+        ,ggplot(data = data.frame(x = numeric())) + geom_blank()
+        ,ggplot(data = data.frame(x = numeric())) + geom_blank()
+        ,LASSO_coef
+        ,data.frame(x = numeric())
+      )
+      )
+      stopifnot(TRUE)
     }
     
+    # Instead of using the given temperature value from the data,
+    # we instead bootstrap in values from our filtered list of weather data.
+    # There isn't that strong of a relationship between temperature and crude qualities,
+    # so we just randomly insert them into the prediction matrix
+    pred_matrix_input <-
+      data_input %>%
+      cbind(
+        sample_n(
+          data_weather_input
+          ,size =
+            data_input %>%
+            count() %>%
+            as.numeric()
+          ,replace = TRUE
+        )
+      ) %>%
+      mutate(
+        mth = as.numeric(mth_input)
+        ,Jan = if_else(mth == 1, 1, 0)
+        ,Feb = if_else(mth == 2, 1, 0)
+        ,Mar = if_else(mth == 3, 1, 0)
+        ,Apr = if_else(mth == 4, 1, 0)
+        ,May = if_else(mth == 5, 1, 0)
+        ,Jun = if_else(mth == 6, 1, 0)
+        ,Jul = if_else(mth == 7, 1, 0)
+        ,Aug = if_else(mth == 8, 1, 0)
+        ,Sep = if_else(mth == 9, 1, 0)
+        ,Oct = if_else(mth == 10, 1, 0)
+        ,Nov = if_else(mth == 11, 1, 0)
+        ,Dec = if_else(mth == 12, 1, 0) 
+        ,Sulf.C5 = Sulf * C5
+        ,Sulf.L_LSB = Sulf * Light_LSB
+        ,Sulf.L_SW = Sulf * Light_SW
+        ,Sulf.M_LSB = Sulf * Medium_LSB
+        ,Sulf.M_SW = Sulf * Medium_SW
+        ,Sulf.Midale = Sulf * Midale
+        ,Sulf.H_Sour = Sulf * Heavy_Sour
+        ,Sulf.H_SW = Sulf * Heavy_SW
+        ,Dens.C5 = Dens * C5
+        ,Dens.L_LSB = Dens * Light_LSB
+        ,Dens.L_SW = Dens * Light_SW
+        ,Dens.M_LSB = Dens * Medium_LSB
+        ,Dens.M_SW = Dens * Medium_SW
+        ,Dens.Midale = Dens * Midale
+        ,Dens.H_Sour = Dens * Heavy_Sour
+        ,Dens.H_SW = Dens * Heavy_SW
+        ,Temp.Roll.C5 = Temp.Roll * C5
+        ,Temp.Roll.L_LSB = Temp.Roll * Light_LSB
+        ,Temp.Roll.L_SW = Temp.Roll * Light_SW
+        ,Temp.Roll.M_LSB = Temp.Roll * Medium_LSB
+        ,Temp.Roll.M_SW = Temp.Roll * Medium_SW
+        ,Temp.Roll.Midale = Temp.Roll * Midale
+        ,Temp.Roll.H_Sour = Temp.Roll * Heavy_Sour
+        ,Temp.Roll.H_SW = Temp.Roll * Heavy_SW
+        ,Post_Aquisition.C5 = Post_Aquisition * C5
+        ,Post_Aquisition.L_LSB = Post_Aquisition * Light_LSB
+        ,Post_Aquisition.L_SW = Post_Aquisition * Light_SW
+        ,Post_Aquisition.M_LSB = Post_Aquisition * Medium_LSB
+        ,Post_Aquisition.M_SW = Post_Aquisition * Medium_SW
+        ,Post_Aquisition.Midale = Post_Aquisition * Midale
+        ,Post_Aquisition.H_Sour = Post_Aquisition * Heavy_Sour
+        ,Post_Aquisition.H_SW = Post_Aquisition * Heavy_SW
+      ) %>%
+      select(var.pred) %>%
+      as.matrix()
+    colnames(pred_matrix_input) <- NULL
+    
+    fitted_actual_input <-
+      fitted_actual_input %>%
+      rbind(
+        tibble(
+          Num_Month = mth_input
+          ,Month = Mth_long[mth_input]
+          ,Crude_Breakdown = data_input$Crude_Breakdown
+          ,Fitted =
+            predict(
+              cvfit_penalty_dummy
+              ,newx = pred_matrix_input
+              ,s = "lambda.1se"
+            ) %>%
+            as.vector()
+          ,Historical = data_input$VP
+        )
+      )
     
     
     # Simulation Outputs --------------------------------------
@@ -997,17 +983,25 @@ function(input, output, session) {
   # Creates an output when the action button is pressed.
   observeEvent(input$run_sim, {
     
+    # Run Sim --------------------------
     # Adds a progress bar to show the simulation is running.
     withProgress(
       message = "Running Simulation"
       ,value = NULL
-      ,main_output <- main()
+      ,c(
+        returned_data_output
+        ,fitted_actual_input_summary_output
+        ,b_kern_output
+        ,b_ecdf_output
+        ,LASSO_coef_output
+        ,data_output
+      ) %<-% main()
     )
     
     # Data Cleaning ----------------------
     # Checks to see if any data, as if we don't these cause the application to crash.
-    if(main_output[[1]]){
-      fitted_actual_input_summary_new <- as.tibble(main_output[[2]])
+    if(returned_data_output){
+      fitted_actual_input_summary_new <- as.tibble(fitted_actual_input_summary_output)
       # To get each button push to add a new row, I had to initialize the tibble with NA's,
       # after we add a row, the NAs are removed.
       fitted_actual_input_summary <<-
@@ -1065,7 +1059,7 @@ function(input, output, session) {
     # Grabs the variables and coefficients of the LASSO regression.
     LASSO_coef <-
       # LASSO_coef %>% 
-      main_output[[5]] %>%
+      LASSO_coef_output %>%
       as.matrix() %>%
       round(4) %>% 
       as.data.frame() %>%
@@ -1075,39 +1069,16 @@ function(input, output, session) {
         `1` != 0
       )
     colnames(LASSO_coef) <- c("Variable", "Coefficient")
-
-    # Splits the  LASSO output into two tables for ease of display.
-    # LASSO_coef_1 <-
-    #   LASSO_coef %>%
-    #   mutate(rowname = 1:count.num(LASSO_coef)) %>% 
-    #   filter(
-    #     rowname <=
-    #       count.num(LASSO_coef) / 2 %>%
-    #       ceiling()
-    #   ) %>% 
-    #   select(
-    #     -rowname
-    #   )
-    # LASSO_coef_2 <-
-    #   LASSO_coef %>%
-    #   mutate(rowname = 1:count.num(LASSO_coef)) %>% 
-    #   filter(
-    #     rowname >
-    #       count.num(LASSO_coef) / 2 %>%
-    #       ceiling()
-    #   ) %>% 
-    #   select(
-    #     -rowname
-    #   )
+    
     
     # Outputs -----------------------------------
     # Plots the kernel density estimator and the ECDF and the results
-    output$b_kern <- renderPlot(main_output[[3]])
-    output$b_ecdf <- renderPlot(main_output[[4]])
+    output$b_kern <- renderPlot(b_kern_output)
+    output$b_ecdf <- renderPlot(b_ecdf_output)
     output$result_chart <- renderPlot(result_chart)
     
     output$fitted_actual_input_summary <- renderDataTable(fitted_actual_input_summary)
-
+    
     output$LASSO_coef <- renderDataTable(LASSO_coef)
     # output$LASSO_coef_1 <- renderTable(LASSO_coef_1)
     # output$LASSO_coef_2 <- renderTable(LASSO_coef_2)
@@ -1117,7 +1088,7 @@ function(input, output, session) {
       downloadHandler(
         filename = { paste("VP_Data_", Sys.Date(), ".csv", sep = "") }
         ,content = function(file) {
-          write.csv(main_output[[6]], file)
+          write.csv(data_output, file)
         }
       )
     
@@ -1136,7 +1107,7 @@ function(input, output, session) {
         filename = { paste("VP_Model_", Sys.Date(), ".csv", sep = "") }
         ,content = function(file) {
           write.csv(
-            main_output[[5]] %>%
+            LASSO_coef_output %>%
               as.matrix() %>%
               as.data.frame() %>%
               rownames_to_column() %>%
@@ -1146,8 +1117,9 @@ function(input, output, session) {
         }
       )
     
-
+    
   })
+  
   
 }
 
