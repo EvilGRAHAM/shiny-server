@@ -9,6 +9,22 @@ library(shiny, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
 library(zeallot, warn.conflicts = FALSE, quietly = TRUE)
 
+# Updates them_minimal so that there is borders around the graphs and the facet headings.
+theme_minimal2 <- theme_minimal() %>%  theme_set()
+theme_minimal2 <-
+  theme_update(
+    panel.border = element_rect(
+      linetype = "solid"
+      ,colour = "grey92"
+      ,fill = NA
+    )
+    ,strip.background = element_rect(
+      linetype = "solid"
+      ,colour = "grey92"
+      ,fill = NA
+    )
+  )
+
 # Functions ----------------------------
 data.conversions <- function(data_file) {
   
@@ -184,9 +200,10 @@ function(input, output, session) {
     mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
   
   # Joins the two tables together by the sample date.
-  data_complete %<-%
+  data_complete %<>%
     left_join(
       data_weather
+      ,by = "Date"
     ) %>% 
     mutate(
       Jan = if_else(mth == 1, 1, 0)
@@ -235,6 +252,22 @@ function(input, output, session) {
       ,Post_Aquisition.H_SW = Post_Aquisition * Heavy_SW
     )
   
+  data_weather <- 
+    data_weather %>% 
+    mutate(      
+      mth =
+        Date %>%
+        month() %>%
+        as.integer()
+      ,yr =
+        Date %>%
+        year() %>%
+        as.integer()
+      ,day =
+        Date %>%
+        day() %>%
+        as.integer()
+    )
 
   
   # Variables ----------------------------------
@@ -465,23 +498,6 @@ function(input, output, session) {
     weather_multiplier <- input$multiplier_weather_input
     
     
-    # Updates them_minimal so that there is borders around the graphs and the facet headings.
-    theme_minimal2 <- theme_minimal() %>%  theme_set()
-    theme_minimal2 <-
-      theme_update(
-        panel.border = element_rect(
-          linetype = "solid"
-          ,colour = "grey92"
-          ,fill = NA
-        )
-        ,strip.background = element_rect(
-          linetype = "solid"
-          ,colour = "grey92"
-          ,fill = NA
-        )
-      )
-    
-    
     # LASSO -------------------------------------------------------------------
     
     # We generate a matrix from the complete data set using the list of variables defined above.
@@ -499,35 +515,14 @@ function(input, output, session) {
     colnames(lasso.pred) <- lasso_var_names
     colnames(lasso.result) <- "VP"
     
-    # 0 => keep in model, 1 => perform normally
-    # Keeps all dummy variables
-    # We aren't using the Midale + Heavy vars as this way when you fit the regression model,
-    # the default (all dummy variables  = 0) is a midale. As well nothing that could be
-    # considered a heavy has entered the system.
+
     set.seed(8)
     cvfit_penalty_dummy <-
       cv.glmnet(
-        x = lasso.pred#[, 1:16]
+        x = lasso.pred
         ,y = lasso.result
         ,alpha = input$alpha_input
-        # ,penalty.factor =
-        #   c(
-        #     rep(
-        #       1
-        #       ,times = 11 # VP_95_Spec
-        #     )
-        #     ,rep(
-        #       0
-        #       ,times = 7 # Heavy SW
-        #     )
-        #     ,rep(
-        #       1
-        #       ,times = 37 # Medium SW
-        #     )
-        #   )
       )
-    # LASSO + C5 + Split + Dummy + Keep - Midale + Spec
-    autoplot(cvfit_penalty_dummy) + labs(title = "LASSO + C5 + Split + Dummy + Keep - Midale + Spec")
     LASSO_coef <- coef(cvfit_penalty_dummy, s = "lambda.1se", exact = TRUE)
     LASSO_coef
     
@@ -829,15 +824,7 @@ function(input, output, session) {
         ,`Data Points`
       )
     fitted_actual_input_summary
-    
-    
-    # fitted_actual_input_summary_tidy <-
-    #   fitted_actual_input_summary %>%
-    #   gather(
-    #     Model
-    #     ,VP
-    #     ,-Month
-    #   )
+
     # Adds back the column names for the prediction matrix so it can be downloaded to a csv.
     colnames(pred_matrix_input) <- var.pred
     
@@ -879,13 +866,6 @@ function(input, output, session) {
     
     b_kern <-
       b_base +
-      # geom_histogram(
-      #   aes(
-      #     y = ..density..
-      #   )
-      #   ,alpha = 0.5
-      #   ,binwidth = function(x) {2 * IQR(x) * length(x)^(-1/3)}
-      # ) +
       geom_density() +
       labs(
         y = "Density"
@@ -899,78 +879,6 @@ function(input, output, session) {
       labs(
         y = "P(< VP)"
       )
-    
-    b_kern
-    b_ecdf
-    
-    # c_base <-
-    #   ggplot(
-    #     fitted_actual_input_summary_tidy %>%
-    #       filter(
-    #         Model != "SD Predicted VP"
-    #         ,Model != "Median Predicted VP"
-    #       )
-    #     ,aes(
-    #       x = Month
-    #       ,y = VP
-    #       ,colour = Model
-    #     )
-    #   ) +
-    #   scale_x_discrete(
-    #     labels = Mth_comb
-    #   ) +
-    #   scale_colour_brewer(
-    #     type = "qual"
-    #     ,name = "Model:"
-    #     ,palette = "Dark2"
-    #   ) +
-    #   labs(
-    #     title = "Actual vs. Fitted VP by Month"
-    #     ,subtitle =
-    #       paste(
-    #         "For"
-    #         ,Crude_Breakdown_Cleaned[Crude_Breakdown_input]
-    #       )
-    #     ,x = ""
-    #     ,y = "VP (kPa)"
-    #   )
-    # 
-    # 
-    # c_a_f <-
-    #   c_base +
-    #   geom_violin(
-    #     data = fitted_actual_input_tidy
-    #     ,aes(
-    #       y = VP
-    #     )
-    #     ,colour = "black"
-    #   ) +
-    #   stat_boxplot(
-    #     data = fitted_actual_input_tidy
-    #     ,aes(
-    #       y = VP
-    #     )
-    #     ,geom = "errorbar"
-    #     ,colour = "black"
-    #     ,width = 2/3
-    #   ) +
-    #   geom_boxplot(
-    #     data = fitted_actual_input_tidy
-    #     ,aes(
-    #       y = VP
-    #     )
-    #     ,colour = "black"
-    #     ,fill = "white"
-    #     ,width = 1/8
-    #   ) +
-    #   geom_line(
-    #     aes(
-    #       group = Model
-    #     )
-    #     ,size = 1
-    #   )
-    # 
-    # c_a_f
     
     # Return ------------------------------
     return(
