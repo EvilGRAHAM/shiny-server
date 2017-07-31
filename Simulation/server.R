@@ -12,12 +12,12 @@ library(zeallot, warn.conflicts = FALSE, quietly = TRUE)
 # Functions ----------------------------
 data.conversions <- function(data_file) {
   
-  # Converts SDate to date format, and Producer + Battery to factors
+  # Converts Date to date format, and Producer + Battery to factors
   # Grabs the year and the month for each entry.
   # Arranges the entries chronologically
   data_file %<>%
     mutate(
-      SDate = as.Date(SDate, format = "%m/%d/%Y")
+      Date = as.Date(Date, format = "%m/%d/%Y")
     ) %>%
     mutate(
       Producer = as.factor(Producer)
@@ -27,19 +27,19 @@ data.conversions <- function(data_file) {
       ,Crude_Num = as.factor(Crude_Num)
       ,Crude_Breakdown = as.factor(Crude_Breakdown)
       ,mth =
-        SDate %>%
+        Date %>%
         month() %>%
         as.integer()
       ,yr =
-        SDate %>%
+        Date %>%
         year() %>%
         as.integer()
       ,day =
-        SDate %>%
+        Date %>%
         day() %>%
         as.integer()
     ) %>%
-    arrange(SDate) %>%
+    arrange(Date) %>%
     filter(
       !is.na(VP)
       ,!is.na(Sulf)
@@ -175,7 +175,19 @@ function(input, output, session) {
     read_csv(
       "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
     ) %>% 
-    data.conversions() %>% 
+    data.conversions()
+  
+  data_weather <-
+    read_csv(
+      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/Weather_Data.csv"
+    ) %>% 
+    mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
+  
+  # Joins the two tables together by the sample date.
+  data_complete %<-%
+    left_join(
+      data_weather
+    ) %>% 
     mutate(
       Jan = if_else(mth == 1, 1, 0)
       ,Feb = if_else(mth == 2, 1, 0)
@@ -223,11 +235,7 @@ function(input, output, session) {
       ,Post_Aquisition.H_SW = Post_Aquisition * Heavy_SW
     )
   
-  data_weather <-
-    read_csv(
-      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/Weather_Data.csv"
-    ) %>% 
-    mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
+
   
   # Variables ----------------------------------
   Mth <- c(
