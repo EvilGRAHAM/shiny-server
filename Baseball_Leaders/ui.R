@@ -37,7 +37,7 @@ fluidPage(
         # Which statistic to show.
         selectInput(
           inputId = "baseball_stat"
-          ,label = "Options"
+          ,label = "Statistic:"
           ,baseball_stats
           ,selectize=TRUE
         )

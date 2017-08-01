@@ -62,8 +62,8 @@ shinyServer(
         # Grabs the top n values.
         head(input$n) %>% 
         mutate(
-          # Incase more than one name is returned, we choose the first one, as it should be the exact match.
-          `Full Name` = paste0(playerInfo(playerID)[1, ]$nameLast, ", ", playerInfo(playerID)[1, ]$nameFirst)
+          # In case more than one name is returned, we choose the first one, as it should be the exact match.
+          `Full Name` = paste(playerInfo(playerID)[1, ]$nameFirst, playerInfo(playerID)[1, ]$nameLast)
         ) %>% 
         ungroup() %>%
         select(
@@ -73,7 +73,13 @@ shinyServer(
             ,teamID
             ,lgID
           )
-        )
+        ) %>% 
+        select(
+          `Full Name`
+          ,Career_Stat
+          ,everything()
+        ) %>% 
+        rename(Year = yearID)
       
     })
     
@@ -84,8 +90,8 @@ shinyServer(
         batting_Career() %>% 
           head(input$n) %>% 
           mutate(
-            # Incase more than one name is returned, we choose the first one, as it should be the exact match.
-            `Full Name` = paste0(playerInfo(playerID)[1, ]$nameLast, ", ", playerInfo(playerID)[1, ]$nameFirst)
+            # In case more than one name is returned, we choose the first one, as it should be the exact match.
+            `Full Name` = paste(playerInfo(playerID)[1, ]$nameFirst, playerInfo(playerID)[1, ]$nameLast)
           )
         ,aes(
           x = factor(`Full Name`, levels = `Full Name`[order(batting_Career()$Career_Stat %>% head(input$n) %>% desc())])
@@ -99,6 +105,9 @@ shinyServer(
           title = paste0("Top ", input$n, " Players by Career ", input$baseball_stat, "'s from ", input$year_lkup[[1]], "-", input$year_lkup[[2]])
           ,x = "Player"
           ,y = paste0("Career ", input$baseball_stat, "'s")
+        ) +
+        theme(
+          axis.text.x = element_text(angle = 90, hjust = 1)
         )
       
     })
