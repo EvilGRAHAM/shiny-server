@@ -162,22 +162,6 @@ crude_type_check <- function(density, sulfur){
     }
   }
 }
-# Initialize ---------------------------------------------
-# Initializes one of the output tables.
-fitted_actual_input_summary_init <- tibble(
-  Month = NA
-  ,Density = as.numeric(NA)
-  ,Sulfur = as.numeric(NA)
-  ,`Crude Type` = NA
-  ,`7 Day Temperature Average` = as.numeric(NA)
-  ,`Mean Historical VP` = as.numeric(NA)
-  ,`Mean Predicted VP` = as.numeric(NA)
-  ,`Median Predicted VP` = as.numeric(NA)
-  ,`SD Predicted VP` = as.numeric(NA)
-  ,`Min Predicted VP` = as.numeric(NA)
-  ,`Max Predicted VP` = as.numeric(NA)
-  ,`Data Points` = as.numeric(NA)
-)
 
 # Page -----------------------------
 function(input, output, session) {
@@ -451,6 +435,29 @@ function(input, output, session) {
     # ,"Post Aquisition:Heavy SW"
   )
   
+  
+  # This only needs to occur when the app opens.
+  fitted_actual_input_summary <- tibble(
+    Month = NA
+    ,Density = as.numeric(NA)
+    ,Sulfur = as.numeric(NA)
+    ,`Crude Type` = NA
+    ,`7 Day Temperature Average` = as.numeric(NA)
+    ,`Mean Historical VP` = as.numeric(NA)
+    ,`Mean Predicted VP` = as.numeric(NA)
+    ,`Median Predicted VP` = as.numeric(NA)
+    ,`SD Predicted VP` = as.numeric(NA)
+    ,`Min Predicted VP` = as.numeric(NA)
+    ,`Max Predicted VP` = as.numeric(NA)
+    ,`Data Points` = as.numeric(NA)
+  )
+  
+  LASSO_coef <- tibble(
+  `Coefficients` = as.numeric(NA)
+  ,`Variables` = as.numeric(NA)
+  )
+  
+  
   # Main Function ------------------------------
   main <- function(){
     
@@ -493,10 +500,6 @@ function(input, output, session) {
         )
     }
     
-    # How many times we multiply the SD by to get our input rows.
-    crude_multiplier <- input$multiplier_crude_input
-    weather_multiplier <- input$multiplier_weather_input
-    
     
     # LASSO -------------------------------------------------------------------
     
@@ -524,7 +527,6 @@ function(input, output, session) {
         ,alpha = input$alpha_input
       )
     LASSO_coef <- coef(cvfit_penalty_dummy, s = "lambda.1se", exact = TRUE)
-    LASSO_coef
     
     
     # Simulation Setup ---------------------------------------------
@@ -534,6 +536,10 @@ function(input, output, session) {
     Sulfur_input <- input$sulf_input
     Temp.Roll_input <- input$temp.roll_input
     mth_input <- input$mth_input
+    # How many times we multiply the SD by to get our input rows.
+    density_multiplier <- input$multiplier_density_input
+    sulfur_multiplier <- input$multiplier_sulfur_input
+    weather_multiplier <- input$multiplier_weather_input
     
     # Creates an empty tibble to be filled with the results of the predictions.
     fitted_actual_input <- tibble(
@@ -612,32 +618,32 @@ function(input, output, session) {
         # the inputted are used.
         # Crude_Breakdown == Crude_Breakdown_input &
         # mth == as.numeric(mth_input) &
-        Temp.Roll >= Temp.Roll_input %>% as.numeric() - crude_multiplier * (
+        Temp.Roll >= Temp.Roll_input %>% as.numeric() - weather_multiplier * (
           weather_stats %>%
             select(Temp.Roll_SD) %>%
             as.numeric()
         ) &
-          Temp.Roll <= Temp.Roll_input %>% as.numeric() + crude_multiplier * (
+          Temp.Roll <= Temp.Roll_input %>% as.numeric() + weather_multiplier * (
             weather_stats %>%
               select(Temp.Roll_SD) %>%
               as.numeric()
           ) &
-          Dens >= Density_input %>% as.numeric() - crude_multiplier * (
+          Dens >= Density_input %>% as.numeric() - density_multiplier * (
             crude_bd_stats %>%
               select(Density_SD) %>%
               as.numeric()
           ) &
-          Dens <= Density_input %>% as.numeric() + crude_multiplier * (
+          Dens <= Density_input %>% as.numeric() + density_multiplier * (
             crude_bd_stats %>%
               select(Density_SD) %>%
               as.numeric()
           ) &
-          Sulf >= Sulfur_input %>% as.numeric() - crude_multiplier * (
+          Sulf >= Sulfur_input %>% as.numeric() - sulfur_multiplier * (
             crude_bd_stats %>%
               select(Sulfur_SD) %>%
               as.numeric()
           ) &
-          Sulf <= Sulfur_input %>% as.numeric() + crude_multiplier * (
+          Sulf <= Sulfur_input %>% as.numeric() + sulfur_multiplier * (
             crude_bd_stats %>%
               select(Sulfur_SD) %>%
               as.numeric()
@@ -894,8 +900,7 @@ function(input, output, session) {
   }
   
   # Output ------------------------------------
-  
-  fitted_actual_input_summary <- fitted_actual_input_summary_init
+
   # Creates an output when the action button is pressed.
   observeEvent(input$run_sim, {
     
@@ -996,8 +1001,6 @@ function(input, output, session) {
     output$fitted_actual_input_summary <- renderDataTable(fitted_actual_input_summary)
     
     output$LASSO_coef <- renderDataTable(LASSO_coef)
-    # output$LASSO_coef_1 <- renderTable(LASSO_coef_1)
-    # output$LASSO_coef_2 <- renderTable(LASSO_coef_2)
     
     # Lets you download the data used in the model.
     output$downloadData <- 
@@ -1036,6 +1039,25 @@ function(input, output, session) {
     
   })
   
+  # Output Defaults -----------------------------------
+  # Plots the kernel density estimator and the ECDF and the results
+  output$b_kern <- renderPlot(
+    ggplot() + 
+      geom_blank()
+  )
+  output$b_ecdf <- renderPlot(
+    ggplot() + 
+      geom_blank()
+  )
+  output$result_chart <- renderPlot(
+    ggplot() + 
+      geom_blank()
+  )
   
+  output$fitted_actual_input_summary <- renderDataTable(fitted_actual_input_summary)
+  
+  output$LASSO_coef <- renderDataTable(LASSO_coef)
+  
+
 }
 
