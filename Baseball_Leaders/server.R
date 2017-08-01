@@ -35,7 +35,7 @@ shinyServer(
     batting_cum <- reactive({
       # Adds a progress bar to show the calculations are running.
       withProgress(
-        message = "Calculating"
+        message = "Calculating..."
         ,value = NULL
         ,Batting_tib %>% 
           filter(yearID <= input$year_lkup) %>% 
@@ -80,9 +80,10 @@ shinyServer(
     output$leaderboardPlot <- renderPlot({
       
       ggplot(
-        batting_cum() %>% head(input$n)
+        batting_cum() %>% 
+          head(input$n)
         ,aes(
-          x = `Full Name`
+          x = factor(`Full Name`, levels = `Full Name`[order(batting_cum()$Cum_Stat %>% head(input$n) %>% desc())])
           ,y = Cum_Stat
         )
       ) +

@@ -21,8 +21,8 @@ theme_minimal2 <-
 
 # Year to go up to
 yr <- 2017
-n <- 22
-test <- quo(G)
+n <- 10
+stat_input <- quo(G)
 
 Batting_tib <- 
   Batting %>% 
@@ -35,7 +35,7 @@ batting_cum <-
   Batting_tib %>% 
   filter(yearID <= yr) %>% 
   group_by(playerID) %>% 
-  mutate(Cum_HR = cumsum(!!test)) %>% 
+  mutate(Cum_HR = cumsum(!!stat_input)) %>% 
   arrange(desc(Cum_HR)) %>% 
   distinct(
     playerID
@@ -48,15 +48,16 @@ batting_cum <-
   ) %>%
   mutate(
     `Full Name` = paste0(`Last Name`, ", ", `First Name`)
-  )
+  ) %>% 
+  ungroup()
 
 
 top_n_bar_chart <- 
   ggplot(
-    batting_cum%>% 
+    batting_cum %>% 
       head(n)
     ,aes(
-      x = `Full Name`
+      x = factor(`Full Name`, levels = `Full Name`[order(batting_cum$Cum_HR %>% head(n) %>% desc())])
       ,y = Cum_HR
     )
   ) +

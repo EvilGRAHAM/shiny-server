@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# Libraries ----------\nlibrary(shiny)\nlibrary(shinythemes)\nlibrary(tidyverse)\nlibrary(Lahman)\nlibrary(lubridate)\n\n# Baseball Statistics ----------\nbaseball_stats <- \n  Batting %>% \n  as.tibble() %>% \n  select(\n    -c(\n      playerID\n      ,yearID\n      ,stint\n      ,teamID\n      ,lgID\n    )\n  ) %>% \n  colnames()\n# UI ----------\nfluidPage(\n  \n  # Application title ----------\n  theme = shinytheme(\"lumen\")\n  \n  ,titlePanel(\"Baseball Individual Leaderboard\")\n  \n  ,fluidRow(\n    \n    # Inputs ----------\n    column(\n      4\n      ,offset = 0\n      ,wellPanel(\n        # Which statistic to show.\n        selectInput(\n          inputId = \"baseball_stat\"\n          ,label = \"Options\"\n          ,baseball_stats\n          ,selectize=TRUE\n        )\n        # Year that we provides an upper bound for the summing.\n        ,numericInput(\n          inputId = \"year_lkup\"\n          ,label = \"Year:\"\n          ,value = year(today())\n        )\n        # Number of players to show.\n        ,numericInput(\n          inputId = \"n\"\n          ,label = \"Number of Players:\"\n          ,value = 10\n        )\n      )\n    )\n    \n    # Main ----------\n    # Show a plot of the generated distribution\n    ,column(\n      8\n      ,offset = 0\n      ,tabsetPanel(type = \"tabs\"\n        ,tabPanel(\n          \"Leaderboard Plot\"\n          ,plotOutput(\"leaderboardPlot\")\n        )\n        ,tabPanel(\n          \"Leaderboard Table\"\n          ,tableOutput(\"leaderboardTable\")\n        )\n      )\n    )\n    \n  )\n  \n)\n\n",
+    "created" : 1501603209710.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1070482886",
+    "id" : "C9B376FD",
+    "lastKnownWriteTime" : 1501600501,
+    "last_content_update" : 1501600501,
+    "path" : "~/GitHub/shiny-server/Baseball_Leaders/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+        "docOutlineVisible" : "1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
