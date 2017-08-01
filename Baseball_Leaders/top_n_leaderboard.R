@@ -20,9 +20,9 @@ theme_minimal2 <-
   )
 
 # Year to go up to
-yr <- 2017
+yr <- 1905
 n <- 10
-stat_input <- quo(G)
+stat_input <- quo(HR)
 
 Batting_tib <- 
   Batting %>% 

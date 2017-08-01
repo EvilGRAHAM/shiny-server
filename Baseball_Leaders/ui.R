@@ -42,10 +42,13 @@ fluidPage(
           ,selectize=TRUE
         )
         # Year that we provides an upper bound for the summing.
-        ,numericInput(
+        ,sliderInput(
           inputId = "year_lkup"
           ,label = "Year:"
-          ,value = year(today())
+          ,min = 1871
+          ,max = year(today())
+          ,value = c(1871, year(today()))
+          ,sep = ""
         )
         # Number of players to show.
         ,numericInput(

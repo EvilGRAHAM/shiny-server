@@ -38,7 +38,10 @@ shinyServer(
         message = "Calculating..."
         ,value = NULL
         ,Batting_tib %>% 
-          filter(yearID <= input$year_lkup) %>% 
+          filter(
+            yearID >= input$year_lkup[[1]]
+            ,yearID <= input$year_lkup[[2]]
+          ) %>% 
           group_by(playerID) %>% 
           mutate(
             Career_Stat = cumsum(!!quo(eval(parse(text = input$baseball_stat))))
@@ -48,11 +51,6 @@ shinyServer(
           distinct(
             playerID
             ,.keep_all = TRUE
-          ) %>% 
-          head(100) %>% 
-          mutate(
-            # Incase more than one name is returned, we choose the first one, as it should be the exact match.
-            `Full Name` = paste0(playerInfo(playerID)[1, ]$nameLast, ", ", playerInfo(playerID)[1, ]$nameFirst)
           )
       )
     })
@@ -63,7 +61,11 @@ shinyServer(
       batting_Career() %>%
         # Grabs the top n values.
         head(input$n) %>% 
-        ungroup() %>% 
+        mutate(
+          # Incase more than one name is returned, we choose the first one, as it should be the exact match.
+          `Full Name` = paste0(playerInfo(playerID)[1, ]$nameLast, ", ", playerInfo(playerID)[1, ]$nameFirst)
+        ) %>% 
+        ungroup() %>%
         select(
           -c(
             playerID
@@ -80,7 +82,11 @@ shinyServer(
       
       ggplot(
         batting_Career() %>% 
-          head(input$n)
+          head(input$n) %>% 
+          mutate(
+            # Incase more than one name is returned, we choose the first one, as it should be the exact match.
+            `Full Name` = paste0(playerInfo(playerID)[1, ]$nameLast, ", ", playerInfo(playerID)[1, ]$nameFirst)
+          )
         ,aes(
           x = factor(`Full Name`, levels = `Full Name`[order(batting_Career()$Career_Stat %>% head(input$n) %>% desc())])
           ,y = Career_Stat
@@ -90,7 +96,7 @@ shinyServer(
           alpha = 0.75
         ) +
         labs(
-          title = paste0("Top ", input$n, " Players by Career ", input$baseball_stat, "'s in ", input$year_lkup)
+          title = paste0("Top ", input$n, " Players by Career ", input$baseball_stat, "'s from ", input$year_lkup[[1]], "-", input$year_lkup[[2]])
           ,x = "Player"
           ,y = paste0("Career ", input$baseball_stat, "'s")
         )
