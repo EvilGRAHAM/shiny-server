@@ -9,7 +9,7 @@ library(shiny, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
 library(zeallot, warn.conflicts = FALSE, quietly = TRUE)
 
-# Updates them_minimal so that there is borders around the graphs and the facet headings.
+# Updates theme_minimal so that there is borders around the graphs and the facet headings.
 theme_minimal2 <- theme_minimal() %>%  theme_set()
 theme_minimal2 <-
   theme_update(

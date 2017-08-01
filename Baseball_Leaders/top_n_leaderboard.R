@@ -30,13 +30,13 @@ Batting_tib <-
 
 
 
-# Provides cumulative stats for each player up to this year.
-batting_cum <- 
+# Provides Career stats for each player up to this year.
+batting_Career <- 
   Batting_tib %>% 
   filter(yearID <= yr) %>% 
   group_by(playerID) %>% 
-  mutate(Cum_HR = cumsum(!!stat_input)) %>% 
-  arrange(desc(Cum_HR)) %>% 
+  mutate(Career_HR = cumsum(!!stat_input)) %>% 
+  arrange(desc(Career_HR)) %>% 
   distinct(
     playerID
     ,.keep_all = TRUE
@@ -54,19 +54,19 @@ batting_cum <-
 
 top_n_bar_chart <- 
   ggplot(
-    batting_cum %>% 
+    batting_Career %>% 
       head(n)
     ,aes(
-      x = factor(`Full Name`, levels = `Full Name`[order(batting_cum$Cum_HR %>% head(n) %>% desc())])
-      ,y = Cum_HR
+      x = factor(`Full Name`, levels = `Full Name`[order(batting_Career$Career_HR %>% head(n) %>% desc())])
+      ,y = Career_HR
     )
   ) +
   geom_col(
     alpha = 0.75
   ) +
   labs(
-    title = paste("Top", n, "Players by Cumulative HR's in", yr)
-    ,y = "Cumulative HR's"
+    title = paste("Top", n, "Players by Career HR's in", yr)
+    ,y = "Career HR's"
   )
 top_n_bar_chart
   

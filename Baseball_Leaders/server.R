@@ -6,7 +6,7 @@ library(Lahman)
 library(lubridate)
 
 # ggplot Formatting ----------
-# Updates them_minimal so that there is borders around the graphs and the facet headings.
+# Updates theme_minimal so that there is borders around the graphs and the facet headings.
 theme_minimal2 <- theme_minimal() %>%  theme_set()
 theme_minimal2 <-
   theme_update(
@@ -32,7 +32,7 @@ shinyServer(
   function(input, output) {
     
     # Dataset ----------
-    batting_cum <- reactive({
+    batting_Career <- reactive({
       # Adds a progress bar to show the calculations are running.
       withProgress(
         message = "Calculating..."
@@ -41,9 +41,9 @@ shinyServer(
           filter(yearID <= input$year_lkup) %>% 
           group_by(playerID) %>% 
           mutate(
-            Cum_Stat = cumsum(!!quo(eval(parse(text = input$baseball_stat))))
+            Career_Stat = cumsum(!!quo(eval(parse(text = input$baseball_stat))))
           ) %>% 
-          arrange(desc(Cum_Stat)) %>% 
+          arrange(desc(Career_Stat)) %>% 
           # Removes cases where a player appears multiple times in the list due to being a leader for multiple years.
           distinct(
             playerID
@@ -60,7 +60,7 @@ shinyServer(
     # Leaderboard Table ----------
     output$leaderboardTable <- renderTable({
       
-      batting_cum() %>%
+      batting_Career() %>%
         # Grabs the top n values.
         head(input$n) %>% 
         ungroup() %>% 
@@ -80,20 +80,20 @@ shinyServer(
     output$leaderboardPlot <- renderPlot({
       
       ggplot(
-        batting_cum() %>% 
+        batting_Career() %>% 
           head(input$n)
         ,aes(
-          x = factor(`Full Name`, levels = `Full Name`[order(batting_cum()$Cum_Stat %>% head(input$n) %>% desc())])
-          ,y = Cum_Stat
+          x = factor(`Full Name`, levels = `Full Name`[order(batting_Career()$Career_Stat %>% head(input$n) %>% desc())])
+          ,y = Career_Stat
         )
       ) +
         geom_col(
           alpha = 0.75
         ) +
         labs(
-          title = paste0("Top ", input$n, " Players by Cumulative ", input$baseball_stat, "'s in ", input$year_lkup)
+          title = paste0("Top ", input$n, " Players by Career ", input$baseball_stat, "'s in ", input$year_lkup)
           ,x = "Player"
-          ,y = paste0("Cumulative ", input$baseball_stat, "'s")
+          ,y = paste0("Career ", input$baseball_stat, "'s")
         )
       
     })
