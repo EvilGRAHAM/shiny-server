@@ -1,29 +1,79 @@
+# Libraries ----------
 library(shiny)
+library(shinythemes)
 library(tidyverse)
 library(Lahman)
 library(lubridate)
 
-shinyUI(
-  fluidPage(
+# Baseball Statistics ----------
+baseball_stats <- 
+  Batting %>% 
+  as.tibble() %>% 
+  select(
+    -c(
+      playerID
+      ,yearID
+      ,stint
+      ,teamID
+      ,lgID
+    )
+  ) %>% 
+  colnames()
+# UI ----------
+fluidPage(
   
-    # Application title
-    titlePanel("Baseball Individual Leaderboard"),
+  # Application title ----------
+  theme = shinytheme("lumen")
   
-    # Sidebar with a slider input for number of bins
-    sidebarLayout(
-      sidebarPanel(
-        sliderInput("bins",
-                    "Number of bins:",
-                    min = 1,
-                    max = 50,
-                    value = 30)
-      ),
+  ,titlePanel("Baseball Individual Leaderboard")
   
-      # Show a plot of the generated distribution
-      mainPanel(
-        plotOutput("distPlot")
+  ,fluidRow(
+    
+    # Inputs ----------
+    column(
+      4
+      ,offset = 0
+      ,wellPanel(
+        # Which statistic to show.
+        selectInput(
+          inputId = "baseball_stat"
+          ,label = "Options"
+          ,baseball_stats
+          ,selectize=TRUE
+        )
+        # Year that we provides an upper bound for the summing.
+        ,numericInput(
+          inputId = "year_lkup"
+          ,label = "Year:"
+          ,value = year(today())
+        )
+        # Number of players to show.
+        ,numericInput(
+          inputId = "n"
+          ,label = "Number of Players:"
+          ,value = 10
+        )
       )
     )
-  
+    
+    # Main ----------
+    # Show a plot of the generated distribution
+    ,column(
+      8
+      ,offset = 0
+      ,tabsetPanel(type = "tabs"
+        ,tabPanel(
+          "Leaderboard Plot"
+          ,plotOutput("leaderboardPlot")
+        )
+        ,tabPanel(
+          "Leaderboard Table"
+          ,tableOutput("leaderboardTable")
+        )
+      )
+    )
+    
   )
+  
 )
+

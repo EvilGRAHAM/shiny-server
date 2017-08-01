@@ -10,7 +10,7 @@ library(DT, warn.conflicts = FALSE, quietly = TRUE)
 fluidPage(
   theme = shinytheme("lumen")
   
-  ,headerPanel("VP Simulation")
+  ,titlePanel("VP Simulation")
   
   
   ,fluidRow(

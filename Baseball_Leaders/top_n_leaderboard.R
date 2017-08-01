@@ -20,38 +20,34 @@ theme_minimal2 <-
   )
 
 # Year to go up to
-yr <- 1990
-n <- 10
+yr <- 2017
+n <- 22
+test <- quo(G)
 
 Batting_tib <- 
   Batting %>% 
   as.tibble()
 
+
+
 # Provides cumulative stats for each player up to this year.
 batting_cum <- 
   Batting_tib %>% 
-  group_by(playerID) %>% 
-  mutate(Cum_HR = cumsum(HR)) %>% 
   filter(yearID <= yr) %>% 
+  group_by(playerID) %>% 
+  mutate(Cum_HR = cumsum(!!test)) %>% 
   arrange(desc(Cum_HR)) %>% 
   distinct(
     playerID
     ,.keep_all = TRUE
   ) %>%
-  head(n) %>% 
+  head(n) %>%
   mutate(
-    `First Name` = playerInfo(playerID)$nameFirst
-    ,`Last Name` = playerInfo(playerID)$nameLast
-  ) %>% 
+    `First Name` = playerInfo(playerID)[1, ]$nameFirst
+    ,`Last Name` = playerInfo(playerID)[1, ]$nameLast
+  ) %>%
   mutate(
     `Full Name` = paste0(`Last Name`, ", ", `First Name`)
-  )
-
-batting_cum %>% 
-  head(n) %>% 
-  mutate(
-    `First Name` = playerInfo(playerID)$nameFirst
-    ,`Last Name` = playerInfo(playerID)$nameLast
   )
 
 
