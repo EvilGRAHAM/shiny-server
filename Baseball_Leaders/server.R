@@ -67,7 +67,6 @@ shinyServer(
         select(
           -c(
             playerID
-            ,yearID
             ,stint
             ,teamID
             ,lgID
