@@ -1,4 +1,7 @@
 library(shiny)
+library(tidyverse)
+library(Lahman)
+library(lubridate)
 
 shinyServer(
   function(input, output) {

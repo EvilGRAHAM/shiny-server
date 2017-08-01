@@ -1,14 +1,14 @@
 {
     "collab_server" : "",
-    "contents" : "library(shiny)\n\nshinyServer(\n  function(input, output) {\n\n    output$distPlot <- renderPlot({\n\n      # generate bins based on input$bins from ui.R\n      x    <- faithful[, 2]\n      bins <- seq(min(x), max(x), length.out = input$bins + 1)\n  \n      # draw the histogram with the specified number of bins\n      hist(x, breaks = bins, col = 'darkgray', border = 'white')\n\n  })\n\n})\n",
+    "contents" : "library(shiny)\nlibrary(tidyverse)\nlibrary(Lahman)\nlibrary(lubridate)\n\nshinyServer(\n  function(input, output) {\n\n    output$distPlot <- renderPlot({\n\n      # generate bins based on input$bins from ui.R\n      x    <- faithful[, 2]\n      bins <- seq(min(x), max(x), length.out = input$bins + 1)\n  \n      # draw the histogram with the specified number of bins\n      hist(x, breaks = bins, col = 'darkgray', border = 'white')\n\n  })\n\n})\n",
     "created" : 1501566337697.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "1127749209",
+    "hash" : "3481351130",
     "id" : "BBF75818",
-    "lastKnownWriteTime" : 1501566484,
-    "last_content_update" : 1501566484903,
+    "lastKnownWriteTime" : 1501567551,
+    "last_content_update" : 1501567551777,
     "path" : "~/GitHub/shiny-server/Baseball_Leaders/server.R",
     "project_path" : "server.R",
     "properties" : {
