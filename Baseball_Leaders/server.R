@@ -33,24 +33,28 @@ shinyServer(
     
     # Dataset ----------
     batting_cum <- reactive({
-      Batting_tib %>% 
-        filter(yearID <= input$year_lkup) %>% 
-        group_by(playerID) %>% 
-        mutate(
-          Cum_Stat = cumsum(!!quo(eval(parse(text = input$baseball_stat))))
-        ) %>% 
-        arrange(desc(Cum_Stat)) %>% 
-        # Removes cases where a player appears multiple times in the list due to being a leader for multiple years.
-        distinct(
-          playerID
-          ,.keep_all = TRUE
-        ) %>% 
-        head(100) %>% 
-        mutate(
-          # Incase more than one name is returned, we choose the first one, as it should be the exact match.
-          `Full Name` = paste0(playerInfo(playerID)[1, ]$nameLast, ", ", playerInfo(playerID)[1, ]$nameFirst)
-        ) 
-      
+      # Adds a progress bar to show the calculations are running.
+      withProgress(
+        message = "Calculating"
+        ,value = NULL
+        ,Batting_tib %>% 
+          filter(yearID <= input$year_lkup) %>% 
+          group_by(playerID) %>% 
+          mutate(
+            Cum_Stat = cumsum(!!quo(eval(parse(text = input$baseball_stat))))
+          ) %>% 
+          arrange(desc(Cum_Stat)) %>% 
+          # Removes cases where a player appears multiple times in the list due to being a leader for multiple years.
+          distinct(
+            playerID
+            ,.keep_all = TRUE
+          ) %>% 
+          head(100) %>% 
+          mutate(
+            # Incase more than one name is returned, we choose the first one, as it should be the exact match.
+            `Full Name` = paste0(playerInfo(playerID)[1, ]$nameLast, ", ", playerInfo(playerID)[1, ]$nameFirst)
+          )
+      )
     })
     
     # Leaderboard Table ----------
