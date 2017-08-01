@@ -1,0 +1,9 @@
+{
+    "path" : "~/GitHub/shiny-server/Baseball_Leaders",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
