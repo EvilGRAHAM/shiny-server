@@ -173,13 +173,13 @@ function(input, output, session) {
   # As well it splits the mth variable into 12 dummy variables.
   data_complete <-
     read_csv(
-      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/VP_Data_Complete.csv"
+      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/VP_Simulation/Data/VP_Data_Complete.csv"
     ) %>% 
     data.conversions()
   
   data_weather <-
     read_csv(
-      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/Simulation/Data/Weather_Data.csv"
+      "https://raw.githubusercontent.com/EvilGRAHAM/shiny-server/master/VP_Simulation/Data/Weather_Data.csv"
     ) %>% 
     mutate(Date = as.Date(Date, format = "%m/%d/%Y"))
   
