@@ -80,7 +80,7 @@ db_body <- dashboardBody(
           # Price Table ----------
           ,box(
             width = NULL
-            ,tableOutput("price_tbl")
+            ,dataTableOutput("price_tbl")
           )
         )
         

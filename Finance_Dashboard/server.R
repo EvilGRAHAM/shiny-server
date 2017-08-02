@@ -33,7 +33,7 @@ shinyServer(
     # Data set ----------
     price_data <- reactive({
       tq_get(
-        tibble(symbol = "AAPL")#input$stock_ticker)
+        tibble(symbol = input$stock_ticker)
       ) %>% 
         group_by(
           symbol
@@ -41,7 +41,7 @@ shinyServer(
     })
     
     # Price Table ----------
-    output$price_tbl <- renderTable({
+    output$price_tbl <- renderDataTable({
       if(is.null(input$stock_ticker)){
         tibble(
           stock = as.numeric(NA)
