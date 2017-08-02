@@ -5,7 +5,6 @@ library(shinydashboard, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyquant, warn.conflicts = FALSE, quietly = TRUE)
 library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
-library(plotly, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
 
 
@@ -102,7 +101,7 @@ db_body <- dashboardBody(
     )
     
     ,tabItem(tabName = "db_metal"
-      ,h2("metal")
+      ,tableOutput("test")
     )
   )
 )

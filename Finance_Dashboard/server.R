@@ -5,7 +5,6 @@ library(shinydashboard, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyquant, warn.conflicts = FALSE, quietly = TRUE)
 library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
-library(plotly, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
 
 
@@ -137,5 +136,7 @@ shinyServer(
           )
       }
     })
+    
+    output$test <- renderTable(head(tq_get("gold", get = "metal.prices")))
   }
 )
