@@ -33,7 +33,7 @@ shinyServer(
     # Data set ----------
     price_data <- reactive({
       tq_get(
-        tibble(symbol = input$stock_ticker)
+        tibble(symbol = "AAPL")#input$stock_ticker)
       ) %>% 
         group_by(
           symbol
