@@ -41,7 +41,7 @@ shinyServer(
     })
     
     # Price Table ----------
-    output$price_tbl <- renderDataTable({
+    output$price_tbl <- renderTable({
       if(is.null(input$stock_ticker)){
         tibble(
           stock = as.numeric(NA)
