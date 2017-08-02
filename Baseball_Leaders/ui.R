@@ -1,9 +1,9 @@
 # Libraries ----------
-library(shiny)
-library(shinythemes)
-library(tidyverse)
-library(Lahman)
-library(lubridate)
+library(shiny, warn.conflicts = FALSE, quietly = TRUE)
+library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
+library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
+library(Lahman, warn.conflicts = FALSE, quietly = TRUE)
+library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
 
 # Baseball Statistics ----------
 baseball_stats <- 
@@ -39,7 +39,8 @@ fluidPage(
           inputId = "baseball_stat"
           ,label = "Statistic:"
           ,baseball_stats
-          ,selectize=TRUE
+          ,selected = "HR"
+          ,selectize = TRUE
         )
         # Year that we provides an upper bound for the summing.
         ,sliderInput(

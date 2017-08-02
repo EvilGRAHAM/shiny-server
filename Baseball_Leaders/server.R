@@ -1,9 +1,9 @@
 # Libraries ----------
-library(shiny)
-library(shinythemes)
-library(tidyverse)
-library(Lahman)
-library(lubridate)
+library(shiny, warn.conflicts = FALSE, quietly = TRUE)
+library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
+library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
+library(Lahman, warn.conflicts = FALSE, quietly = TRUE)
+library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
 
 # ggplot Formatting ----------
 # Updates theme_minimal so that there is borders around the graphs and the facet headings.
