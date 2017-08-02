@@ -137,6 +137,6 @@ shinyServer(
       }
     })
     
-    output$test <- renderTable(head(tq_get("AAPL")))#renderTable(head(tq_get("gold", get = "metal.prices")))
+    output$test <- renderTable(head(tq_get(tibble(symbol = "AAPL"))))#renderTable(head(tq_get("gold", get = "metal.prices")))
   }
 )
