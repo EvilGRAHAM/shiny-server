@@ -101,7 +101,7 @@ db_body <- dashboardBody(
     )
     
     ,tabItem(tabName = "db_metal"
-      ,tableOutput("test")
+      ,dataTableOutput("test")
     )
   )
 )
