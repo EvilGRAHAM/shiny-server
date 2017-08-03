@@ -32,34 +32,38 @@ shinyServer(
     
     # Data set ----------
     price_data <- reactive({
-      price_data <- tibble(
-        symbol = as.numeric(NA)
-        ,date = as.Date(NA)
-        ,open = as.numeric(NA)
-        ,high = as.numeric(NA)
-        ,low = as.numeric(NA)
-        ,close = as.numeric(NA)
-        ,volume = as.numeric(NA)
-        ,adjusted = as.numeric(NA)
-      )
-      for (i in input$stock_ticker){
-        price_data_temp <- 
-          tq_get(
-            i
-          ) %>% 
-          mutate(
-            symbol = i
-          ) %>% 
-          select(
-            symbol
-            ,date:adjusted
-          ) 
-        price_data <- 
-          rbind(price_data, price_data_temp)
-      }
-      price_data %<>%
-        filter(!is.na(symbol)) %>%
+      tq_get(
+        tibble(symbol = input$stock_ticker)
+      ) %>% 
         group_by(symbol)
+      # price_data <- tibble(
+      #   symbol = as.numeric(NA)
+      #   ,date = as.Date(NA)
+      #   ,open = as.numeric(NA)
+      #   ,high = as.numeric(NA)
+      #   ,low = as.numeric(NA)
+      #   ,close = as.numeric(NA)
+      #   ,volume = as.numeric(NA)
+      #   ,adjusted = as.numeric(NA)
+      # )
+      # for (i in input$stock_ticker){
+      #   price_data_temp <- 
+      #     tq_get(
+      #       i
+      #     ) %>% 
+      #     mutate(
+      #       symbol = i
+      #     ) %>% 
+      #     select(
+      #       symbol
+      #       ,date:adjusted
+      #     ) 
+      #   price_data <- 
+      #     rbind(price_data, price_data_temp)
+      # }
+      # price_data %<>%
+      #   filter(!is.na(symbol)) %>%
+      #   group_by(symbol)
     })
     
     # Price Table ----------
@@ -158,6 +162,11 @@ shinyServer(
       }
     })
     
-    output$test <- renderDataTable(head(tq_get("gold", get = "metal.prices")))
+    output$gold <- renderDataTable(
+      tq_get(
+        tibble(symbol = "gold")
+        ,get = "metal.prices"
+      )
+    )
   }
 )

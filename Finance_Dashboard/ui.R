@@ -20,6 +20,7 @@ db_sidebar <- dashboardSidebar(
     # Sidebar Menu List ----------
     menuItem("Stocks", tabName = "db_stock", icon = icon("line-chart"))
     ,menuItem("Metals", tabName = "db_metal", icon = icon("bank"))
+    ,menuItem("Oil", tabName = "db_oil", icon = icon("tint"))
     # Date Range ----------
     ,dateRangeInput(
       inputId = "date_range"
@@ -101,8 +102,10 @@ db_body <- dashboardBody(
     )
     
     ,tabItem(tabName = "db_metal"
-      ,dataTableOutput("test")
+      ,dataTableOutput("gold")
     )
+    
+    ,tabItem(tabName = "db_oil")
   )
 )
 
