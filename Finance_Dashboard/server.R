@@ -134,7 +134,7 @@ shinyServer(
             date <= input$date_range[[2]]
             ,date >= input$date_range[[1]]
           ) %>% 
-          tq_mutate(
+          tq_transmute(
             select = adjusted
             ,mutate_fun = periodReturn
             ,period = input$return_period

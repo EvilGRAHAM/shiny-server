@@ -56,6 +56,7 @@ fluidPage(
           inputId = "n"
           ,label = "Number of Players:"
           ,value = 10
+          ,min = 1
         )
       )
     )
