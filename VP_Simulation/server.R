@@ -939,7 +939,7 @@ function(input, output, session) {
     }
     
     # Charts the results from each successive simulation.
-    result_chart <-
+    fitted_actual_input_summary_chart <- 
       fitted_actual_input_summary %>% 
       mutate(Iteration = 1:count.num(fitted_actual_input_summary)) %>%
       select(
@@ -957,12 +957,38 @@ function(input, output, session) {
         ,VP
         ,-Iteration
         ,-Month
+      )
+    
+    result_chart <-
+      fitted_actual_input_summary_chart %>% 
+      group_by(
+        Iteration
       ) %>% 
       ggplot(
         aes(
           x = Iteration
-          ,y = `VP`
           ,colour = Result
+        )
+      ) + 
+      geom_ribbon(
+        data = fitted_actual_input_summary %>% 
+          mutate(Iteration = 1:count.num(fitted_actual_input_summary))
+        ,aes(
+          ymin = `Min Predicted VP`
+          ,ymax = `Max Predicted VP`
+        )
+        ,colour = NA
+        ,fill = "grey92"
+        ,alpha = 0.5
+      ) +
+      geom_line(
+        aes(
+          y = `VP`
+        )
+      ) +
+      geom_point(
+        aes(
+          y = `VP`
         )
       ) +
       scale_colour_brewer(
@@ -973,13 +999,11 @@ function(input, output, session) {
       labs(
         title = "Simulation Results"
         ,y = "VP (kPa)"
-      ) +
-      geom_line() +
-      geom_point()
+      )
+
     
     # Grabs the variables and coefficients of the LASSO regression.
     LASSO_coef <-
-      # LASSO_coef %>% 
       LASSO_coef_output %>%
       as.matrix() %>%
       round(4) %>% 

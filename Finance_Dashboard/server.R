@@ -32,10 +32,14 @@ shinyServer(
     
     # Data set ----------
     price_data <- reactive({
-      tq_get(
-        tibble(symbol = input$stock_ticker)
-      ) %>% 
-        group_by(symbol)
+      withProgress(
+        message = "Retrieving Data..."
+        ,value = NULL
+        ,tq_get(
+          tibble(symbol = input$stock_ticker)
+        ) %>% 
+          group_by(symbol)
+      )
     })
     
     # Price Table ----------
