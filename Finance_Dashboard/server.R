@@ -86,10 +86,19 @@ shinyServer(
           ,close = as.numeric(NA)
           ,volume = as.numeric(NA)
           ,adjusted = as.numeric(NA)
-          ,R_a = as.numeric(NA)
+          # ,R_a = as.numeric(NA)
         )
       } else{
         stock_price_data() %>% 
+          mutate(
+            open = round(open, 2)
+            ,high = round(high, 2)
+            ,low = round(low, 2)
+            ,close = round(close, 2)
+            ,adjusted = round(adjusted, 2)
+            ,R_a = paste0(round(R_a, 4)*100,"%")
+          ) %>% 
+          # select(-R_a) %>% 
           arrange(
             desc(date)
           )
