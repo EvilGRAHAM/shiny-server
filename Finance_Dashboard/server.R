@@ -99,7 +99,12 @@ shinyServer(
     # Price Time Series ----------
     output$price_ts <- renderPlot({
       if(is.null(input$stock_ticker)){
-        ggplot() + geom_blank()
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = "Date"
+            ,y = "Price"
+          )
       } else{
         stock_price_data() %>% 
           ggplot(
@@ -132,7 +137,12 @@ shinyServer(
     # Returns Time Series ----------
     output$return_ts <- renderPlot({
       if(is.null(input$stock_ticker)){
-        ggplot() + geom_blank()
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = "Date"
+            ,y = "Return"
+          )
       } else{
         stock_price_data() %>% 
           ggplot(
@@ -156,7 +166,12 @@ shinyServer(
     # Stock vs. Index Returns Chart ----------
     output$stock_index_return <- renderPlot({
       if(is.null(input$stock_ticker) | is.null(input$index_ticker)){
-        ggplot() + geom_blank()
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = expression("R"[Mkt])
+            ,y = expression("R"[i])
+          )
       } else{
         stock_price_data() %>%
           left_join(
@@ -174,6 +189,10 @@ shinyServer(
           facet_wrap(
             symbol.y ~ symbol.x
             ,scales = if_else(input$fix_y_axis_scale_ts, "fixed", "free")
+          ) +
+          labs(
+            x = expression("R"[Mkt])
+            ,y = expression("R"[i])
           )
       }
     })
