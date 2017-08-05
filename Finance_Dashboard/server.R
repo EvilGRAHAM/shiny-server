@@ -30,15 +30,47 @@ theme_minimal2 <-
 shinyServer(
   function(input, output) {
     
-    # Data set ----------
-    price_data <- reactive({
+    # Stock Data set ----------
+    stock_price_data <- reactive({
       withProgress(
-        message = "Retrieving Data..."
+        message = "Retrieving Stock Data..."
         ,value = NULL
         ,tq_get(
           tibble(symbol = input$stock_ticker)
         ) %>% 
-          group_by(symbol)
+          group_by(symbol) %>% 
+          filter(
+            date <= input$date_range[[2]]
+            ,date >= input$date_range[[1]]
+          ) %>% 
+          tq_mutate(
+            select = adjusted
+            ,mutate_fun = periodReturn
+            ,period = input$return_period
+            ,col_rename = "R_a"
+          )
+      ) 
+    })
+    
+    # Index Data set ----------
+    index_price_data <- reactive({
+      withProgress(
+        message = "Retrieving Index Data..."
+        ,value = NULL
+        ,tq_get(
+          tibble(symbol = input$index_ticker)
+        ) %>%
+          group_by(symbol) %>%
+          filter(
+            date <= input$date_range[[2]]
+            ,date >= input$date_range[[1]]
+          ) %>%
+          tq_mutate(
+            select = adjusted
+            ,mutate_fun = periodReturn
+            ,period = input$return_period
+            ,col_rename = "R_b"
+          )
       )
     })
     
@@ -54,13 +86,10 @@ shinyServer(
           ,close = as.numeric(NA)
           ,volume = as.numeric(NA)
           ,adjusted = as.numeric(NA)
+          ,R_a = as.numeric(NA)
         )
       } else{
-        price_data() %>% 
-          filter(
-            date <= input$date_range[[2]]
-            ,date >= input$date_range[[1]]
-          ) %>% 
+        stock_price_data() %>% 
           arrange(
             desc(date)
           )
@@ -72,11 +101,7 @@ shinyServer(
       if(is.null(input$stock_ticker)){
         ggplot() + geom_blank()
       } else{
-        price_data() %>% 
-          filter(
-            date <= input$date_range[[2]]
-            ,date >= input$date_range[[1]]
-          ) %>% 
+        stock_price_data() %>% 
           ggplot(
             aes(
               x = date
@@ -109,21 +134,11 @@ shinyServer(
       if(is.null(input$stock_ticker)){
         ggplot() + geom_blank()
       } else{
-        price_data() %>% 
-          filter(
-            date <= input$date_range[[2]]
-            ,date >= input$date_range[[1]]
-          ) %>% 
-          tq_transmute(
-            select = adjusted
-            ,mutate_fun = periodReturn
-            ,period = input$return_period
-            ,col_rename = "Ra"
-          ) %>% 
+        stock_price_data() %>% 
           ggplot(
             aes(
               x = date
-              ,y = Ra
+              ,y = R_a
             )
           ) +
           geom_line() +
@@ -134,6 +149,31 @@ shinyServer(
           labs(
             x = "Date"
             ,y = "Return"
+          )
+      }
+    })
+    
+    # Stock vs. Index Returns Chart ----------
+    output$stock_index_return <- renderPlot({
+      if(is.null(input$stock_ticker) | is.null(input$index_ticker)){
+        ggplot() + geom_blank()
+      } else{
+        stock_price_data() %>%
+          left_join(
+            index_price_data()
+            ,by = "date"
+          ) %>% 
+          ggplot(
+            aes(
+              x = R_b
+              ,y = R_a
+            )
+          ) +
+          geom_point() +
+          geom_smooth(method = "lm") +
+          facet_wrap(
+            symbol.y ~ symbol.x
+            ,scales = if_else(input$fix_y_axis_scale_ts, "fixed", "free")
           )
       }
     })

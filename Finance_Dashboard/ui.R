@@ -60,6 +60,25 @@ db_body <- dashboardBody(
               ,multiple = TRUE
               ,selectize = TRUE
             )
+            # Index Inputs ----------
+            ,selectInput(
+              inputId = "index_ticker"
+              ,label = "Enter a Stock Index:"
+              ,choices = c(
+                "XLF"
+                ,"SPY"
+                ,"VXX"
+                ,"EEM"
+                ,"GDX"
+                ,"QQQ"
+                ,"USO"
+                ,"IWM"
+                ,"EWZ"
+                ,"XOP"
+              )
+              ,multiple = TRUE
+              ,selectize = TRUE
+            )
             # Period for Returns ----------
             ,selectInput(
               inputId = "return_period"
@@ -95,6 +114,11 @@ db_body <- dashboardBody(
           ,box(
             width = NULL
             ,plotOutput("return_ts")
+          )
+          # Stock vs. Index Returns ----------
+          ,box(
+            width = NULL
+            ,plotOutput("stock_index_return")
           )
         )
       
