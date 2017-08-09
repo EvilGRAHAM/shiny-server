@@ -106,6 +106,11 @@ db_body <- dashboardBody(
             width = NULL
             ,dataTableOutput("price_tbl")
           )
+          # CAPM Regression Ouput ----------
+          ,box(
+            width = NULL
+            ,verbatimTextOutput("capm_regression")
+          )
         )
         
         ,column(

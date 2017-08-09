@@ -30,9 +30,8 @@ theme_tq() %>% theme_set()
 # Functions ----------
 # Retrieves stocks, and adds the returns column
 stock_retrieve <- function(ticker, date_min, date_max, return_period, returns_col){
-  tq_get(
-    tibble(symbol = ticker)
-  ) %>% 
+  tibble(symbol = ticker) %>% 
+    tq_get() %>% 
     group_by(symbol) %>% 
     filter(
       date <= date_max
@@ -219,6 +218,22 @@ shinyServer(
         ,get = "metal.prices"
       )
     )
+    
+    # Regression Model ----------
+    output$capm_regression <- renderPrint({
+      stock_price_data() %>% 
+        left_join(
+          index_price_data()
+          ,by = "date"
+          ,suffix = c(".stock", ".index")
+        ) %>% 
+        split(list(
+          .$symbol.stock
+          ,.$symbol.index
+        )) %>% 
+        map(~ lm(R_a ~ R_b, data = .x)) %>% 
+        map(summary)
+    })
     
     # Energy Stock Data set ----------
     energy_stock_price_data <- reactive({
