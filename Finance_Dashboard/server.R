@@ -27,6 +27,26 @@ library(DT, warn.conflicts = FALSE, quietly = TRUE)
 theme_tq() %>% theme_set()
 
 
+# Functions ----------
+# Retrieves stocks, and adds the returns column
+stock_retrieve <- function(ticker, date_min, date_max, return_period, returns_col){
+  tq_get(
+    tibble(symbol = ticker)
+  ) %>% 
+    group_by(symbol) %>% 
+    filter(
+      date <= date_max
+      ,date >= date_min
+    ) %>% 
+    tq_mutate(
+      select = adjusted
+      ,mutate_fun = periodReturn
+      ,period = return_period
+      ,col_rename = returns_col
+    )
+}
+
+
 # Server ----------
 shinyServer(
   function(input, output) {
@@ -36,20 +56,13 @@ shinyServer(
       withProgress(
         message = "Retrieving Stock Data..."
         ,value = NULL
-        ,tq_get(
-          tibble(symbol = input$stock_ticker)
-        ) %>% 
-          group_by(symbol) %>% 
-          filter(
-            date <= input$date_range[[2]]
-            ,date >= input$date_range[[1]]
-          ) %>% 
-          tq_mutate(
-            select = adjusted
-            ,mutate_fun = periodReturn
-            ,period = input$return_period
-            ,col_rename = "R_a"
-          )
+        ,stock_retrieve(
+          input$stock_ticker
+          ,input$date_range[[1]]
+          ,input$date_range[[2]]
+          ,input$return_period
+          ,"R_a"
+        )
       ) 
     })
     
@@ -58,20 +71,13 @@ shinyServer(
       withProgress(
         message = "Retrieving Index Data..."
         ,value = NULL
-        ,tq_get(
-          tibble(symbol = input$index_ticker)
-        ) %>%
-          group_by(symbol) %>%
-          filter(
-            date <= input$date_range[[2]]
-            ,date >= input$date_range[[1]]
-          ) %>%
-          tq_mutate(
-            select = adjusted
-            ,mutate_fun = periodReturn
-            ,period = input$return_period
-            ,col_rename = "R_b"
-          )
+        ,stock_retrieve(
+          input$index_ticker
+          ,input$date_range[[1]]
+          ,input$date_range[[2]]
+          ,input$return_period
+          ,"R_b"
+        )
       )
     })
     
@@ -219,20 +225,13 @@ shinyServer(
       withProgress(
         message = "Retrieving Stock Data..."
         ,value = NULL
-        ,tq_get(
-          tibble(symbol = input$energy_stock_ticker)
-        ) %>% 
-          group_by(symbol) %>% 
-          filter(
-            date <= input$date_range[[2]]
-            ,date >= input$date_range[[1]]
-          ) %>% 
-          tq_mutate(
-            select = adjusted
-            ,mutate_fun = periodReturn
-            ,period = input$return_period
-            ,col_rename = "R_a"
-          )
+        ,stock_retrieve(
+          input$energy_stock_ticker
+          ,input$date_range[[1]]
+          ,input$date_range[[2]]
+          ,input$return_period
+          ,"R_a"
+        )
       ) 
     })
     
@@ -250,13 +249,6 @@ shinyServer(
             date <= input$date_range[[2]]
             ,date >= input$date_range[[1]]
           ) 
-        # %>%
-        #   tq_mutate(
-        #     select = price
-        #     ,mutate_fun = periodReturn
-        #     ,period = input$return_period
-        #     ,col_rename = "R_b"
-        #   )
       )
     })
     
