@@ -7,6 +7,13 @@ library(tidyquant, warn.conflicts = FALSE, quietly = TRUE)
 library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
 
+# Stock List ----------
+stock_list <- 
+  rbind(
+    tq_exchange("NASDAQ")
+    ,tq_exchange("NYSE")
+    ,tq_exchange("AMEX")
+  )
 
 # Dashboard Header ----------
 db_header <- dashboardHeader(
@@ -20,7 +27,7 @@ db_sidebar <- dashboardSidebar(
     # Sidebar Menu List ----------
     menuItem("Stocks", tabName = "db_stock", icon = icon("line-chart"))
     ,menuItem("Metals", tabName = "db_metal", icon = icon("bank"))
-    ,menuItem("Oil", tabName = "db_oil", icon = icon("tint"))
+    ,menuItem("Energy", tabName = "db_energy", icon = icon("tint"))
     # Date Range ----------
     ,dateRangeInput(
       inputId = "date_range"
@@ -37,10 +44,12 @@ db_sidebar <- dashboardSidebar(
 db_body <- dashboardBody(
   tabItems(
     
-    tabItem(tabName = "db_stock"
+    tabItem(
+      tabName = "db_stock"
       ,fluidRow(
         
-        column(6
+        column(
+          6
           # Stock Inputs ----------
           ,box(
             title = "Inputs"
@@ -49,12 +58,7 @@ db_body <- dashboardBody(
             ,selectInput(
               inputId = "stock_ticker"
               ,label = "Enter a Stock Symbol:"
-              ,choices = 
-                rbind(
-                  tq_exchange("NASDAQ")
-                  # ,tq_exchange("NYSE")
-                  # ,tq_exchange("AMEX")
-                ) %>%
+              ,choices = stock_list %>% 
                 select(symbol) %>%
                 arrange(symbol)
               ,multiple = TRUE
@@ -104,7 +108,8 @@ db_body <- dashboardBody(
           )
         )
         
-        ,column(6
+        ,column(
+          6
           # Price Time Series ----------
           ,box(
             width = NULL
@@ -121,15 +126,69 @@ db_body <- dashboardBody(
             ,plotOutput("stock_index_return")
           )
         )
-      
+        
       )
     )
     
-    ,tabItem(tabName = "db_metal"
+    ,tabItem(
+      tabName = "db_metal"
       ,dataTableOutput("gold")
     )
     
-    ,tabItem(tabName = "db_oil")
+    ,tabItem(
+      tabName = "db_energy"
+      ,fluidRow(
+        
+        column(
+          6
+          # Stock Inputs ----------
+          ,box(
+            title = "Inputs"
+            ,width = NULL
+            # Stock Ticker ----------
+            ,selectInput(
+              inputId = "energy_stock_ticker"
+              ,label = "Enter a Stock Symbol:"
+              ,choices = stock_list %>% 
+                filter(sector == "Energy") %>% 
+                select(symbol) %>%
+                arrange(symbol)
+              ,multiple = TRUE
+              ,selectize = TRUE
+            )
+            # Energy Commodity Ticker ----------
+            ,selectInput(
+              inputId = "energy_commodity_ticker"
+              ,label = "Enter a Commodity:"
+              ,choices = 
+                c(
+                  WTI = "DCOILWTICO"
+                  ,BRENT = "DCOILBRENTEU"
+                  ,`Asian LNG` = "PNGASJPUSDM"
+                  ,`Henry Hub Natural Gas Spot Price` = "MHHNGSP"
+                  ,`Mount Belvieu Propane Prices` = "DPROPANEMBTX"
+                  ,""
+                  ,""
+                  ,""
+                  ,""
+                  ,""
+                )
+              ,multiple = TRUE
+              ,selectize = TRUE
+            )
+          )
+        )
+        
+        ,column(
+          6
+          # Energy Price Time Series ----------
+          ,box(
+            width = NULL
+            ,plotOutput("energy_price_ts")
+          )
+        )
+      )
+    )
   )
 )
 
@@ -145,6 +204,6 @@ shinyUI(
     ,db_sidebar
     
     ,db_body
-
+    
   )
 )

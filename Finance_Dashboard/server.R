@@ -1,4 +1,4 @@
-#Libraries ----------
+# Libraries ----------
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
 library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(shinydashboard, warn.conflicts = FALSE, quietly = TRUE)
@@ -10,20 +10,21 @@ library(DT, warn.conflicts = FALSE, quietly = TRUE)
 
 # ggplot Formatting ----------
 # Updates theme_minimal so that there is borders around the graphs and the facet headings.
-theme_minimal2 <- theme_minimal() %>%  theme_set()
-theme_minimal2 <-
-  theme_update(
-    panel.border = element_rect(
-      linetype = "solid"
-      ,colour = "grey92"
-      ,fill = NA
-    )
-    ,strip.background = element_rect(
-      linetype = "solid"
-      ,colour = "grey92"
-      ,fill = NA
-    )
-  )
+# theme_minimal2 <- theme_minimal() %>%  theme_set()
+# theme_minimal2 <-
+#   theme_update(
+#     panel.border = element_rect(
+#       linetype = "solid"
+#       ,colour = "grey92"
+#       ,fill = NA
+#     )
+#     ,strip.background = element_rect(
+#       linetype = "solid"
+#       ,colour = "grey92"
+#       ,fill = NA
+#     )
+#   )
+theme_tq() %>% theme_set()
 
 
 # Server ----------
@@ -212,5 +213,151 @@ shinyServer(
         ,get = "metal.prices"
       )
     )
+    
+    # Energy Stock Data set ----------
+    energy_stock_price_data <- reactive({
+      withProgress(
+        message = "Retrieving Stock Data..."
+        ,value = NULL
+        ,tq_get(
+          tibble(symbol = input$energy_stock_ticker)
+        ) %>% 
+          group_by(symbol) %>% 
+          filter(
+            date <= input$date_range[[2]]
+            ,date >= input$date_range[[1]]
+          ) %>% 
+          tq_mutate(
+            select = adjusted
+            ,mutate_fun = periodReturn
+            ,period = input$return_period
+            ,col_rename = "R_a"
+          )
+      ) 
+    })
+    
+    # Energy Commodity Data set ----------
+    energy_commodity_price_data <- reactive({
+      withProgress(
+        message = "Retrieving Energy Data..."
+        ,value = NULL
+        ,tq_get(
+          tibble(commodity = input$energy_commodity_ticker)
+          ,get = "economic.data"
+        ) %>%
+          group_by(commodity) %>%
+          filter(
+            date <= input$date_range[[2]]
+            ,date >= input$date_range[[1]]
+          ) 
+        # %>%
+        #   tq_mutate(
+        #     select = price
+        #     ,mutate_fun = periodReturn
+        #     ,period = input$return_period
+        #     ,col_rename = "R_b"
+        #   )
+      )
+    })
+    
+    # Energy Time Series ----------
+    output$energy_price_ts <- renderPlot({
+      # If nothing is inputted a blank plot is produced.
+      if(is.null(input$energy_commodity_ticker) & is.null(input$energy_stock_ticker)){
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = "Date"
+            ,y = "Price"
+          )
+        
+      # Plots only the commodity if no stock in inputed.
+      } else if(is.null(input$energy_stock_ticker)){
+        energy_commodity_price_data() %>% 
+          ggplot(
+            aes(
+              x = date
+              ,y = price
+            )
+          ) +
+          geom_area(
+            fill = "grey"
+            ,alpha = 0.75
+          ) +
+          facet_wrap(
+            ~ commodity
+            ,scales = if_else(input$fix_y_axis_scale_ts, "fixed", "free_y")
+          ) +
+          labs(
+            x = "Date"
+            ,y = "Price"
+          )
+        
+      # Plots only the stock if no commodity in inputed.
+      } else if(is.null(input$energy_commodity_ticker)){
+        energy_stock_price_data() %>% 
+          ggplot(
+            aes(
+              x = date
+              ,y = close
+            )
+          ) +
+          geom_line(
+            aes(
+              colour = symbol
+            )
+          ) +
+          # scale_colour_brewer(
+          #   type = "qual"
+          #   ,name = "Ticker:"
+          #   ,palette = "Set2"
+          # ) +
+          scale_color_tq(
+            name = "Ticker:"
+          ) +
+          labs(
+            x = "Date"
+            ,y = "Price"
+          )
+      # Plots both if both are inputted.
+      } else{
+          energy_stock_price_data() %>% 
+          ggplot(
+            aes(
+              x = date
+              ,y = close
+            )
+          ) +
+          geom_area(
+            data = energy_commodity_price_data()
+            ,aes(
+              y = price
+            )
+            ,fill = "grey"
+            ,alpha = 0.75
+          ) +
+          geom_line(
+            aes(
+              colour = symbol
+            )
+          ) +
+          facet_wrap(
+            ~ commodity
+            ,scales = if_else(input$fix_y_axis_scale_ts, "fixed", "free_y")
+          ) +
+          # scale_colour_brewer(
+          #   type = "qual"
+          #   ,name = "Ticker:"
+          #   ,palette = "Set2"
+          # ) +
+          scale_color_tq(
+            name = "Ticker:"
+          ) +
+          labs(
+            x = "Date"
+            ,y = "Price"
+          )
+      }
+    })
   }
 )
