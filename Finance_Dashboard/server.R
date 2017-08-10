@@ -221,18 +221,22 @@ shinyServer(
     
     # Regression Model ----------
     output$capm_regression <- renderPrint({
-      stock_price_data() %>% 
-        left_join(
-          index_price_data()
-          ,by = "date"
-          ,suffix = c(".stock", ".index")
-        ) %>% 
-        split(list(
-          .$symbol.stock
-          ,.$symbol.index
-        )) %>% 
-        map(~ lm(R_a ~ R_b, data = .x)) %>% 
-        map(summary)
+      if(is.null(input$stock_ticker) | is.null(input$index_ticker)) {
+        
+      } else{
+        stock_price_data() %>% 
+          left_join(
+            index_price_data()
+            ,by = "date"
+            ,suffix = c(".stock", ".index")
+          ) %>% 
+          split(list(
+            .$symbol.stock
+            ,.$symbol.index
+          )) %>% 
+          map(~ lm(R_a ~ R_b, data = .x)) %>% 
+          map(summary)
+      }
     })
     
     # Energy Stock Data set ----------
