@@ -1,14 +1,14 @@
 {
     "collab_server" : "",
-    "contents" : "library(shiny)\nlibrary(tidyverse)\nlibrary(Lahman)\nlibrary(lubridate)\n\nshinyUI(\n  fluidPage(\n  \n    # Application title\n    titlePanel(\"Baseball Individual Leaderboard\"),\n  \n    # Sidebar with a slider input for number of bins\n    sidebarLayout(\n      sidebarPanel(\n        sliderInput(\"bins\",\n                    \"Number of bins:\",\n                    min = 1,\n                    max = 50,\n                    value = 30)\n      ),\n  \n      # Show a plot of the generated distribution\n      mainPanel(\n        plotOutput(\"distPlot\")\n      )\n    )\n  \n  )\n)\n",
+    "contents" : "# Libraries ----------\nlibrary(shiny, warn.conflicts = FALSE, quietly = TRUE)\nlibrary(shinythemes, warn.conflicts = FALSE, quietly = TRUE)\nlibrary(tidyverse, warn.conflicts = FALSE, quietly = TRUE)\nlibrary(Lahman, warn.conflicts = FALSE, quietly = TRUE)\nlibrary(lubridate, warn.conflicts = FALSE, quietly = TRUE)\n\n\n# UI ----------\nfluidPage(\n  \n  # Application title ----------\n  theme = shinytheme(\"lumen\")\n  \n  ,titlePanel(\"Baseball Individual Leaderboard\")\n  \n  ,fluidRow(\n    \n    # Inputs ----------\n    column(\n      4\n      ,offset = 0\n      ,wellPanel(\n        selectInput(\n          inputId = \"data_input\"\n          ,label = \"Data Set:\"\n          ,choices = c(\n            \"Batting\"\n            ,\"Pitching\"\n          )\n          ,selected = \"Batting\"\n          ,selectize = TRUE\n        )\n        # Which statistic to show.\n        ,selectInput(\n          inputId = \"baseball_stat\"\n          ,label = \"Statistic:\"\n          ,choices = battingLabels %>% \n            filter(\n              variable != \"playerID\"\n              ,variable != \"yearID\"\n              ,variable != \"stint\"\n              ,variable != \"teamID\"\n              ,variable != \"lgID\"\n            ) %>%\n            select(label)\n          # ,choices = c(\n          #   \"label 1\" = \"option1\"\n          #   ,\"label 2\" = \"option2\"\n          # )\n          ,selected = \"Games\"\n          ,selectize = TRUE\n        )\n        # Year that we provides an upper bound for the summing.\n        ,sliderInput(\n          inputId = \"year_lkup\"\n          ,label = \"Year:\"\n          ,min = 1871\n          ,max = year(today())\n          ,value = c(1871, year(today()))\n          ,sep = \"\"\n        )\n        # Number of players to show.\n        ,numericInput(\n          inputId = \"n\"\n          ,label = \"Number of Players:\"\n          ,value = 10\n          ,min = 1\n        )\n      )\n    )\n    \n    # Main ----------\n    # Show a plot of the generated distribution\n    ,column(\n      8\n      ,offset = 0\n      ,tabsetPanel(type = \"tabs\"\n        ,tabPanel(\n          \"Leaderboard Plot\"\n          ,plotOutput(\"leaderboardPlot\")\n        )\n        ,tabPanel(\n          \"Leaderboard Table\"\n          ,tableOutput(\"leaderboardTable\")\n        )\n      )\n    )\n    \n  )\n  \n)\n\n",
     "created" : 1501566337079.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3717833358",
+    "hash" : "3050445854",
     "id" : "75CC9D95",
-    "lastKnownWriteTime" : 1501567553,
-    "last_content_update" : 1501567553433,
+    "lastKnownWriteTime" : 1502421451,
+    "last_content_update" : 1502421451286,
     "path" : "~/GitHub/shiny-server/Baseball_Leaders/ui.R",
     "project_path" : "ui.R",
     "properties" : {

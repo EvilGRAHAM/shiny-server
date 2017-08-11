@@ -5,20 +5,7 @@ library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(Lahman, warn.conflicts = FALSE, quietly = TRUE)
 library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
 
-# Baseball Statistics ----------
-baseball_stats <- 
-  Batting %>% 
-  as.tibble() %>% 
-  select(
-    -c(
-      playerID
-      ,yearID
-      ,stint
-      ,teamID
-      ,lgID
-    )
-  ) %>% 
-  colnames()
+
 # UI ----------
 fluidPage(
   
@@ -34,12 +21,34 @@ fluidPage(
       4
       ,offset = 0
       ,wellPanel(
-        # Which statistic to show.
         selectInput(
+          inputId = "data_input"
+          ,label = "Data Set:"
+          ,choices = c(
+            "Batting"
+            ,"Pitching"
+          )
+          ,selected = "Batting"
+          ,selectize = TRUE
+        )
+        # Which statistic to show.
+        ,selectInput(
           inputId = "baseball_stat"
           ,label = "Statistic:"
-          ,baseball_stats
-          ,selected = "HR"
+          ,choices = battingLabels %>% 
+            filter(
+              variable != "playerID"
+              ,variable != "yearID"
+              ,variable != "stint"
+              ,variable != "teamID"
+              ,variable != "lgID"
+            ) %>%
+            select(label)
+          # ,choices = c(
+          #   "label 1" = "option1"
+          #   ,"label 2" = "option2"
+          # )
+          ,selected = "Games"
           ,selectize = TRUE
         )
         # Year that we provides an upper bound for the summing.

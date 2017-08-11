@@ -23,28 +23,31 @@ theme_minimal2 <-
   )
 
 # Loads Batting dataset as tibble.
-Batting_tib <- 
-  Batting %>% 
-  as.tibble()
 
 #Server ----------
 shinyServer(
-  function(input, output) {
+  function(input, output, clientData, session) {
+    
     
     # Dataset ----------
-    batting_Career <- reactive({
+    baseball_data <- reactive({
       # Adds a progress bar to show the calculations are running.
       withProgress(
         message = "Calculating..."
         ,value = NULL
-        ,Batting_tib %>% 
+        ,switch(
+          input$data_input
+          ,"Batting" = Batting
+          ,"Pitching" = Pitching
+        ) %>%
+          as.tibble() %>% 
           filter(
             yearID >= input$year_lkup[[1]]
             ,yearID <= input$year_lkup[[2]]
           ) %>% 
           group_by(playerID) %>% 
           mutate(
-            Career_Stat = cumsum(!!quo(eval(parse(text = input$baseball_stat))))
+            Career_Stat = cumsum(!!quo(eval(parse(text = battingLabels %>% filter(label == input$baseball_stat) %>% select(variable) %>% as.character()))))
           ) %>% 
           arrange(desc(Career_Stat)) %>% 
           # Removes cases where a player appears multiple times in the list due to being a leader for multiple years.
@@ -55,10 +58,31 @@ shinyServer(
       )
     })
     
+    # observe({
+    # # Statistic List ----------
+    # updateSelectizeInput(
+    #   session
+    #   ,"baseball_stat"
+    #   ,choices =
+    #     baseball_data() %>% 
+    #     as.tibble() %>% 
+    #     select(
+    #       -c(
+    #         playerID
+    #         ,yearID
+    #         ,stint
+    #         ,teamID
+    #         ,lgID
+    #       )
+    #     ) %>% 
+    #     colnames()
+    # )
+    # })
+    
     # Leaderboard Table ----------
     output$leaderboardTable <- renderTable({
       
-      batting_Career() %>%
+      baseball_data() %>%
         # Grabs the top n values.
         head(input$n) %>% 
         mutate(
@@ -87,14 +111,14 @@ shinyServer(
     output$leaderboardPlot <- renderPlot({
       
       ggplot(
-        batting_Career() %>% 
+        baseball_data() %>% 
           head(input$n) %>% 
           mutate(
             # In case more than one name is returned, we choose the first one, as it should be the exact match.
             `Full Name` = paste(playerInfo(playerID)[1, ]$nameFirst, playerInfo(playerID)[1, ]$nameLast)
           )
         ,aes(
-          x = factor(`Full Name`, levels = `Full Name`[order(batting_Career()$Career_Stat %>% head(input$n) %>% desc())])
+          x = factor(`Full Name`, levels = `Full Name`[order(baseball_data()$Career_Stat %>% head(input$n) %>% desc())])
           ,y = Career_Stat
         )
       ) +
