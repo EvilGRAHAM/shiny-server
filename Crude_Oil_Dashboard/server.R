@@ -260,23 +260,26 @@ shinyServer(
     # Summary Table ----------
     output$summary_tbl <- renderDataTable({
       summary_tbl <- summary_tbl_fun(trade_data())
-      base_stream_tbl <- 
-        trade_data() %>% 
-        filter(Stream == input$base_stream) %>% 
-        summary_tbl_fun()
-      summary_tbl %>% 
-        mutate(
-          `Spread` = round(base_stream_tbl$`Index Price` - `Index Price`, 4)
-        )
+      # base_stream_tbl <- 
+      #   trade_data() %>% 
+      #   filter(
+      #     Stream == input$base_stream
+      #   ) %>% 
+      #   summary_tbl_fun()
+      # summary_tbl %>% 
+      #   mutate(
+      #     `Spread` = round(base_stream_tbl$`Index Price` - `Index Price`, 4)
+      #   )
     }
-      ,options = list(
-        pageLength = priority_streams %>% count() %>% as.numeric()
-      )
+    ,options = list(
+      pageLength = priority_streams %>% count() %>% as.numeric()
+    )
+    # ,selection = "single"
     )
     
     # Price Time Series Charts ----------
     output$price_ts_charts <- renderPlot({
-      if(is.null(input$chart_stream)){
+      if(is.null((summary_tbl_fun(trade_data())[input$summary_tbl_rows_selected, 1] %>% as.vector())$Stream)){#input$chart_stream)){
         ggplot() +
           geom_blank() +
           labs(
@@ -296,7 +299,10 @@ shinyServer(
               ,scales = "free"
             )
           }
-        stream_chart_fun(trade_data(), input$chart_stream %>% sort()) +
+        stream_chart_fun(
+          trade_data()
+          ,(summary_tbl_fun(trade_data())[input$summary_tbl_rows_selected, 1] %>% as.vector())$Stream %>% sort()#input$chart_stream %>% sort()
+        ) +
           platform_facet
       }
     })
@@ -427,7 +433,7 @@ shinyServer(
     
     # Base Trade List ----------
     output$base_trade_list <- renderDataTable({
-      trade_data() %>% 
+      trade_data() %>%
         select(
           -c(
             `Trade Cycle`
@@ -437,10 +443,10 @@ shinyServer(
             ,`priority`
             ,`in_trade_cycle`
           )
-        ) %>% 
+        ) %>%
         filter(
-          Stream == input$base_stream
-        ) %>% 
+          Stream == (summary_tbl_fun(trade_data())[input$summary_tbl_rows_selected, 1] %>% as.vector())$Stream#input$base_stream
+        ) %>%
         mutate(
           `Trade Date` = as.character(`Trade Date`)
         )
@@ -450,7 +456,7 @@ shinyServer(
     output$base_monthly_index <- renderDataTable({
       monthly_blended_index %>% 
         filter(
-          Stream == input$base_stream
+          Stream == (summary_tbl_fun(trade_data())[input$summary_tbl_rows_selected, 1] %>% as.vector())$Stream#input$base_stream
         ) %>% 
         arrange(
           desc(`Trade Cycle`)
@@ -465,19 +471,25 @@ shinyServer(
     output$historical_price_base_ts <- renderPlot({
       monthly_blended_index %>% 
         filter(
-          Stream == input$base_stream
+          Stream == (summary_tbl_fun(trade_data())[input$summary_tbl_rows_selected, 1] %>% as.vector())$Stream#input$base_stream
         ) %>% 
         ggplot(
           aes(
             x = `Trade Cycle`
             ,y = `Index Price`
+            ,colour = `Stream`
           ) 
         ) +
         geom_line() +
         geom_smooth(
           se = FALSE
-          ,colour = "black"
+          # ,colour = "black"
           ,linetype = "dashed"
+        ) +
+        scale_colour_brewer(
+          type = "qual"
+          ,name = "Stream:"
+          ,palette = "Set2"
         )
     })
     # Historical Price Time Series Chart for WTI ----------
