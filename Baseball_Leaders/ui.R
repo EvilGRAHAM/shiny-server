@@ -35,19 +35,19 @@ fluidPage(
         ,selectInput(
           inputId = "baseball_stat"
           ,label = "Statistic:"
-          # ,choices = battingLabels %>% 
-          #   filter(
-          #     variable != "playerID"
-          #     ,variable != "yearID"
-          #     ,variable != "stint"
-          #     ,variable != "teamID"
-          #     ,variable != "lgID"
-          #   ) %>%
-          #   select(variable)
-          ,choices = c(
-            "label 1" = "option1"
-            ,"label 2" = "option2"
-          )
+          ,choices = battingLabels %>%
+            filter(
+              variable != "playerID"
+              ,variable != "yearID"
+              ,variable != "stint"
+              ,variable != "teamID"
+              ,variable != "lgID"
+            ) %>%
+            select(variable)
+          # ,choices = c(
+          #   "label 1" = "option1"
+          #   ,"label 2" = "option2"
+          # )
           ,selected = "G"
           ,selectize = TRUE
         )
@@ -57,7 +57,7 @@ fluidPage(
           ,label = "Year:"
           ,min = 1871
           ,max = year(today())
-          ,value = c(1871, year(today()))
+          ,value = c(1871 , year(today()))
           ,sep = ""
         )
         # Number of players to show.
@@ -71,7 +71,7 @@ fluidPage(
     )
     
     # Main ----------
-    # Show a plot of the generated distribution
+    # Show a plot of the generated distribution 
     ,column(
       8
       ,offset = 0

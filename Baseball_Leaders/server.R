@@ -35,11 +35,12 @@ shinyServer(
       withProgress(
         message = "Calculating..."
         ,value = NULL
-        ,switch(
-          input$data_input
-          ,"Batting" = Batting
-          ,"Pitching" = Pitching
-        ) %>%
+        # ,switch(
+        #   input$data_input
+        #   ,"Batting" = Batting
+        #   ,"Pitching" = Pitching
+        # ) %>%
+        ,Batting %>% 
           as.tibble() %>% 
           filter(
             yearID >= input$year_lkup[[1]]
@@ -47,7 +48,7 @@ shinyServer(
           ) %>% 
           group_by(playerID) %>% 
           mutate(
-            Career_Stat = cumsum(!!quo(eval(parse(text =input$baseball_stat))))#battingLabels %>% filter(label == input$baseball_stat) %>% select(variable) %>% as.character()))))
+            Career_Stat = cumsum(!!quo(eval(parse(text = battingLabels %>% filter(variable == input$baseball_stat) %>% select(variable) %>% as.character()))))
           ) %>% 
           arrange(desc(Career_Stat)) %>% 
           # Removes cases where a player appears multiple times in the list due to being a leader for multiple years.
@@ -58,26 +59,26 @@ shinyServer(
       )
     })
     
-    observe({
-      # Statistic List ----------
-      updateSelectizeInput(
-        session
-        ,"baseball_stat"
-        ,choices =
-          baseball_data() %>%
-          as.tibble() %>%
-          select(
-            -c(
-              playerID
-              ,yearID
-              ,stint
-              ,teamID
-              ,lgID
-            )
-          ) %>%
-          colnames()
-      )
-    })
+    # observe({
+    #   # Statistic List ----------
+    #   updateSelectizeInput(
+    #     session
+    #     ,"baseball_stat"
+    #     ,choices =
+    #       baseball_data() %>%
+    #       as.tibble() %>%
+    #       select(
+    #         -c(
+    #           playerID
+    #           ,yearID
+    #           ,stint
+    #           ,teamID
+    #           ,lgID
+    #         )
+    #       ) %>%
+    #       colnames()
+    #   )
+    # })
     
     # Leaderboard Table ----------
     output$leaderboardTable <- renderTable({
