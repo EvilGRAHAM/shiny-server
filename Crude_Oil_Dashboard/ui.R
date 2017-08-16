@@ -57,12 +57,8 @@ db_sidebar <- dashboardSidebar(
       ,choices = trade_cycle_list
       ,selectize = TRUE
     )
-    ,selectInput(
-      inputId = "base_stream"
-      ,label = "Enter the Base Stream:"
-      ,choices = priority_streams$Stream
-      ,selectize = TRUE
-    )
+    # NoS Date Output ----------
+    ,verbatimTextOutput("nos_date")
   )
 )
 
@@ -80,13 +76,6 @@ db_body <- dashboardBody(
           8
           ,box(
             plotOutput("price_ts_charts")
-            ,selectInput(
-              inputId = "chart_stream"
-              ,label = "Enter the Base Stream:"
-              ,choices = priority_streams$Stream
-              ,selectize = TRUE
-              ,multiple = TRUE
-            )
             ,checkboxInput(
               inputId = "platform_split"
               ,label = "Split by Platform?"

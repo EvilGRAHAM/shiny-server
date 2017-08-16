@@ -238,7 +238,6 @@ monthly_blended_index <- get_monthly_blended_index_data(pricing_con)
 # Server ----------
 shinyServer(
   function(input, output){
-    
     # Trade Data ----------
     trade_data_complete <- reactive({
       # Pulls new trades in whenever the Refresh Date button is pressed.
@@ -257,6 +256,13 @@ shinyServer(
         )
     })
     
+    # NOS Date ----------
+    output$nos_date <- renderPrint(
+      (nos_dates %>% 
+        filter(
+          `Trade Cycle` == as.Date(input$trade_cycle)
+        ))$`NOS Date`
+    )
     # Summary Table ----------
     output$summary_tbl <- renderDataTable({
       summary_tbl <- summary_tbl_fun(trade_data())
@@ -386,7 +392,7 @@ shinyServer(
           coord_flip()
       )
     
-    # Trade Split Chart ----------
+    # Trade Split CAhart ----------
     output$trade_split_chart <-
       renderPlot(
         trade_data() %>% 
