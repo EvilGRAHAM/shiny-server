@@ -36,6 +36,8 @@ db_sidebar <- dashboardSidebar(
       ,start = today() - years(1)
       ,end = today()
     )
+    # Bookmark Button ----------
+    ,bookmarkButton()
   )
 )
 
@@ -201,14 +203,16 @@ db_body <- dashboardBody(
 
 # UI ----------
 shinyUI(
-  dashboardPage(
-    skin = "black"
-    
-    ,db_header
-    
-    ,db_sidebar
-    
-    ,db_body
-    
-  )
+  function(request) {
+    dashboardPage(
+      skin = "black"
+      
+      ,db_header
+      
+      ,db_sidebar
+      
+      ,db_body
+      
+    )
+  }
 )
