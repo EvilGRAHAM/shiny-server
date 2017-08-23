@@ -48,7 +48,7 @@ stock_retrieve <- function(ticker, date_min, date_max, return_period, returns_co
 
 # Server ----------
 shinyServer(
-  function(input, output) {
+  function(input, output, session) {
     
     # Stock Data set ----------
     stock_price_data <- reactive({
@@ -92,7 +92,7 @@ shinyServer(
           ,close = as.numeric(NA)
           ,volume = as.numeric(NA)
           ,adjusted = as.numeric(NA)
-          # ,R_a = as.numeric(NA)
+          ,R_a = as.numeric(NA)
         )
       } else{
         stock_price_data() %>% 
@@ -109,7 +109,9 @@ shinyServer(
             desc(date)
           )
       }
-    })
+      }
+      ,selection = "none"
+    )
     
     # Price Time Series ----------
     output$price_ts <- renderPlot({
@@ -169,7 +171,7 @@ shinyServer(
           geom_line() +
           facet_wrap(
             ~ symbol
-            ,scales = if_else(input$fix_y_axis_scale_ts, "fixed", "free_y")
+            ,scales = "fixed"
           ) +
           labs(
             x = "Date"
@@ -203,7 +205,7 @@ shinyServer(
           geom_smooth(method = "lm") +
           facet_wrap(
             symbol.y ~ symbol.x
-            ,scales = if_else(input$fix_y_axis_scale_ts, "fixed", "free")
+            ,scales = "fixed"
           ) +
           labs(
             x = expression("R"[Mkt])
@@ -212,17 +214,19 @@ shinyServer(
       }
     })
     
+    # Gold Test ----------
     output$gold <- renderDataTable(
       tq_get(
         tibble(symbol = "gold")
         ,get = "metal.prices"
       )
+      ,selection = "none"
     )
     
     # Regression Model ----------
     output$capm_regression <- renderPrint({
       if(is.null(input$stock_ticker) | is.null(input$index_ticker)) {
-        
+        # Do Nothing...
       } else{
         stock_price_data() %>% 
           left_join(

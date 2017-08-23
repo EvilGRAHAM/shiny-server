@@ -268,24 +268,12 @@ shinyServer(
       )$`NOS Date`
     )
     # Summary Table ----------
-    output$summary_tbl <- renderDataTable({
+    output$summary_tbl <- renderDataTable(
       summary_tbl <- summary_tbl_fun(trade_data())
-      # base_stream_tbl <- 
-      #   trade_data() %>% 
-      #   filter(
-      #     Stream == input$base_stream
-      #   ) %>% 
-      #   summary_tbl_fun()
-      # summary_tbl %>% 
-      #   mutate(
-      #     `Spread` = round(base_stream_tbl$`Index Price` - `Index Price`, 4)
-      #   )
-    }
-    ,options = list(
-      pageLength = priority_streams %>% count() %>% as.numeric()
-      ,target = "row"
-    )
-    # ,selection = "single"
+      ,options = list(
+        pageLength = priority_streams %>% count() %>% as.numeric()
+        ,target = "row"
+      )
     )
     
     # Price Time Series Charts ----------
