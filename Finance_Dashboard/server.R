@@ -31,12 +31,14 @@ theme_tq() %>% theme_set()
 # Retrieves stocks, and adds the returns column
 stock_retrieve <- function(ticker, date_min, date_max, return_period, returns_col){
   tibble(symbol = ticker) %>% 
-    tq_get() %>% 
+    tq_get(
+      to = date_max
+    ) %>%
     group_by(symbol) %>% 
-    filter(
-      date <= date_max
-      ,date >= date_min
-    ) %>% 
+    # filter(
+    #   date <= date_max
+    #   ,date >= date_min
+    # ) %>% 
     tq_mutate(
       select = adjusted
       ,mutate_fun = periodReturn
@@ -124,10 +126,14 @@ shinyServer(
           )
       } else{
         stock_price_data() %>% 
+          filter(
+            date >= input$date_range[[1]] - 2*input$n_moving_average
+          ) %>%
           ggplot(
             aes(
               x = date
-              ,y = close
+              # ,y = close
+              ,y = adjusted
               ,open = open
               ,high = high
               ,low = low
@@ -135,10 +141,14 @@ shinyServer(
             )
           ) +
           geom_barchart() +
+          # geom_line() +
+          geom_smooth(
+            se = FALSE
+          ) +
           geom_bbands(
             ma_fun = SMA
             ,sd = 2
-            ,n = 20
+            ,n = input$n_moving_average
           ) +
           facet_wrap(
             ~ symbol
@@ -147,16 +157,29 @@ shinyServer(
           labs(
             x = "Date"
             ,y = "Price"
+          ) +
+          coord_x_date(
+            xlim = c(
+              input$date_range[[1]]
+              ,input$date_range[[2]]
+            )
           )
       }
     })
     
-    output$price_ts_hover_info <- renderText({
-      if(is.null(input$price_ts_hover)) {
+    output$price_ts_click_info <- renderPrint({
+      if(is.null(input$price_ts_click)) {
         
       } else{
-        nearPoints(stock_price_data(), input$price_ts_hover, addDist = FALSE)
-        #paste0("x = ", as.Date(input$price_ts_hover$x, origin = "1970-01-01"), "\ny = ", input$price_ts_hover$y)
+        nearPoints(
+          stock_price_data() %>% 
+            filter(
+              date >= input$date_range[[1]] - 2*input$n_moving_average
+            )
+          ,input$price_ts_click
+          ,addDist = FALSE
+        )
+        # paste0("x = ", as.Date(input$price_ts_click$x, origin = "1970-01-01"), "\ny = ", input$price_ts_click$y)
       }  
     })
     
@@ -171,6 +194,10 @@ shinyServer(
           )
       } else{
         stock_price_data() %>% 
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
           ggplot(
             aes(
               x = date
@@ -200,6 +227,10 @@ shinyServer(
           )
       } else{
         stock_price_data() %>%
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
           left_join(
             index_price_data()
             ,by = "date"
@@ -223,15 +254,6 @@ shinyServer(
       }
     })
     
-    # Gold Test ----------
-    output$gold <- renderDataTable(
-      tq_get(
-        tibble(symbol = "gold")
-        ,get = "metal.prices"
-      )
-      ,selection = "none"
-    )
-    
     # Regression Model ----------
     output$capm_regression <- renderPrint({
       if(is.null(input$stock_ticker) | is.null(input$index_ticker)) {
@@ -243,6 +265,10 @@ shinyServer(
             ,by = "date"
             ,suffix = c(".stock", ".index")
           ) %>% 
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
           split(list(
             .$symbol.stock
             ,.$symbol.index
@@ -251,6 +277,15 @@ shinyServer(
           map(summary)
       }
     })
+    
+    # Gold Test ----------
+    output$gold <- renderDataTable(
+      tq_get(
+        tibble(symbol = "gold")
+        ,get = "metal.prices"
+      )
+      ,selection = "none"
+    )
     
     # Energy Stock Data set ----------
     energy_stock_price_data <- reactive({
@@ -298,6 +333,10 @@ shinyServer(
       # Plots only the commodity if no stock in inputed.
       } else if(is.null(input$energy_stock_ticker)){
         energy_commodity_price_data() %>% 
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
           ggplot(
             aes(
               x = date
@@ -320,6 +359,10 @@ shinyServer(
       # Plots only the stock if no commodity in inputed.
       } else if(is.null(input$energy_commodity_ticker)){
         energy_stock_price_data() %>% 
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
           ggplot(
             aes(
               x = date
@@ -331,11 +374,6 @@ shinyServer(
               colour = symbol
             )
           ) +
-          # scale_colour_brewer(
-          #   type = "qual"
-          #   ,name = "Ticker:"
-          #   ,palette = "Set2"
-          # ) +
           scale_color_tq(
             name = "Ticker:"
           ) +
@@ -346,6 +384,10 @@ shinyServer(
       # Plots both if both are inputted.
       } else{
           energy_stock_price_data() %>% 
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
           ggplot(
             aes(
               x = date
@@ -369,11 +411,6 @@ shinyServer(
             ~ commodity
             ,scales = if_else(input$fix_y_axis_scale_ts, "fixed", "free_y")
           ) +
-          # scale_colour_brewer(
-          #   type = "qual"
-          #   ,name = "Ticker:"
-          #   ,palette = "Set2"
-          # ) +
           scale_color_tq(
             name = "Ticker:"
           ) +

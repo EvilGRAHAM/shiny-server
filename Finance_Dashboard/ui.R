@@ -102,6 +102,14 @@ db_body <- dashboardBody(
               ,label = "Fix y-axis Scale?"
               ,value = FALSE
             )
+            # Number of days for Moving Average ----------
+            ,numericInput(
+              inputId = "n_moving_average"
+              ,label = "Number of days for Moving Average:"
+              ,value = 20
+              ,min = 1
+              ,step = 1
+            )
           )
           # Price Table ----------
           ,box(
@@ -122,12 +130,12 @@ db_body <- dashboardBody(
             width = NULL
             ,plotOutput(
               "price_ts"
-              ,hover = hoverOpts(
-                id = "price_ts_hover"
+              ,click = clickOpts(
+                id = "price_ts_click"
               )
             )
             ,verbatimTextOutput(
-              "price_ts_hover_info"
+              "price_ts_click_info"
             )
           )
           # Return Time Series ----------
