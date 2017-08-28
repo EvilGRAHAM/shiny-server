@@ -120,7 +120,15 @@ db_body <- dashboardBody(
           # Price Time Series ----------
           ,box(
             width = NULL
-            ,plotOutput("price_ts")
+            ,plotOutput(
+              "price_ts"
+              ,hover = hoverOpts(
+                id = "price_ts_hover"
+              )
+            )
+            ,verbatimTextOutput(
+              "price_ts_hover_info"
+            )
           )
           # Return Time Series ----------
           ,box(

@@ -151,6 +151,15 @@ shinyServer(
       }
     })
     
+    output$price_ts_hover_info <- renderText({
+      if(is.null(input$price_ts_hover)) {
+        
+      } else{
+        nearPoints(stock_price_data(), input$price_ts_hover, addDist = FALSE)
+        #paste0("x = ", as.Date(input$price_ts_hover$x, origin = "1970-01-01"), "\ny = ", input$price_ts_hover$y)
+      }  
+    })
+    
     # Returns Time Series ----------
     output$return_ts <- renderPlot({
       if(is.null(input$stock_ticker)){
