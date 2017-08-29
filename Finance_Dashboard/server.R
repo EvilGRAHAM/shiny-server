@@ -11,20 +11,6 @@ library(DT, warn.conflicts = FALSE, quietly = TRUE)
 
 # ggplot Formatting ----------
 # Updates theme_minimal so that there is borders around the graphs and the facet headings.
-# theme_minimal2 <- theme_minimal() %>%  theme_set()
-# theme_minimal2 <-
-#   theme_update(
-#     panel.border = element_rect(
-#       linetype = "solid"
-#       ,colour = "grey92"
-#       ,fill = NA
-#     )
-#     ,strip.background = element_rect(
-#       linetype = "solid"
-#       ,colour = "grey92"
-#       ,fill = NA
-#     )
-#   )
 theme_tq() %>% theme_set()
 
 

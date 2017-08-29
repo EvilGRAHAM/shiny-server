@@ -69,6 +69,20 @@ db_body <- dashboardBody(
     
     tabItem(
       tabName = "db_pricing"
+      # Row n ----------
+      ,fluidRow(
+        # Summary Table ----------
+        column(
+          12
+          ,box(
+            dataTableOutput("summary_tbl")
+            ,title = "Summary Table"
+            ,width = NULL
+            ,collapsible = TRUE
+          )
+        )
+      )
+      
       # Row 1 ----------
       ,fluidRow(
         # Price Time Series Charts ----------
@@ -155,19 +169,8 @@ db_body <- dashboardBody(
           )
         )
       )
-      # Row n ----------
-      ,fluidRow(
-        # Summary Table ----------
-        column(
-          12
-          ,box(
-            dataTableOutput("summary_tbl")
-            ,title = "Summary Table"
-            ,width = NULL
-            ,collapsible = TRUE
-          )
-        )
-      )
+      
+    # Closing Brackets ----------
     )
   )
 )
