@@ -116,7 +116,7 @@ blended_summary_fun <- function(summary_data){
 stream_chart_fun <- function(chart_data, stream_input){
   chart_data %>% 
     filter(
-      Stream == stream_input
+      Stream %in% stream_input
     ) %>%
     group_by(
       Stream
@@ -147,7 +147,6 @@ stream_chart_fun <- function(chart_data, stream_input){
     ) +
     geom_point() +
     geom_line() +
-    # geom_smooth(se = FALSE) +
     scale_colour_brewer(
       type = "qual"
       ,name = "Method:"
@@ -300,7 +299,7 @@ shinyServer(
           }
         stream_chart_fun(
           trade_data()
-          ,(summary_tbl_fun(trade_data())[input$summary_tbl_rows_selected, 1] %>% as.vector())$Stream %>% sort()#input$chart_stream %>% sort()
+          ,(summary_tbl_fun(trade_data())[input$summary_tbl_rows_selected, 1] %>% as.vector())$Stream %>% sort()
         ) +
           platform_facet
       }
