@@ -48,13 +48,13 @@ shinyServer(
           ) %>% 
           group_by(playerID) %>% 
           mutate(
-            Career_Stat = cumsum(!!quo(eval(parse(text = battingLabels %>% filter(variable == input$baseball_stat) %>% select(variable) %>% as.character()))))
+              Career_Stat = cumsum(!!quo(eval(parse(text = battingLabels %>% filter(variable == input$baseball_stat) %>% select(variable) %>% as.character()))))
           ) %>% 
           arrange(desc(Career_Stat)) %>% 
           # Removes cases where a player appears multiple times in the list due to being a leader for multiple years.
           distinct(
             playerID
-            ,.keep_all = TRUE
+            ,keep_all = TRUE
           )
       )
     })
