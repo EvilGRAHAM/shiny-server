@@ -12,6 +12,7 @@
     "path" : "~/GitHub/shiny-server/Baseball_Leaders/server.R",
     "project_path" : "server.R",
     "properties" : {
+        "docOutlineVisible" : "0"
     },
     "relative_order" : 2,
     "source_on_save" : false,

@@ -104,11 +104,12 @@ db_body <- dashboardBody(
               ,value = FALSE
             )
             # Number of days for Moving Average ----------
-            ,numericInput(
+            ,sliderInput(
               inputId = "n_moving_average"
               ,label = "Number of days for Moving Average:"
               ,value = 20
-              ,min = 1
+              ,min = 0
+              ,max = 365
               ,step = 1
             )
           )
