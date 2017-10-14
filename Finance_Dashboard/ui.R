@@ -112,7 +112,7 @@ db_body <- dashboardBody(
             ,sliderInput(
               inputId = "n_acf_lag"
               ,label = "Number of days for Autocorrelation Lag:"
-              ,value = 30
+              ,value = c(0, 30)
               ,min = 0
               ,max = 100
               ,step = 1

@@ -285,9 +285,13 @@ shinyServer(
             ,R_a
           ) %>% 
           split(f = .$symbol) %>% 
-          map(function(x) acf(x = x$R_a, plot = FALSE, lag.max = input$n_acf_lag)) %>% 
+          map(function(x) acf(x = x$R_a, plot = FALSE, lag.max = input$n_acf_lag[[2]])) %>% 
           map_dfr(~with(data = .,expr = data.frame(Lag = lag, Autocorrelation = acf))) %>% 
-          mutate(symbol = rep(c(input$stock_ticker), each = input$n_acf_lag + 1)) %>% 
+          mutate(symbol = rep(c(input$stock_ticker), each = input$n_acf_lag[[2]] + 1)) %>% 
+          filter(
+            Lag <= input$n_acf_lag[[2]]
+            ,Lag >= input$n_acf_lag[[1]]
+          ) %>% 
           ggplot(
             aes(
               x = Lag
