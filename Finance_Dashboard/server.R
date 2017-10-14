@@ -312,6 +312,7 @@ shinyServer(
           )
       }
     })
+    
     # Gold Test ----------
     output$gold <- renderDataTable(
       tq_get(
