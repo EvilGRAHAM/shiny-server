@@ -16,16 +16,16 @@ theme_tq() %>% theme_set()
 
 # Functions ----------
 # Retrieves stocks, and adds the returns column
-stock_retrieve <- function(ticker, date_min, date_max, return_period, returns_col){
-  tibble(symbol = ticker) %>% 
+stock_retrieve <- function(ticker, date_min, date_max, returns_col){
+  tibble(symbol = ticker) %>%
     tq_get(
       to = date_max
     ) %>%
-    group_by(symbol) %>% 
+    group_by(symbol) %>%
     tq_mutate(
       select = adjusted
       ,mutate_fun = periodReturn
-      ,period = return_period
+      ,period = "daily"
       ,col_rename = returns_col
     )
 }
@@ -44,7 +44,6 @@ shinyServer(
           input$stock_ticker
           ,input$date_range[[1]]
           ,input$date_range[[2]]
-          ,input$return_period
           ,"R_a"
         )
       ) 
@@ -59,7 +58,6 @@ shinyServer(
           input$index_ticker
           ,input$date_range[[1]]
           ,input$date_range[[2]]
-          ,input$return_period
           ,"R_b"
         )
       )
@@ -176,7 +174,13 @@ shinyServer(
             ,y = "Return"
           )
       } else{
-        stock_price_data() %>% 
+        stock_price_data() %>%
+          tq_transmute(
+            select = adjusted
+            ,mutate_fun = periodReturn
+            ,period = input$return_period
+            ,col_rename = "R_a"
+          ) %>% 
           filter(
             date >= input$date_range[[1]]
             ,date <= input$date_range[[2]]
@@ -261,7 +265,7 @@ shinyServer(
       }
     })
     
-    # Autocorrelation ----------
+    # Autocorrelation Plot ----------
     output$acf_plot <- renderPlot({
       if(is.null(input$stock_ticker)){
         ggplot() + 
@@ -331,7 +335,6 @@ shinyServer(
           input$energy_stock_ticker
           ,input$date_range[[1]]
           ,input$date_range[[2]]
-          ,input$return_period
           ,"R_a"
         )
       ) 
