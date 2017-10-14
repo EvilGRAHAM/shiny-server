@@ -22,10 +22,6 @@ stock_retrieve <- function(ticker, date_min, date_max, return_period, returns_co
       to = date_max
     ) %>%
     group_by(symbol) %>% 
-    # filter(
-    #   date <= date_max
-    #   ,date >= date_min
-    # ) %>% 
     tq_mutate(
       select = adjusted
       ,mutate_fun = periodReturn
@@ -265,6 +261,57 @@ shinyServer(
       }
     })
     
+    # Autocorrelation ----------
+    output$acf_plot <- renderPlot({
+      if(is.null(input$stock_ticker)){
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = "Lag"
+            ,y = "Autocorrelation"
+          )
+      } else{
+        stock_price_data() %>% 
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
+          select(
+            symbol
+            ,R_a
+          ) %>% 
+          split(f = .$symbol) %>% 
+          map(function(x) acf(x = x$R_a, plot = FALSE, lag.max = input$n_acf_lag)) %>% 
+          map_dfr(~with(data = .,expr = data.frame(Lag = lag, Autocorrelation = acf))) %>% 
+          mutate(symbol = rep(c(input$stock_ticker), each = input$n_acf_lag + 1)) %>% 
+          ggplot(
+            aes(
+              x = Lag
+              ,y = Autocorrelation
+            )
+          ) +
+          geom_hline(
+            aes(
+              yintercept = 0
+            )
+            ,linetype = "dotted"
+          ) +
+          geom_segment(
+            aes(
+              xend = Lag
+              ,yend = 0
+            )
+          ) +
+          geom_smooth(
+            linetype = 0
+            ,method = "lm"
+            ,formula = y ~ 1
+          ) +
+          facet_wrap(
+            ~ symbol
+          )
+      }
+    })
     # Gold Test ----------
     output$gold <- renderDataTable(
       tq_get(

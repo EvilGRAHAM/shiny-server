@@ -51,6 +51,7 @@ db_body <- dashboardBody(
       tabName = "db_stock"
       ,fluidRow(
         
+        # Column 1 ----------
         column(
           6
           # Stock Inputs ----------
@@ -86,31 +87,11 @@ db_body <- dashboardBody(
               ,multiple = TRUE
               ,selectize = TRUE
             )
-            # Period for Returns ----------
-            ,selectInput(
-              inputId = "return_period"
-              ,label = "Period for returns:"
-              ,choices = c(
-                Daily = "daily"
-                ,Monthly = "monthly"
-                ,Quarterly = "quarterly"
-                ,Annual = "yearly"
-              )
-            )
             # Fix y-axis Scale Boolean ----------
             ,checkboxInput(
               inputId = "fix_y_axis_scale_ts"
               ,label = "Fix y-axis Scale?"
               ,value = FALSE
-            )
-            # Number of days for Moving Average ----------
-            ,sliderInput(
-              inputId = "n_moving_average"
-              ,label = "Number of days for Moving Average:"
-              ,value = 20
-              ,min = 0
-              ,max = 365
-              ,step = 1
             )
           )
           # Price Table ----------
@@ -123,8 +104,23 @@ db_body <- dashboardBody(
             width = NULL
             ,verbatimTextOutput("capm_regression")
           )
+          # Autocorrelation Plot ----------
+          ,box(
+            width = NULL
+            ,plotOutput("acf_plot")
+            # Number of days for ACF Lag ----------
+            ,sliderInput(
+              inputId = "n_acf_lag"
+              ,label = "Number of days for Autocorrelation Lag:"
+              ,value = 30
+              ,min = 0
+              ,max = 100
+              ,step = 1
+            )
+          )
         )
         
+        # Column 2 ----------
         ,column(
           6
           # Price Time Series ----------
@@ -139,17 +135,38 @@ db_body <- dashboardBody(
             ,verbatimTextOutput(
               "price_ts_click_info"
             )
+            # Number of days for Moving Average ----------
+            ,sliderInput(
+              inputId = "n_moving_average"
+              ,label = "Number of days for Moving Average:"
+              ,value = 20
+              ,min = 0
+              ,max = 365
+              ,step = 1
+            )
           )
           # Return Time Series ----------
           ,box(
             width = NULL
             ,plotOutput("return_ts")
+            # Period for Returns ----------
+            ,selectInput(
+              inputId = "return_period"
+              ,label = "Period for returns:"
+              ,choices = c(
+                Daily = "daily"
+                ,Monthly = "monthly"
+                ,Quarterly = "quarterly"
+                ,Annual = "yearly"
+              )
+            )
           )
           # Stock vs. Index Returns ----------
           ,box(
             width = NULL
             ,plotOutput("stock_index_return")
           )
+          
         )
         
       )
@@ -164,6 +181,7 @@ db_body <- dashboardBody(
       tabName = "db_energy"
       ,fluidRow(
         
+        # Column 1 ----------
         column(
           6
           # Stock Inputs ----------
@@ -204,6 +222,7 @@ db_body <- dashboardBody(
           )
         )
         
+        # Column 2 ----------
         ,column(
           6
           # Energy Price Time Series ----------
