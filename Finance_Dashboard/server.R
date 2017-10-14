@@ -271,45 +271,45 @@ shinyServer(
             ,y = "Autocorrelation"
           )
       } else{
-        # stock_price_data() %>% 
-        #   filter(
-        #     date >= input$date_range[[1]]
-        #     ,date <= input$date_range[[2]]
-        #   ) %>%
-        #   select(
-        #     symbol
-        #     ,R_a
-        #   ) %>% 
-        #   split(f = .$symbol) %>% 
-        #   map(function(x) acf(x = x$R_a, plot = FALSE, lag.max = input$n_acf_lag)) %>% 
-        #   map_dfr(~with(data = .,expr = data.frame(Lag = lag, Autocorrelation = acf))) %>% 
-        #   mutate(symbol = rep(c(input$stock_ticker), each = input$n_acf_lag + 1)) %>% 
-        #   ggplot(
-        #     aes(
-        #       x = Lag
-        #       ,y = Autocorrelation
-        #     )
-        #   ) +
-        #   geom_hline(
-        #     aes(
-        #       yintercept = 0
-        #     )
-        #     ,linetype = "dotted"
-        #   ) +
-        #   geom_segment(
-        #     aes(
-        #       xend = Lag
-        #       ,yend = 0
-        #     )
-        #   ) +
-        #   geom_smooth(
-        #     linetype = 0
-        #     ,method = "lm"
-        #     ,formula = y ~ 1
-        #   ) +
-        #   facet_wrap(
-        #     ~ symbol
-        #   )
+        stock_price_data() %>% 
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
+          select(
+            symbol
+            ,R_a
+          ) %>% 
+          split(f = .$symbol) %>% 
+          map(function(x) acf(x = x$R_a, plot = FALSE, lag.max = input$n_acf_lag)) %>% 
+          map_dfr(~with(data = .,expr = data.frame(Lag = lag, Autocorrelation = acf))) %>% 
+          mutate(symbol = rep(c(input$stock_ticker), each = input$n_acf_lag + 1)) %>% 
+          ggplot(
+            aes(
+              x = Lag
+              ,y = Autocorrelation
+            )
+          ) +
+          geom_hline(
+            aes(
+              yintercept = 0
+            )
+            ,linetype = "dotted"
+          ) +
+          geom_segment(
+            aes(
+              xend = Lag
+              ,yend = 0
+            )
+          ) +
+          geom_smooth(
+            linetype = 0
+            ,method = "lm"
+            ,formula = y ~ 1
+          ) +
+          facet_wrap(
+            ~ symbol
+          )
       }
     })
     
