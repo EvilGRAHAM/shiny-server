@@ -191,6 +191,12 @@ shinyServer(
               ,y = R_a
             )
           ) +
+          geom_hline(
+            aes(
+              yintercept = 0
+            )
+            ,linetype = "dotted"
+          ) +
           geom_line() +
           facet_wrap(
             ~ symbol

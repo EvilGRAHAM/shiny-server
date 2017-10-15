@@ -155,6 +155,7 @@ db_body <- dashboardBody(
               ,label = "Period for returns:"
               ,choices = c(
                 Daily = "daily"
+                ,Weekly = "weekly"
                 ,Monthly = "monthly"
                 ,Quarterly = "quarterly"
                 ,Annual = "yearly"
