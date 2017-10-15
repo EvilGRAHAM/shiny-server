@@ -321,6 +321,37 @@ shinyServer(
       }
     })
     
+    # Market Cap Plot ----------
+    output$market_cap_bc <- renderPlot({
+      if(is.null(input$stock_ticker)){
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = "Stock Ticker"
+            ,y = "Market Cap ($)"
+          )
+      } else{
+        tibble(symbol = input$stock_ticker) %>% 
+          tq_get(get = "key.stats") %>% 
+          group_by(symbol) %>% 
+          select(
+            symbol
+            ,Market.Capitalization
+          ) %>% 
+          arrange(symbol) %>% 
+          ggplot(
+            aes(
+              x = symbol
+              ,y = Market.Capitalization
+            )
+          ) + 
+          geom_col(alpha = 0.75) +
+          labs(
+            x = "Stock Ticker"
+            ,y = "Market Cap ($)"
+          )
+      }
+    })
     # Gold Test ----------
     output$gold <- renderDataTable(
       tq_get(

@@ -166,6 +166,11 @@ db_body <- dashboardBody(
             width = NULL
             ,plotOutput("stock_index_return")
           )
+          # Market Cap ----------
+          ,box(
+            width = NULL
+            ,plotOutput("market_cap_bc")
+          )
           
         )
         
