@@ -30,6 +30,89 @@ stock_retrieve <- function(ticker, date_min, date_max, returns_col){
     )
 }
 
+weight_determine <- function(stock_list, n){
+  stock_weight <- rep(0, n)
+  stock_order <- sample(n)
+  for (i in 1:n-1){
+    stock_weight[stock_order[i]] <- runif(n = 1, min = 0, max = 1 - sum(stock_weight)) %>% round(4)
+  }
+  stock_weight[stock_order[n]] <- 1 - sum(stock_weight)
+  stock_weight
+}
+
+stock_var_fun <- function(stock_list, stock_cov, stock_weight, n){
+  stock_var <- 0
+  for (i in 1:n){
+    for(j in 1:n){
+      stock_var <- stock_var + stock_cov[i, j] * stock_weight[i] * stock_weight[j]
+    }
+  }
+  stock_var
+}
+
+port_optim <- function(stock_ticker, stock_price_data, port_num_iterations, port_max_volatility){
+  stock_num <- 
+    stock_ticker %>% 
+    length %>% 
+    as.numeric
+  
+  stock_summary <-
+    stock_price_data %>%
+    tq_performance(
+      Ra = R_a
+      ,Rb = NULL
+      , performance_fun = table.AnnualizedReturns
+    )
+  
+  stock_cov <-
+    stock_price_data %>%
+    select(symbol, R_a, date) %>%
+    spread(symbol, R_a) %>%
+    select(-date) %>%
+    cov() * 252
+  
+  portfolio_results <- matrix(nrow = port_num_iterations, ncol = 2 + stock_num)
+  colnames(portfolio_results) <- c("Mean Return", "Volatility", stock_ticker %>% as.character())
+  portfolio_results %<>%
+    as.tibble %>%
+    mutate_all(.funs = as.numeric)
+  
+  for(i in 1:port_num_iterations){
+    portfolio_weight <- weight_determine(stock_list = stock_ticker, n = stock_num)
+    portfolio_sd <- stock_var_fun(stock_list = stock_ticker, stock_cov = stock_cov, stock_weight = portfolio_weight, n = stock_num) %>% sqrt
+    portfolio_return <- sum(stock_summary$AnnualizedReturn * portfolio_weight)
+    portfolio_results[i, ] <- c(portfolio_return, portfolio_sd, portfolio_weight)
+  }
+  
+  portfolio_optimal <-
+    portfolio_results %>%
+    filter(Volatility <= port_max_volatility) %>%
+    arrange(desc(`Mean Return`)) %>%
+    first
+  
+  portfolio_optimal %>%
+    select(
+      -c(
+        `Mean Return`
+        ,Volatility
+      )
+    ) %>%
+    gather(
+      key = symbol
+      ,value = Weight
+    ) %>%
+    ggplot(
+      aes(
+        x = symbol
+        ,y = Weight
+      )
+    ) +
+    geom_col(alpha = 0.75) +
+    labs(
+      x = "Stock Ticker"
+      ,y = "Weight (%)"
+    )
+}
 
 # Server ----------
 shinyServer(
@@ -87,7 +170,6 @@ shinyServer(
             ,adjusted = round(adjusted, 2)
             ,R_a = paste0(round(R_a, 4)*100,"%")
           ) %>% 
-          # select(-R_a) %>% 
           arrange(
             desc(date)
           )
@@ -113,7 +195,6 @@ shinyServer(
           ggplot(
             aes(
               x = date
-              # ,y = close
               ,y = adjusted
               ,open = open
               ,high = high
@@ -122,7 +203,6 @@ shinyServer(
             )
           ) +
           geom_barchart() +
-          # geom_line() +
           geom_smooth(
             se = FALSE
           ) +
@@ -497,6 +577,25 @@ shinyServer(
             x = "Date"
             ,y = "Price"
           )
+      }
+    })
+    
+    # Portfolio Weights ----------
+    output$port_opt_prop_bc <- renderPlot({
+      if(is.null(input$stock_ticker)){
+        ggplot() +
+          geom_blank() +
+          labs(
+            x = "Stock Ticker"
+            ,y = "Weight (%)"
+          )
+      } else{
+        port_optim(
+          stock_ticker = input$stock_ticker
+          ,stock_price_data = stock_price_data()
+          ,port_num_iterations = input$port_num_iterations
+          ,port_max_volatility = input$port_max_volatility
+        )
       }
     })
   }

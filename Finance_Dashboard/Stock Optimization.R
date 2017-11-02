@@ -176,8 +176,8 @@ results %>%
   mutate(
     port_return = mean(risk_tolerance)#port_optim(risk_tolerance = risk_tolerance) %>% select(port_return) %>%  as.numeric()
   )
-ggplot(data = tibble(risk_tolerance = c(0.1,3))) +
-  stat_function(data = port_optim, aes(y = port_return), fun = port_optim)
+# ggplot(data = tibble(risk_tolerance = c(0.1,3))) +
+#   stat_function(data = port_optim, aes(y = port_return), fun = port_optim)
 test <- tibble(risk_tolerance = as.numeric(), port_return = as.numeric(), port_sd = as.numeric())
 for (i in 1:50){
   test[i,] <- c(i/100, port_optim(i/100))

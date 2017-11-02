@@ -27,8 +27,9 @@ db_sidebar <- dashboardSidebar(
   sidebarMenu(
     # Sidebar Menu List ----------
     menuItem("Stocks", tabName = "db_stock", icon = icon("line-chart"))
-    ,menuItem("Metals", tabName = "db_metal", icon = icon("bank"))
+    ,menuItem("Portfolio Optimization", tabName = "db_port_opt", icon = icon("balance-scale"))
     ,menuItem("Energy", tabName = "db_energy", icon = icon("tint"))
+    ,menuItem("Metals", tabName = "db_metal", icon = icon("bank"))
     # Date Range ----------
     ,dateRangeInput(
       inputId = "date_range"
@@ -47,6 +48,7 @@ db_sidebar <- dashboardSidebar(
 db_body <- dashboardBody(
   tabItems(
     
+    # Stock Tab ----------
     tabItem(
       tabName = "db_stock"
       ,fluidRow(
@@ -178,11 +180,56 @@ db_body <- dashboardBody(
       )
     )
     
+    # Portfolio Tab ----------
+    ,tabItem(
+      tabName = "db_port_opt"
+      ,fluidRow(
+        
+        # Column 1 ----------
+        column(
+          6
+          # Parameter Inputs ----------
+          ,box(
+            title = "Inputs"
+            ,width = NULL
+            # Max Volatility ----------
+            ,numericInput(
+              inputId = "port_max_volatility"
+              ,label = "Enter the maximum allowable volatility:"
+              ,value = 0.3
+              ,min = 0
+              ,step = 0.1
+            )
+            # Number of Iterations
+            ,sliderInput(
+              inputId = "port_num_iterations"
+              ,label = "Number of iterations:"
+              ,min = 1
+              ,max = 10000
+              ,value = 1000
+            )
+          )
+        )
+        
+        # Column 2 ----------
+        ,column(
+          6
+          # Portfolio Proportions ----------
+          ,box(
+            width = NULL
+            ,plotOutput("port_opt_prop_bc")
+          )
+        )
+      )
+    )
+    
+    # Metals Tab ----------
     ,tabItem(
       tabName = "db_metal"
       ,dataTableOutput("gold")
     )
     
+    # Energy Tab ----------
     ,tabItem(
       tabName = "db_energy"
       ,fluidRow(
