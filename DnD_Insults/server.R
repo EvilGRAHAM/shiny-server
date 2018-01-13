@@ -41,6 +41,7 @@ shinyServer(
           ## First Phrase ----------
           full_insult[1] <- 
             First_Phrase %>% 
+            na.omit() %>% 
             sample_n(size = 1) %>% 
             as.character()
           
@@ -50,14 +51,17 @@ shinyServer(
               case_when(
                 full_insult[1] == "Your" ~ 
                   Your_Second_Phrase[, i-1] %>% 
+                  na.omit() %>% 
                   sample_n(size = 1) %>% 
                   as.character()
                 ,full_insult[1] == "You're" ~ 
                   Youre_Second_Phrase[, i-1] %>% 
+                  na.omit() %>% 
                   sample_n(size = 1) %>% 
                   as.character()
                 ,full_insult[1] == "I've" ~ 
                   Ive_Second_Phrase[, i-1] %>% 
+                  na.omit() %>% 
                   sample_n(size = 1) %>% 
                   as.character()
               )
