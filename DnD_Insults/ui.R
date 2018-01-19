@@ -10,8 +10,8 @@ fluidPage(
   
   # Application title ----------
   theme = shinytheme("lumen")
-  
-  ,titlePanel("D&D Insult Generator")
+  ,headerPanel(HTML('<p><img src="D&D_Transparent.png" height=60 width=120/></p>'))
+  ,titlePanel("Insult Generator")
   
   ,fluidRow(
     
