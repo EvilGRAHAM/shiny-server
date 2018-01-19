@@ -6,26 +6,19 @@ library(readxl, warn.conflicts = FALSE, quietly = TRUE)
 
 
 # Data Import ----------
+insult_spreadsheet <- "data/Insults.xlsx"
 First_Phrase <-
-  read_xlsx(
-    path = "data/Insults.xlsx"
-    ,sheet = "First_Phrase"
-  )
+  insult_spreadsheet %>% 
+  read_xlsx(sheet = "First_Phrase")
 Your_Second_Phrase <-
-  read_xlsx(
-    path = "data/Insults.xlsx"
-    ,sheet = "Your_Second_Phrase"
-  )
+  insult_spreadsheet %>% 
+  read_xlsx(sheet = "Your_Second_Phrase")
 Youre_Second_Phrase <-
-  read_xlsx(
-    path = "data/Insults.xlsx"
-    ,sheet = "Youre_Second_Phrase"
-  )
+  insult_spreadsheet %>% 
+  read_xlsx(sheet = "Youre_Second_Phrase")
 Ive_Second_Phrase <-
-  read_xlsx(
-    path = "data/Insults.xlsx"
-    ,sheet = "Ive_Second_Phrase"
-  )
+  insult_spreadsheet %>% 
+  read_xlsx(sheet = "Ive_Second_Phrase")
 
 
 #Server ----------
