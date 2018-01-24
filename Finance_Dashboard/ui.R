@@ -4,8 +4,9 @@ library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(shinydashboard, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(magrittr, warn.conflicts = FALSE, quietly = TRUE)
-library(tidyquant, warn.conflicts = FALSE, quietly = TRUE)
 library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
+library(ggridges, warn.conflicts = FALSE, quietly = TRUE)
+library(tidyquant, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
 
 # Stock List ----------
@@ -168,6 +169,11 @@ db_body <- dashboardBody(
           ,box(
             width = NULL
             ,plotOutput("stock_index_return")
+          )
+          # Return Histogram Plot ----------
+          ,box(
+            width = NULL
+            ,plotOutput("return_hist_ridge")
           )
           # Market Cap ----------
           ,box(

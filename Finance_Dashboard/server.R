@@ -4,8 +4,9 @@ library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(shinydashboard, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(magrittr, warn.conflicts = FALSE, quietly = TRUE)
-library(tidyquant, warn.conflicts = FALSE, quietly = TRUE)
 library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
+library(ggridges, warn.conflicts = FALSE, quietly = TRUE)
+library(tidyquant, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
 
 
@@ -373,7 +374,18 @@ shinyServer(
           split(f = .$symbol) %>% 
           map(function(x) acf(x = x$R_a, plot = FALSE, lag.max = input$n_acf_lag[[2]])) %>% 
           map_dfr(~with(data = .,expr = data.frame(Lag = lag, Autocorrelation = acf))) %>% 
-          mutate(symbol = rep(c(input$stock_ticker), each = input$n_acf_lag[[2]] + 1)) %>% 
+          mutate(symbol = rep(c(input$stock_ticker), each = input$n_acf_lag[[2]] + 1)) %>%
+          left_join(
+            y = 
+              stock_price_data() %>% 
+              filter(
+                date >= input$date_range[[1]]
+                ,date <= input$date_range[[2]]
+              ) %>%  
+              group_by(symbol) %>% 
+              tally()
+            ,by = "symbol"
+          ) %>%
           filter(
             Lag <= input$n_acf_lag[[2]]
             ,Lag >= input$n_acf_lag[[1]]
@@ -385,10 +397,15 @@ shinyServer(
             )
           ) +
           geom_hline(
-            aes(
-              yintercept = 0
-            )
+            aes(yintercept = 0)
             ,linetype = "dotted"
+          ) +
+          geom_ribbon(
+            aes(
+              ymin = qnorm(0.025)/sqrt(n)
+              ,ymax = qnorm(0.975)/sqrt(n)
+            )
+            ,alpha = 0.2
           ) +
           geom_segment(
             aes(
@@ -396,14 +413,7 @@ shinyServer(
               ,yend = 0
             )
           ) +
-          geom_smooth(
-            linetype = 0
-            ,method = "lm"
-            ,formula = y ~ 1
-          ) +
-          facet_wrap(
-            ~ symbol
-          )
+          facet_wrap(~ symbol)
       }
     })
     
@@ -438,6 +448,41 @@ shinyServer(
           )
       }
     })
+    
+    # Return Histogram Plot ----------
+    output$return_hist_ridge <- renderPlot({
+      if(is.null(input$stock_ticker)){
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = "Return"
+            ,y = "Stock Ticker"
+          )
+      } else{
+        stock_price_data() %>%
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
+          ggplot(
+            aes(
+              x = R_a
+              ,y = symbol
+              ,height = ..density..
+            )
+          ) +
+          geom_density_ridges(
+            stat = "density"
+            ,rel_min_height = 0.001
+          ) +
+          labs(
+            x = "Return"
+            ,y = "Stock Ticker"
+          )
+      }
+    })
+    
+    
     # Gold Test ----------
     output$gold <- renderDataTable(
       tq_get(
@@ -446,6 +491,7 @@ shinyServer(
       )
       ,selection = "none"
     )
+    
     
     # Energy Stock Data set ----------
     energy_stock_price_data <- reactive({
@@ -579,6 +625,7 @@ shinyServer(
           )
       }
     })
+    
     
     # Portfolio Weights ----------
     output$port_opt_prop_bc <- renderPlot({
