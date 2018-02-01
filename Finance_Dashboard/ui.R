@@ -127,41 +127,43 @@ db_body <- dashboardBody(
         ,column(
           6
           # Price Time Series ----------
-          ,box(
+          ,tabBox(
             width = NULL
-            ,plotOutput(
-              "price_ts"
-              ,click = clickOpts(
-                id = "price_ts_click"
+            ,tabPanel(
+              title = "Price"
+              ,plotOutput(
+                "price_ts"
+                ,click = clickOpts(id = "price_ts_click")
+              )
+              ,verbatimTextOutput("price_ts_click_info")
+              # Number of days for Moving Average ----------
+              ,sliderInput(
+                inputId = "n_moving_average"
+                ,label = "Number of days for Moving Average:"
+                ,value = 20
+                ,min = 0
+                ,max = 365
+                ,step = 1
               )
             )
-            ,verbatimTextOutput(
-              "price_ts_click_info"
+            ,tabPanel(
+              title = "Volume"
+              ,plotOutput("volume_ts")
             )
-            # Number of days for Moving Average ----------
-            ,sliderInput(
-              inputId = "n_moving_average"
-              ,label = "Number of days for Moving Average:"
-              ,value = 20
-              ,min = 0
-              ,max = 365
-              ,step = 1
-            )
-          )
-          # Return Time Series ----------
-          ,box(
-            width = NULL
-            ,plotOutput("return_ts")
-            # Period for Returns ----------
-            ,selectInput(
-              inputId = "return_period"
-              ,label = "Period for returns:"
-              ,choices = c(
-                Daily = "daily"
-                ,Weekly = "weekly"
-                ,Monthly = "monthly"
-                ,Quarterly = "quarterly"
-                ,Annual = "yearly"
+            ,tabPanel(
+              title = "Returns"
+              ,plotOutput("return_ts")
+              # Period for Returns ----------
+              ,selectInput(
+                inputId = "return_period"
+                ,label = "Period for returns:"
+                ,choices = c(
+                  Daily = "daily"
+                  ,Weekly = "weekly"
+                  ,Monthly = "monthly"
+                  ,Quarterly = "quarterly"
+                  ,Annual = "yearly"
+                )
               )
             )
           )

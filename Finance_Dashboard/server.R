@@ -245,6 +245,44 @@ shinyServer(
       }  
     })
     
+    # Volume Time Series ----------
+    output$volume_ts <- renderPlot({
+      if(is.null(input$stock_ticker)){
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = "Date"
+            ,y = "Volume"
+          )
+      } else{
+        stock_price_data() %>% 
+          filter(
+            date >= input$date_range[[1]] - 2*input$n_moving_average
+          ) %>%
+          ggplot(
+            aes(
+              x = date
+              ,y = volume
+            )
+          ) +
+          geom_col() +
+          facet_wrap(
+            ~ symbol
+            ,scales = if_else(input$fix_y_axis_scale_ts, "fixed", "free_y")
+          ) +
+          labs(
+            x = "Date"
+            ,y = "Volume"
+          ) +
+          coord_x_date(
+            xlim = c(
+              input$date_range[[1]]
+              ,input$date_range[[2]]
+            )
+          )
+      }
+    })
+    
     # Returns Time Series ----------
     output$return_ts <- renderPlot({
       if(is.null(input$stock_ticker)){
