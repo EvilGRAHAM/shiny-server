@@ -134,6 +134,7 @@ shinyServer(
       nav_travel_speed <- input$travel_speed
       nav_survival_mod <- input$survival_mod
       nav_roll_type <- if_else(weather_gen()[1, 1] == 20, "Disadvantage", input$survival_roll_type)
+      input$new_day
       
       nav_dc <- 
         region_checks %>% 
@@ -211,6 +212,7 @@ shinyServer(
       input$travel_speed
       input$survival_mod
       input$survival_roll_type
+      input$new_day
       
       encounter_dc <- 
         region_checks %>% 
@@ -304,6 +306,7 @@ shinyServer(
       input$travel_speed
       input$survival_mod
       input$survival_roll_type
+      input$new_day
       
       weather_roll <- sample(1:20, size = 2, replace = TRUE)
       precip <- 

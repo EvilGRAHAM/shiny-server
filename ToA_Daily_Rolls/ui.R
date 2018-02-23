@@ -17,7 +17,11 @@ fluidPage(
       ,offset = 0
       ,wellPanel(
         # Region ----------
-        selectizeInput(
+        actionButton(
+          inputId = "new_day"
+          ,label = "New Day"
+        )
+        ,selectizeInput(
           inputId = "region"
           ,label = "Select Region:"
           ,choices = 
