@@ -201,8 +201,8 @@ function(input, output){
       }
   })
   
-  # Violin Plot ---------
-  output$violin <- renderPlot({
+  # Box Plot ---------
+  output$boxplot <- renderPlot({
     panss_tests %>% 
       select(
         RATER
@@ -225,20 +225,23 @@ function(input, output){
           ,y = Rating
         )
       ) +
-      geom_violin() +
-      geom_errorbar(
-        data = panss_rater_all_lang %>% 
-          filter(str_detect(string = Question, pattern = input$question_set))
-        ,aes(
-          ymin = Rating - 1
-          ,ymax = Rating + 1
-        )
-        ,width = 0.25
-      ) +
+      geom_boxplot() +
+      # geom_errorbar(
+      #   data = panss_rater_all_lang %>% 
+      #     filter(str_detect(string = Question, pattern = input$question_set))
+      #   ,aes(
+      #     ymin = Rating - 1
+      #     ,ymax = Rating + 1
+      #   )
+      #   ,width = 0.25
+      # ) +
+      geom_jitter(height = 0) +
       geom_point(
         data = panss_rater_all_lang %>% 
           filter(str_detect(string = Question, pattern = input$question_set))
         ,aes(shape = as.factor(RATER))
+        ,colour = "red"
+        ,size = 3
       ) +
       scale_shape_manual(
         values = 8
@@ -247,7 +250,7 @@ function(input, output){
       ) +
       scale_y_discrete(limit = 1:7) +
       labs(
-        title = paste("Violin Plot of", question_cats[[input$question_set]], "Ratings")
+        title = paste("Box Plot of", question_cats[[input$question_set]], "Ratings")
         ,y = "Rating"
       ) +
       theme(

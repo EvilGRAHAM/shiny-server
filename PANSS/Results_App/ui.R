@@ -75,9 +75,9 @@ db_body <- dashboardBody(
     ,column(
       width = 6
       ,box(
-        title = "Violin Plots"
+        title = "Box Plots"
         ,width = NULL
-        ,plotOutput("violin")
+        ,plotOutput("boxplot")
       )
       ,box(
         title = "Logistic Regression Summary"
