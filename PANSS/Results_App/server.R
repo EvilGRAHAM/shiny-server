@@ -20,8 +20,8 @@ theme_minimal2 <-
 
 
 # Data Import ----------
-panss <- "../Results App/Panssdata_Modified.csv" %>%
-  # "../Shiny/data/Panssdata_Modified.csv" %>% 
+panss <-
+  "../data/Panssdata_Modified.csv" %>%
   read_csv() %>% 
   filter_all(all_vars(!is.na(.))) %>% 
   mutate(
