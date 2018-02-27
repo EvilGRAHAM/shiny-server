@@ -486,7 +486,7 @@ shinyServer(
         )
     })
     
-    # Dead Explorer Table ----------
+    # Explorers Table ----------
     output$explorer_table <- renderTable({
       explorer_check <- 
         random_encounter_gen() %>%
