@@ -92,6 +92,28 @@ fluidPage(
         ,tableOutput("weather")
       )
     )
+    ,fluidRow(
+      column(
+        width = 3
+        ,offset = 0
+        ,tableOutput("cache_table")
+      )
+      ,column(
+        width = 3 
+        ,offset = 0
+        ,tableOutput("treasure_table")
+      )
+      ,column(
+        width = 3
+        ,offset = 0
+        ,tableOutput("dead_explorer_table")
+      )
+      ,column(
+        width = 3
+        ,offset = 0
+        ,tableOutput("explorer_table")
+      )
+    )
     
     
   )

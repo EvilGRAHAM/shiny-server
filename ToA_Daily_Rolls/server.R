@@ -4,6 +4,33 @@ library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 
 # Variables ----------
+random_encounter_tbl <- 
+  "data/random_encounters.csv" %>% 
+  read_csv() %>% 
+  gather(
+    key = Region
+    ,value = Roll
+    ,-Encounter
+  ) %>% 
+  filter(!is.na(Roll)) %>% 
+  mutate(
+    Bound = str_extract(Region, ".B$")
+    ,Region = 
+      Region %>% 
+      str_replace(pattern = ".B$", replacement = "") %>% 
+      str_trim()
+  ) %>% 
+  spread(
+    key = Bound
+    ,value = Roll
+  ) %>% 
+  mutate(UB = if_else(is.na(UB), LB, UB))
+
+cache_table <- read_csv("data/cache_table.csv")
+treasure_table <- read_csv("data/treasure_table.csv")
+dead_explorer_table <- read_csv("data/dead_explorer_table.csv")
+explorer_table <- read_csv("data/explorer_table.csv")
+
 regions <- 
   c(
     "Beach"
@@ -97,27 +124,6 @@ weather_conditions <-
       )
   )
 
-random_encounter_tbl <- 
-  "data/random_encounters.csv" %>% 
-  read_csv() %>% 
-  gather(
-    key = Region
-    ,value = Roll
-    ,-Encounter
-  ) %>% 
-  filter(!is.na(Roll)) %>% 
-  mutate(
-    Bound = str_extract(Region, ".B$")
-    ,Region = 
-      Region %>% 
-      str_replace(pattern = ".B$", replacement = "") %>% 
-      str_trim()
-  ) %>% 
-  spread(
-    key = Bound
-    ,value = Roll
-  ) %>% 
-  mutate(UB = if_else(is.na(UB), LB, UB))
 
 # Server ----------
 shinyServer(
@@ -207,7 +213,7 @@ shinyServer(
     })
     
     # Random Encounter ----------
-    output$random_encounter <- renderTable({
+    random_encounter_gen <- reactive({
       encounter_region <- input$region
       input$travel_speed
       input$survival_mod
@@ -297,8 +303,11 @@ shinyServer(
           ,`Encounter Check`
           ,`Encounter ID`
           ,Encounter
+        # ) %>% mutate(Encounter = "Explorers")
         )
     })
+    
+    output$random_encounter <- renderTable(random_encounter_gen())
     
     # Weather Check ----------
     weather_gen <- reactive({
@@ -343,8 +352,173 @@ shinyServer(
         )
     })
     
-    output$weather <- renderTable({
-      weather_gen()
+    output$weather <- renderTable(weather_gen())
+    
+    # Cache Table ----------
+    output$cache_table <- renderTable({
+      cache_check <- 
+        random_encounter_gen() %>%
+        select(
+          `Time of Day`
+          ,Encounter
+        ) %>% 
+        mutate(
+          roll_cache = 
+            if_else(
+              Encounter %in% 
+                c(
+                  "Cache"
+                  ,"Girallons"
+                  ,"Grungs"
+                )
+              ,TRUE
+              ,FALSE
+            ) 
+        ) %>% 
+        filter(roll_cache)
+      
+      cache_check %>% 
+        mutate(
+          `Cache ID` = 
+            sample(
+              x = 1:20
+              ,size = 
+                cache_check %>% 
+                count() %>% 
+                as.numeric()
+              ,replace = TRUE
+            )
+        ) %>% 
+        left_join(
+          cache_table
+          ,by = c("Cache ID" = "d20")
+        ) %>% 
+        select(
+          `Time of Day`
+          ,`Cache ID`
+          ,Cache
+        )
     })
+    
+    # Treasure Table ----------
+    output$treasure_table <- renderTable({
+      treasure_check <- 
+        random_encounter_gen() %>%
+        select(
+          `Time of Day`
+          ,Encounter
+        ) %>% 
+        mutate(
+          roll_treasure = 
+            if_else(
+              Encounter %in% 
+                c(
+                  "Cyclops"
+                  ,"Eblis"
+                  ,"Explorer, dead"
+                  ,"Girallons"
+                  ,"Sea hags"
+                  ,"Statue of Ubtao"
+                  ,"Su-monsters"
+                  ,"Wereboar"
+                  ,"Zhentarim"
+                )
+              ,TRUE
+              ,FALSE
+            ) 
+        ) %>% 
+        filter(roll_treasure)
+      
+      treasure_check %>% 
+        mutate(
+          `Treasure ID` = 
+            sample(
+              x = 1:100
+              ,size = 
+                treasure_check %>% 
+                count() %>% 
+                as.numeric()
+              ,replace = TRUE
+            )
+        ) %>% 
+        left_join(
+          treasure_table
+          ,by = c("Treasure ID" = "d100")
+        ) %>% 
+        select(
+          `Time of Day`
+          ,`Treasure ID`
+          ,Treasure
+        )
+    })
+    
+    # Dead Explorer Table ----------
+    output$dead_explorer_table <- renderTable({
+      dead_explorer_check <- 
+        random_encounter_gen() %>%
+        select(
+          `Time of Day`
+          ,Encounter
+        ) %>% 
+        mutate(roll_dead_explorer = if_else(Encounter == "Explorer, dead", TRUE, FALSE)) %>% 
+        filter(roll_dead_explorer)
+      
+      dead_explorer_check %>% 
+        mutate(
+          `Remains ID` = 
+            sample(
+              x = 1:20
+              ,size = 
+                dead_explorer_check %>% 
+                count() %>% 
+                as.numeric()
+              ,replace = TRUE
+            )
+        ) %>% 
+        left_join(
+          dead_explorer_table
+          ,by = c("Remains ID" = "d20")
+        ) %>% 
+        select(
+          `Time of Day`
+          ,`Remains ID`
+          ,Remains
+        )
+    })
+    
+    # Dead Explorer Table ----------
+    output$explorer_table <- renderTable({
+      explorer_check <- 
+        random_encounter_gen() %>%
+        select(
+          `Time of Day`
+          ,Encounter
+        ) %>% 
+        mutate(roll_explorer = if_else(Encounter == "Explorers", TRUE, FALSE)) %>% 
+        filter(roll_explorer)
+      
+      explorer_check %>% 
+        mutate(
+          `Explorers ID` = 
+            sample(
+              x = 1:6
+              ,size = 
+                explorer_check %>% 
+                count() %>% 
+                as.numeric()
+              ,replace = TRUE
+            )
+        ) %>% 
+        left_join(
+          explorer_table
+          ,by = c("Explorers ID" = "d6")
+        ) %>% 
+        select(
+          `Time of Day`
+          ,`Explorers ID`
+          ,Explorers
+        )
+    })
+    
   }
 )
