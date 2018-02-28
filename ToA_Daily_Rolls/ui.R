@@ -27,11 +27,12 @@ fluidPage(
           ,choices = 
             c(
               "Beach"
+              ,"Lake"
               ,"Jungle - No Undead"
               ,"Jungle - Lesser Undead"
               ,"Jungle - Greater Undead"
               ,"Mountains"
-              ,"Rivers/Lake"
+              ,"Rivers"
               ,"Ruins"
               ,"Swamp"
               ,"Wasteland"

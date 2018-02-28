@@ -34,11 +34,12 @@ explorer_table <- read_csv("data/explorer_table.csv")
 regions <- 
   c(
     "Beach"
+    ,"Lake"
     ,"Jungle - No Undead"
     ,"Jungle - Lesser Undead"
     ,"Jungle - Greater Undead"
     ,"Mountains"
-    ,"Rivers/Lake"
+    ,"Rivers"
     ,"Ruins"
     ,"Swamp"
     ,"Wasteland"
@@ -63,28 +64,28 @@ region_checks <-
     Region = regions
     ,`Navigation DC` = 
       c(
-        rep(x = 10, times = 1, each = 1)
-        ,rep(x = 15, times = 4, each = 1)
-        ,rep(x = 10, times = 1, each = 1)
-        ,rep(x = 15, times = 3, each = 1)
+        rep(x = 10, times = 2, each = 1)
+        ,rep(x = 15, times = 8, each = 1)
       )
-    ,`Walking Hexes` = rep(x = 1, times = 9)
+    ,`Walking Hexes` = rep(x = 1, times = 10)
     ,`Canoeing Hexes` =
       c(
-        rep(x = 1, times = 5, each = 1)
+        rep(x = 1, times = 1, each = 1)
+        ,rep(x = 2, times = 1, each = 1)
+        ,rep(x = 1, times = 4, each = 1)
         ,rep(x = 2, times = 1, each = 1)
         ,rep(x = 1, times = 3, each = 1)
       )
     ,`Random Encounters` =
       c(
-        rep(x = 16, times = 2, each = 1)
+        rep(x = 16, times = 3, each = 1)
         ,rep(x = 14, times = 1, each = 1)
         ,rep(x = 12, times = 1, each = 1)
         ,rep(x = 16, times = 5, each = 1)
       )
     ,`Foraging DC` =
       c(
-        rep(x = 10, times = 3, each = 1)
+        rep(x = 10, times = 4, each = 1)
         ,rep(x = 15, times = 2, each = 1)
         ,rep(x = 10, times = 2, each = 1)
         ,rep(x = 15, times = 1, each = 1)

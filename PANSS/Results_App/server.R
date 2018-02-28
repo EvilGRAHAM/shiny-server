@@ -57,13 +57,6 @@ panss_tests <-
   panss %>% 
   filter(RATER != 0)
 
-panss_tests %>% 
-  select(-LANG) %>% 
-  apply(
-    2
-    ,sum
-  )
-
 panss_diff <-
   as.tibble(
     abs(panss_tests[, -2] - panss_rater[rep(x = 1, times = as.numeric(count(panss_tests))), -2])
