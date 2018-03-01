@@ -389,4 +389,16 @@ function(input, output){
         ,Pass
       )
   })
+  
+  # PANSS Results ----------
+  output$panss_results <- renderTable({
+    panss_results %>% 
+      filter(RATER == input$rater_num) %>% 
+      select(
+        RATER
+        ,LANG
+        ,starts_with(input$question_set)
+        ,Passes
+      )
+  })
 }

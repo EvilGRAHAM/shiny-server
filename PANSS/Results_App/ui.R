@@ -45,9 +45,17 @@ db_sidebar <- dashboardSidebar(
 db_body <- dashboardBody(
   fluidRow(
     column(
-      width = 12
+      width = 6
       ,box(
-        title = "Results"
+        title = "PANSS Results"
+        ,width = NULL
+        ,tableOutput("panss_results")
+      )
+    )
+    ,column(
+      width = 6
+      ,box(
+        title = "Question Results"
         ,width = NULL
         ,tableOutput("results")
       )
