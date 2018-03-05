@@ -8,7 +8,7 @@ library(lubridate, warn.conflicts = FALSE, quietly = TRUE)
 library(ggridges, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyquant, warn.conflicts = FALSE, quietly = TRUE)
 library(DT, warn.conflicts = FALSE, quietly = TRUE)
-
+library(CVXR, warn.conflicts = FALSE, quietly = TRUE)
 
 # ggplot Formatting ----------
 # Updates theme_minimal so that there is borders around the graphs and the facet headings.
@@ -20,7 +20,8 @@ theme_tq() %>% theme_set()
 stock_retrieve <- function(ticker, date_min, date_max, returns_col){
   tibble(symbol = ticker) %>%
     tq_get(
-      to = date_max
+      from = min(date_min, today() - years(1))
+      ,to = date_max
     ) %>%
     group_by(symbol) %>%
     tq_mutate(
@@ -31,31 +32,8 @@ stock_retrieve <- function(ticker, date_min, date_max, returns_col){
     )
 }
 
-weight_determine <- function(stock_list, n){
-  stock_weight <- rep(0, n)
-  stock_order <- sample(n)
-  for (i in 1:n-1){
-    stock_weight[stock_order[i]] <- runif(n = 1, min = 0, max = 1 - sum(stock_weight)) %>% round(4)
-  }
-  stock_weight[stock_order[n]] <- 1 - sum(stock_weight)
-  stock_weight
-}
-
-stock_var_fun <- function(stock_list, stock_cov, stock_weight, n){
-  stock_var <- 0
-  for (i in 1:n){
-    for(j in 1:n){
-      stock_var <- stock_var + stock_cov[i, j] * stock_weight[i] * stock_weight[j]
-    }
-  }
-  stock_var
-}
-
-port_optim <- function(stock_ticker, stock_price_data, port_num_iterations, port_max_volatility){
-  stock_num <- 
-    stock_ticker %>% 
-    length %>% 
-    as.numeric
+port_optim <- function(stock_ticker, stock_price_data, port_min_return, short_sale_bool){
+  stock_num <- length(stock_ticker)
   
   stock_summary <-
     stock_price_data %>%
@@ -65,6 +43,13 @@ port_optim <- function(stock_ticker, stock_price_data, port_num_iterations, port
       , performance_fun = table.AnnualizedReturns
     )
   
+  stock_returns <- 
+    stock_summary %>% 
+    ungroup() %>% 
+    select(AnnualizedReturn) %>% 
+    as.matrix() 
+  rownames(stock_returns) <- stock_ticker
+  
   stock_cov <-
     stock_price_data %>%
     select(symbol, R_a, date) %>%
@@ -72,47 +57,53 @@ port_optim <- function(stock_ticker, stock_price_data, port_num_iterations, port
     select(-date) %>%
     cov() * 252
   
-  portfolio_results <- matrix(nrow = port_num_iterations, ncol = 2 + stock_num)
-  colnames(portfolio_results) <- c("Mean Return", "Volatility", stock_ticker %>% as.character())
-  portfolio_results %<>%
-    as.tibble %>%
-    mutate_all(.funs = as.numeric)
-  
-  for(i in 1:port_num_iterations){
-    portfolio_weight <- weight_determine(stock_list = stock_ticker, n = stock_num)
-    portfolio_sd <- stock_var_fun(stock_list = stock_ticker, stock_cov = stock_cov, stock_weight = portfolio_weight, n = stock_num) %>% sqrt
-    portfolio_return <- sum(stock_summary$AnnualizedReturn * portfolio_weight)
-    portfolio_results[i, ] <- c(portfolio_return, portfolio_sd, portfolio_weight)
-  }
-  
-  portfolio_optimal <-
-    portfolio_results %>%
-    filter(Volatility <= port_max_volatility) %>%
-    arrange(desc(`Mean Return`)) %>%
-    first
-  
-  portfolio_optimal %>%
-    select(
-      -c(
-        `Mean Return`
-        ,Volatility
+  stock_weights <- Variable(rows = stock_num)
+  objective_variance <- Minimize(quad_form(stock_weights, stock_cov))
+  portfolio_constraints <- 
+    if(short_sale_bool){
+      list(
+        t(stock_returns) %*% stock_weights >= port_min_return # Higher than specified return
+        ,t(rep(x = 1, times = stock_num)) %*% stock_weights == 1 # Fully allocate budget
       )
-    ) %>%
-    gather(
-      key = symbol
-      ,value = Weight
-    ) %>%
-    ggplot(
-      aes(
-        x = symbol
-        ,y = Weight
+    } else{
+      list(
+        t(stock_returns) %*% stock_weights >= port_min_return # Higher than specified return
+        ,t(rep(x = 1, times = stock_num)) %*% stock_weights == 1 # Fully allocate budget
+        ,stock_weights >= 0 # No Short Selling
       )
-    ) +
-    geom_col(alpha = 0.75) +
-    labs(
-      x = "Stock Ticker"
-      ,y = "Weight (%)"
-    )
+    }
+  portfolio_problem <- Problem(objective = objective_variance, constraints = portfolio_constraints)
+  cvx_portfolio <- solve(portfolio_problem)
+  
+  cvx_weight <- cvx_portfolio$getValue(stock_weights)
+  rownames(cvx_weight) <- stock_ticker
+  colnames(cvx_weight) <- "Weight"
+  cvx_volatility <- sqrt(cvx_portfolio$value)
+  cvx_returns <- as.numeric(t(stock_returns) %*% cvx_weight)
+  cvx_sharpe <- cvx_returns/cvx_volatility
+  
+  list(
+    `Portfolio Summary` =
+      stock_summary %>% 
+      bind_rows(
+        tibble(
+          symbol = "Portfolio"
+          ,AnnualizedReturn = cvx_returns
+          ,`AnnualizedSharpe(Rf=0%)` = cvx_sharpe
+          ,AnnualizedStdDev = cvx_volatility
+        )
+      ) %>% 
+      left_join(
+        cvx_weight %>% 
+          as.data.frame() %>% 
+          rownames_to_column(var = "symbol") %>% 
+          bind_rows(
+            tibble(symbol = "Portfolio", Weight = sum(cvx_weight))
+          )
+        ,by = "symbol"
+      )
+    ,`Covariance Matrix` = stock_cov
+  )
 }
 
 # Server ----------
@@ -125,10 +116,10 @@ shinyServer(
         message = "Retrieving Stock Data..."
         ,value = NULL
         ,stock_retrieve(
-          input$stock_ticker
-          ,input$date_range[[1]]
-          ,input$date_range[[2]]
-          ,"R_a"
+          ticker = input$stock_ticker
+          ,date_min = input$date_range[[1]]
+          ,date_max = input$date_range[[2]]
+          ,returns_col = "R_a"
         )
       ) 
     })
@@ -457,34 +448,34 @@ shinyServer(
     
     # Market Cap Plot ----------
     output$market_cap_bc <- renderPlot({
-      if(is.null(input$stock_ticker)){
+      # if(is.null(input$stock_ticker)){
         ggplot() + 
           geom_blank() +
           labs(
             x = "Stock Ticker"
             ,y = "Market Cap ($)"
           )
-      } else{
-        tibble(symbol = input$stock_ticker) %>% 
-          tq_get(get = "key.stats") %>% 
-          group_by(symbol) %>% 
-          select(
-            symbol
-            ,Market.Capitalization
-          ) %>% 
-          arrange(symbol) %>% 
-          ggplot(
-            aes(
-              x = symbol
-              ,y = Market.Capitalization
-            )
-          ) + 
-          geom_col(alpha = 0.75) +
-          labs(
-            x = "Stock Ticker"
-            ,y = "Market Cap ($)"
-          )
-      }
+      # } else{
+      #   tibble(symbol = input$stock_ticker) %>% 
+      #     tq_get(get = "key.stats") %>% 
+      #     group_by(symbol) %>% 
+      #     select(
+      #       symbol
+      #       ,Market.Capitalization
+      #     ) %>% 
+      #     arrange(symbol) %>% 
+      #     ggplot(
+      #       aes(
+      #         x = symbol
+      #         ,y = Market.Capitalization
+      #       )
+      #     ) + 
+      #     geom_col(alpha = 0.75) +
+      #     labs(
+      #       x = "Stock Ticker"
+      #       ,y = "Market Cap ($)"
+      #     )
+      # }
     })
     
     # Return Histogram Plot ----------
@@ -666,7 +657,16 @@ shinyServer(
     
     
     # Portfolio Weights ----------
-    output$port_opt_prop_bc <- renderPlot({
+    port_opt_tbl <- reactive(
+      port_optim(
+        stock_ticker = input$stock_ticker
+        ,stock_price_data = stock_price_data()
+        ,port_min_return = input$port_min_return
+        ,short_sale_bool = input$short_sale
+      )
+    )
+    
+    output$port_opt_weight_bc <- renderPlot({
       if(is.null(input$stock_ticker)){
         ggplot() +
           geom_blank() +
@@ -675,13 +675,86 @@ shinyServer(
             ,y = "Weight (%)"
           )
       } else{
-        port_optim(
-          stock_ticker = input$stock_ticker
-          ,stock_price_data = stock_price_data()
-          ,port_num_iterations = input$port_num_iterations
-          ,port_max_volatility = input$port_max_volatility
-        )
+        port_opt_tbl()$`Portfolio Summary` %>% 
+          filter(symbol != "Portfolio") %>% 
+          ggplot(
+            aes(
+              x = symbol
+              ,y = Weight
+            )
+          ) +
+          geom_col(alpha = 0.75) +
+          labs(
+            x = "Stock Ticker"
+            ,y = "Weight (%)"
+          )
       }
     })
-  }
-)
+    
+    # Optimal Portfolio Stats ----------
+    output$port_opt_stats <- renderDataTable(
+      port_opt_tbl()$`Portfolio Summary` %>% 
+        rename(Symbol = symbol) %>% 
+        mutate_if(.predicate = is.double, .funs = round, 4)
+      ,selection = "none"
+    )
+    
+    # Covariance Matrix ----------
+    output$port_cov_mat <- renderDataTable(
+      round(port_opt_tbl()$`Covariance Matrix`, 4)
+      ,selection = "none"
+    )
+    
+    # Portfolio Returns Time Series ----------
+    output$port_return_ts <- renderPlot({
+      if(is.null(input$stock_ticker)){
+        ggplot() + 
+          geom_blank() +
+          labs(
+            x = "Date"
+            ,y = "Return"
+          )
+      } else{
+        stock_price_data() %>%
+          tq_transmute(
+            select = adjusted
+            ,mutate_fun = periodReturn
+            ,period = input$return_period
+            ,col_rename = "R_a"
+          ) %>% 
+          tq_portfolio(
+            assets_col = symbol
+            ,returns_col = R_a
+            ,weights = 
+              port_opt_tbl()$`Portfolio Summary` %>% 
+              filter(symbol != "Portfolio") %>% 
+              mutate_if(.predicate = is.double, .funs = round, 4) %>% 
+              select(symbol, weight = Weight)
+            ,col_rename = "R_a"
+          ) %>% 
+          filter(
+            date >= input$date_range[[1]]
+            ,date <= input$date_range[[2]]
+          ) %>%
+          ggplot(
+            aes(
+              x = date
+              ,y = R_a
+            )
+          ) +
+          geom_hline(
+            aes(
+              yintercept = 0
+            )
+            ,linetype = "dotted"
+          ) +
+          geom_line() +
+          labs(
+            x = "Date"
+            ,y = "Return"
+          )
+      }
+    })
+
+})
+    

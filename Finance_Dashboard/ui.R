@@ -200,22 +200,34 @@ db_body <- dashboardBody(
           ,box(
             title = "Inputs"
             ,width = NULL
-            # Max Volatility ----------
+            # Min Return ----------
             ,numericInput(
-              inputId = "port_max_volatility"
-              ,label = "Enter the maximum allowable volatility:"
+              inputId = "port_min_return"
+              ,label = "Enter the Minimum Annual Return:"
               ,value = 0.3
               ,min = 0
               ,step = 0.1
             )
-            # Number of Iterations
-            ,sliderInput(
-              inputId = "port_num_iterations"
-              ,label = "Number of iterations:"
-              ,min = 1
-              ,max = 10000
-              ,value = 1000
+            # Allow Short Selling ----------
+            ,checkboxInput(
+              inputId = "short_sale"
+              ,label = "Allow Short Selling?"
+              ,value = FALSE
             )
+          )
+          # Summary Stats ----------
+          ,box(
+            title = "Summary Statistics"
+            ,width = NULL
+            # Summary Stats Table ----------
+            ,dataTableOutput("port_opt_stats")
+          )
+          # Covariance Matrix ----------
+          ,box(
+            title = "Covariance Matrix"
+            ,width = NULL
+            # Covariance Matrix Table ----------
+            ,dataTableOutput("port_cov_mat")
           )
         )
         
@@ -225,7 +237,12 @@ db_body <- dashboardBody(
           # Portfolio Proportions ----------
           ,box(
             width = NULL
-            ,plotOutput("port_opt_prop_bc")
+            ,plotOutput("port_opt_weight_bc")
+          )
+          # Portfolio Returns Time Series ----------
+          ,box(
+            width = NULL
+            ,plotOutput("port_return_ts")
           )
         )
       )
