@@ -1,6 +1,5 @@
 # Libraries ----------
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
-library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(shinydashboard, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(magrittr, warn.conflicts = FALSE, quietly = TRUE)
@@ -195,9 +194,9 @@ shinyServer(
             )
           ) +
           geom_barchart() +
-          geom_smooth(
-            se = FALSE
-          ) +
+          # geom_smooth(
+          #   se = FALSE
+          # ) +
           geom_bbands(
             ma_fun = SMA
             ,sd = 2
@@ -755,6 +754,10 @@ shinyServer(
           )
       }
     })
+    
+    # output$test <- renderPrint(
+      # stargazer::stargazer(lm(rnorm(100) ~ rnorm(100,1)), type = "html")
+    # )
 
 })
     

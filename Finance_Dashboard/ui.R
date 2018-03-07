@@ -1,6 +1,5 @@
 # Libraries ----------
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
-library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(shinydashboard, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 library(magrittr, warn.conflicts = FALSE, quietly = TRUE)
@@ -21,7 +20,6 @@ stock_list <-
 db_header <- dashboardHeader(
   title = "Financial Dashboard"
 )
-
 
 # Dashboard Sidebar ----------
 db_sidebar <- dashboardSidebar(
@@ -53,63 +51,79 @@ db_body <- dashboardBody(
     tabItem(
       tabName = "db_stock"
       ,fluidRow(
-        
+        # Stock Inputs ----------
+        box(
+          title = "Inputs"
+          ,width = 4
+          ,collapsible = TRUE
+          # Stock Ticker ----------
+          ,selectInput(
+            inputId = "stock_ticker"
+            ,label = "Enter a Stock Symbol:"
+            ,choices = stock_list %>% 
+              select(symbol) %>%
+              arrange(symbol)
+            ,multiple = TRUE
+            ,selectize = TRUE
+          )
+          # Index Inputs ----------
+          ,selectInput(
+            inputId = "index_ticker"
+            ,label = "Enter a Stock Index:"
+            ,choices = c(
+              "XLF"
+              ,"SPY"
+              ,"VXX"
+              ,"EEM"
+              ,"GDX"
+              ,"QQQ"
+              ,"USO"
+              ,"IWM"
+              ,"EWZ"
+              ,"XOP"
+            )
+            ,multiple = TRUE
+            ,selectize = TRUE
+          )
+          # Fix y-axis Scale Boolean ----------
+          ,checkboxInput(
+            inputId = "fix_y_axis_scale_ts"
+            ,label = "Fix y-axis Scale?"
+            ,value = FALSE
+          )
+        )
+        # Price Table ----------
+        ,box(
+          title = "Data"
+          ,width = 8
+          ,collapsible = TRUE
+          ,dataTableOutput("price_tbl")
+          ,textOutput("test")
+        )
+      )
+      
+      
+      ,fluidRow(
         # Column 1 ----------
         column(
-          6
-          # Stock Inputs ----------
-          ,box(
-            title = "Inputs"
-            ,width = NULL
-            # Stock Ticker ----------
-            ,selectInput(
-              inputId = "stock_ticker"
-              ,label = "Enter a Stock Symbol:"
-              ,choices = stock_list %>% 
-                select(symbol) %>%
-                arrange(symbol)
-              ,multiple = TRUE
-              ,selectize = TRUE
-            )
-            # Index Inputs ----------
-            ,selectInput(
-              inputId = "index_ticker"
-              ,label = "Enter a Stock Index:"
-              ,choices = c(
-                "XLF"
-                ,"SPY"
-                ,"VXX"
-                ,"EEM"
-                ,"GDX"
-                ,"QQQ"
-                ,"USO"
-                ,"IWM"
-                ,"EWZ"
-                ,"XOP"
-              )
-              ,multiple = TRUE
-              ,selectize = TRUE
-            )
-            # Fix y-axis Scale Boolean ----------
-            ,checkboxInput(
-              inputId = "fix_y_axis_scale_ts"
-              ,label = "Fix y-axis Scale?"
-              ,value = FALSE
-            )
-          )
-          # Price Table ----------
-          ,box(
-            width = NULL
-            ,dataTableOutput("price_tbl")
-          )
+          width = 6
           # CAPM Regression Ouput ----------
           ,box(
-            width = NULL
+            title = "CAPM Regression"
+            ,width = NULL
+            ,collapsible = TRUE
             ,verbatimTextOutput("capm_regression")
+          )
+          # Stock vs. Index Returns ----------
+          ,box(
+            title = "Stock vs. Index Returns"
+            ,width = NULL
+            ,plotOutput("stock_index_return")
           )
           # Autocorrelation Plot ----------
           ,box(
-            width = NULL
+            title = "Autocorrelation Plot"
+            ,width = NULL
             ,plotOutput("acf_plot")
             # Number of days for ACF Lag ----------
             ,sliderInput(
@@ -125,10 +139,11 @@ db_body <- dashboardBody(
         
         # Column 2 ----------
         ,column(
-          6
+          width = 6
           # Price Time Series ----------
           ,tabBox(
-            width = NULL
+            title = "Time Series Plots"
+            ,width = NULL
             ,tabPanel(
               title = "Price"
               ,plotOutput(
@@ -167,19 +182,18 @@ db_body <- dashboardBody(
               )
             )
           )
-          # Stock vs. Index Returns ----------
-          ,box(
-            width = NULL
-            ,plotOutput("stock_index_return")
-          )
           # Return Histogram Plot ----------
           ,box(
-            width = NULL
+            title = "Histogram of Returns"
+            ,width = NULL
             ,plotOutput("return_hist_ridge")
           )
           # Market Cap ----------
           ,box(
-            width = NULL
+            title = "Market Capitalization"
+            ,width = NULL
+            ,collapsible = TRUE
+            ,collapsed = TRUE
             ,plotOutput("market_cap_bc")
           )
           
@@ -195,7 +209,7 @@ db_body <- dashboardBody(
         
         # Column 1 ----------
         column(
-          6
+          width = 6
           # Parameter Inputs ----------
           ,box(
             title = "Inputs"
@@ -233,7 +247,7 @@ db_body <- dashboardBody(
         
         # Column 2 ----------
         ,column(
-          6
+          width = 6
           # Portfolio Proportions ----------
           ,box(
             width = NULL
@@ -261,7 +275,7 @@ db_body <- dashboardBody(
         
         # Column 1 ----------
         column(
-          6
+          width = 6
           # Stock Inputs ----------
           ,box(
             title = "Inputs"
@@ -302,7 +316,7 @@ db_body <- dashboardBody(
         
         # Column 2 ----------
         ,column(
-          6
+          width = 6
           # Energy Price Time Series ----------
           ,box(
             width = NULL
