@@ -693,7 +693,12 @@ shinyServer(
     # Optimal Portfolio Stats ----------
     output$port_opt_stats <- renderDataTable(
       port_opt_tbl()$`Portfolio Summary` %>% 
-        rename(Symbol = symbol) %>% 
+        rename(
+          Symbol = symbol
+          ,Return = AnnualizedReturn
+          # ,`Sharpe Ratio` = `AnnualizedSharpe(RF=0%)`
+          ,Volatility = AnnualizedStdDev
+        ) %>% 
         mutate_if(.predicate = is.double, .funs = round, 4)
       ,selection = "none"
     )
