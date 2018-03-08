@@ -705,11 +705,13 @@ shinyServer(
         )
       } else{
         port_opt_tbl()$`Portfolio Summary` %>% 
-          rename(
+          select(Sharpe = 3, everything()) %>% 
+          select(
             Symbol = symbol
             ,Return = AnnualizedReturn
-            # ,`Sharpe Ratio` = `AnnualizedSharpe(RF=0%)`
+            ,`Sharpe Ratio` = Sharpe
             ,Volatility = AnnualizedStdDev
+            ,Weight
           ) %>% 
           mutate_if(.predicate = is.double, .funs = round, 4) %>% 
           ungroup() %>% 
