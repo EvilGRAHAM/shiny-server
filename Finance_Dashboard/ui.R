@@ -98,7 +98,6 @@ db_body <- dashboardBody(
           ,width = 8
           ,collapsible = TRUE
           ,dataTableOutput("price_tbl")
-          ,textOutput("test")
         )
       )
       

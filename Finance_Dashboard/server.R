@@ -1,4 +1,5 @@
 # Libraries ----------
+library(tools, warn.conflicts = FALSE, quietly = TRUE)
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
 library(shinydashboard, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
@@ -141,14 +142,14 @@ shinyServer(
     output$price_tbl <- renderDataTable({
       if(is.null(input$stock_ticker)){
         tibble(
-          stock = as.numeric(NA)
-          ,date = as.numeric(NA)
-          ,open = as.numeric(NA)
-          ,high = as.numeric(NA)
-          ,low = as.numeric(NA)
-          ,close = as.numeric(NA)
-          ,volume = as.numeric(NA)
-          ,adjusted = as.numeric(NA)
+          Symbol = as.numeric(NA)
+          ,Date = as.numeric(NA)
+          ,Open = as.numeric(NA)
+          ,High = as.numeric(NA)
+          ,Low = as.numeric(NA)
+          ,Close = as.numeric(NA)
+          ,Volume = as.numeric(NA)
+          ,Adjusted = as.numeric(NA)
           ,R_a = as.numeric(NA)
         )
       } else{
@@ -160,10 +161,12 @@ shinyServer(
             ,close = round(close, 2)
             ,adjusted = round(adjusted, 2)
             ,R_a = paste0(round(R_a, 4)*100,"%")
-          ) %>% 
+          ) %>%
           arrange(
             desc(date)
-          )
+          ) %>%
+          ungroup() %>%
+          rename_all(.funs = toTitleCase)
       }
       }
       ,selection = "none"
@@ -692,20 +695,37 @@ shinyServer(
     
     # Optimal Portfolio Stats ----------
     output$port_opt_stats <- renderDataTable(
-      port_opt_tbl()$`Portfolio Summary` %>% 
-        rename(
-          Symbol = symbol
-          ,Return = AnnualizedReturn
-          # ,`Sharpe Ratio` = `AnnualizedSharpe(RF=0%)`
-          ,Volatility = AnnualizedStdDev
-        ) %>% 
-        mutate_if(.predicate = is.double, .funs = round, 4)
+      if(is.null(input$stock_ticker)){
+        tibble(
+          Symbol = as.numeric(NA)
+          ,Return = as.numeric(NA)
+          ,`AnnualizedSharpe(Rf=0%)` = as.numeric(NA)
+          ,Volatility = as.numeric(NA)
+          ,Weight = as.numeric(NA)
+        )
+      } else{
+        port_opt_tbl()$`Portfolio Summary` %>% 
+          rename(
+            Symbol = symbol
+            ,Return = AnnualizedReturn
+            # ,`Sharpe Ratio` = `AnnualizedSharpe(RF=0%)`
+            ,Volatility = AnnualizedStdDev
+          ) %>% 
+          mutate_if(.predicate = is.double, .funs = round, 4) %>% 
+          ungroup() %>% 
+          rename_all(toTitleCase)
+      }
       ,selection = "none"
     )
     
     # Covariance Matrix ----------
-    output$port_cov_mat <- renderDataTable(
-      round(port_opt_tbl()$`Covariance Matrix`, 4)
+    output$port_cov_mat <- renderDataTable({
+      if(is.null(input$stock_ticker)){
+        matrix(dimnames = list("Stock A", "Stock A"))
+      } else{
+        round(port_opt_tbl()$`Covariance Matrix`, 4)
+      }
+      }
       ,selection = "none"
     )
     
@@ -759,10 +779,6 @@ shinyServer(
           )
       }
     })
-    
-    # output$test <- renderPrint(
-      # stargazer::stargazer(lm(rnorm(100) ~ rnorm(100,1)), type = "html")
-    # )
-
+  
 })
     
