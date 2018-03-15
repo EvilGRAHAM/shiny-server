@@ -130,10 +130,16 @@ weather_conditions <-
 shinyServer(
   function(input, output) {
     # Regions Table ----------
-    output$regions_tbl <- renderTable(region_checks)
+    output$regions_tbl <- renderTable(
+      region_checks %>% 
+        filter(Region == input$region)
+    )
 
     # Pace Table ----------
-    output$pace_tbl <- renderTable(pace_modifiers)
+    output$pace_tbl <- renderTable(
+      pace_modifiers %>% 
+        filter(Pace == paces[input$travel_speed])
+    )
     
     # Navigation Check ----------
     output$navigation_check <- renderPrint({
@@ -193,7 +199,7 @@ shinyServer(
       
       nav_result <- 
         cat(
-          "Navigation Check Result:"
+          " Nav Check Result:"
           ,nav_rolls
           ,nav_survival_sign
           ,abs(nav_survival_mod)

@@ -92,18 +92,24 @@ stock_cov <-
 stock_cov
 
 
-portfolio_results <- matrix(nrow = iterations, ncol = 2 + stock_num)
-colnames(portfolio_results) <- c("Mean Return", "Volatility", stock_list$symbol %>% as.character())
-portfolio_results %<>%
-  as.tibble %>% 
-  mutate_all(.funs = as.numeric)
-
-for(i in 1:iterations){
-  portfolio_weight <- weight_determine(stock_list = stock_list, n = stock_num)
-  portfolio_sd <- stock_var_fun(stock_list = stock_list, stock_cov = stock_cov, stock_weight = portfolio_weight, n = stock_num) %>% sqrt
-  portfolio_return <- sum(stock_summary$AnnualizedReturn * portfolio_weight)
-  portfolio_results[i, ] <- c(portfolio_return, portfolio_sd, portfolio_weight)
-}
+portfolio_results <- 
+  1:iterations %>% 
+  map_df(
+    .f = function(x){
+      portfolio_weight <- weight_determine(stock_list = stock_list, n = stock_num)
+      portfolio_sd <- stock_var_fun(stock_list = stock_list, stock_cov = stock_cov, stock_weight = portfolio_weight, n = stock_num) %>% sqrt
+      portfolio_return <- sum(stock_summary$AnnualizedReturn * portfolio_weight)
+      list(
+        "AAPL" = portfolio_weight[1]
+        ,"FB" = portfolio_weight[2]
+        ,"GOOGL" = portfolio_weight[3]
+        ,"NFLX" = portfolio_weight[4]
+        ,"Volatility" = portfolio_sd
+        ,"Mean Return" = portfolio_return
+      )
+    }
+    ,.id = "Iteration"
+  )
 portfolio_results
 
 portfolio_results %>% 

@@ -10,10 +10,10 @@ library(DT, warn.conflicts = FALSE, quietly = TRUE)
 
 # Stock List ----------
 stock_list <- 
-  rbind(
-    tq_exchange("NASDAQ")
-    ,tq_exchange("NYSE")
-    ,tq_exchange("AMEX")
+  list(
+    NASDAQ = tq_exchange("NASDAQ")
+    ,NYSE = tq_exchange("NYSE")
+    ,AMEX = tq_exchange("AMEX")
   )
 
 # Dashboard Header ----------
@@ -60,9 +60,14 @@ db_body <- dashboardBody(
           ,selectInput(
             inputId = "stock_ticker"
             ,label = "Enter a Stock Symbol:"
-            ,choices = stock_list %>% 
-              select(symbol) %>%
-              arrange(symbol)
+            ,choices = 
+              # stock_list %>% 
+              # select(symbol) %>%
+              # arrange(symbol)
+              stock_list %>% 
+              map(~ select(., symbol)) %>% 
+              map(~ arrange(., symbol)) %>% 
+              map(~ .$symbol)
             ,multiple = TRUE
             ,selectize = TRUE
           )
@@ -283,10 +288,16 @@ db_body <- dashboardBody(
             ,selectInput(
               inputId = "energy_stock_ticker"
               ,label = "Enter a Stock Symbol:"
-              ,choices = stock_list %>% 
-                filter(sector == "Energy") %>% 
-                select(symbol) %>%
-                arrange(symbol)
+              ,choices = 
+                # stock_list %>% 
+                # filter(sector == "Energy") %>% 
+                # select(symbol) %>%
+                # arrange(symbol)
+                stock_list %>% 
+                map(~ filter(., sector == "Energy")) %>% 
+                map(~ select(., symbol)) %>% 
+                map(~ arrange(., symbol)) %>% 
+                map(~ .$symbol)
               ,multiple = TRUE
               ,selectize = TRUE
             )
