@@ -23,6 +23,7 @@ function(request) {
             inputId = "new_day"
             ,label = "New Day"
           )
+          ,bookmarkButton()
           ,selectizeInput(
             inputId = "region"
             ,label = "Select Region:"
@@ -68,7 +69,6 @@ function(request) {
             ,label = "Survival Modifier:"
             ,value = 0
           )
-          ,bookmarkButton()
         )
       )
       
