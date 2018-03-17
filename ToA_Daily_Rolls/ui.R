@@ -1,30 +1,29 @@
 # Libraries ----------
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
+library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(shinymaterial, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 
 
 # UI ----------
-material_page(
+fluidPage(
   
   # Application title ----------
-  title = "Tomb of Annihilation Daily Tracker"
-  ,nav_bar_color = "blue-grey"
-  ,material_row(
+  # theme = shinytheme("lumen")
+  titlePanel(title = "Tomb of Annihilation Daily Tracker")
+  ,fluidRow(
     # Inputs ----------
-    material_column(
+    column(
       width = 3
       ,offset = 0
-      ,material_card(
-        depth = 2
+      ,wellPanel(
         # Region ----------
-        ,material_button(
-          input_id = "new_day"
+        actionButton(
+          inputId = "new_day"
           ,label = "New Day"
-          ,color = "deep-purple"
         )
-        ,material_dropdown(
-          input_id = "region"
+        ,selectizeInput(
+          inputId = "region"
           ,label = "Select Region:"
           ,choices = 
             c(
@@ -39,11 +38,10 @@ material_page(
               ,"Swamp"
               ,"Wasteland"
             )
-          ,color = "deep-purple"
         )
         # Travel Speed ----------
-        ,material_dropdown(
-          input_id = "travel_speed"
+        ,selectizeInput(
+          inputId = "travel_speed"
           ,label = "Travel Speed:"
           ,choices = 
             c(
@@ -51,11 +49,10 @@ material_page(
               ,"Fast" = "f"
               ,"Slow" = "s"
             )
-          ,color = "deep-purple"
         )
         # Survival Roll Type ----------
-        ,material_dropdown(
-          input_id = "survival_roll_type"
+        ,selectizeInput(
+          inputId = "survival_roll_type"
           ,label = "Survival Roll Type:"
           ,choices = 
             c(
@@ -63,96 +60,64 @@ material_page(
               ,"Advantage"
               ,"Disadvantage"
             )
-          ,color = "deep-purple"
         )
         # Survival Modifier ----------
-        ,material_number_box(
-          input_id = "survival_mod"
+        ,numericInput(
+          inputId = "survival_mod"
           ,label = "Survival Modifier:"
-          ,min_value = -5
-          ,max_value = 30
-          ,initial_value = 0
-          ,color = "deep-purple"
+          ,value = 0
         )
       )
     )
     
     # Main ----------
-    ,material_column(
+    ,column(
       width = 9
       ,offset = 0
-      ,material_card(
-        depth = 2
-        ,tableOutput("regions_tbl")
-      )
-      ,material_card(
-        depth = 2
-        ,tableOutput("pace_tbl")
-      )
+      ,tableOutput("regions_tbl")
+      ,tableOutput("pace_tbl")
     )
-  )
-  ,material_row(
-    material_column(
-      width = 4
-      ,offset = 
-        ,material_card(
-          depth = 2          
-          ,verbatimTextOutput("navigation_check")
-        )
-    )
-    ,material_column(
-      width = 4
-      ,offset = 0
-      ,material_card(
-        depth = 2
+    ,fluidRow(
+      column(
+        width = 4
+        ,offset = 0
+        ,verbatimTextOutput("navigation_check")
+      )
+      ,column(
+        width = 4
+        ,offset = 0
         ,tableOutput("random_encounter")
       )
-    )
-    ,material_column(
-      width = 4
-      ,offset = 0
-      ,material_card(
-        depth = 2
+      ,column(
+        width = 4
+        ,offset = 0
         ,tableOutput("weather")
       )
     )
-  )
-  ,material_row(
-    material_column(
-      width = 6
-      ,offset = 0
-      ,material_card(
-        depth = 2
+    ,fluidRow(
+      column(
+        width = 3
+        ,offset = 0
         ,tableOutput("cache_table")
       )
-    )
-    ,material_column(
-      width = 6
-      ,offset = 0
-      ,material_card(
-        depth = 2
+      ,column(
+        width = 3 
+        ,offset = 0
         ,tableOutput("treasure_table")
       )
-    )
-  )
-  ,material_row(
-    material_column(
-      width = 6
-      ,offset = 0
-      ,material_card(
-        depth = 2
+      ,column(
+        width = 3
+        ,offset = 0
         ,tableOutput("dead_explorer_table")
       )
-    )
-    ,material_column(
-      width = 6
-      ,offset = 0
-      ,material_card(
-        depth = 2
+      ,column(
+        width = 3
+        ,offset = 0
         ,tableOutput("explorer_table")
       )
     )
+    
+    
   )
-  
   
 )
