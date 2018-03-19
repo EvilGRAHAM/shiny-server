@@ -4,6 +4,15 @@ library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 
 # Variables ----------
+cr_table <- 
+  c(
+    0
+    ,1/8
+    ,1/4
+    ,1/2
+    ,1:30
+  )
+
 monster_size <- 
   c(
     "Tiny" = "t"
@@ -236,12 +245,10 @@ function(request) {
             inputId = "name"
             ,label = "Name:"
           )
-          ,numericInput(
+          ,selectizeInput(
             inputId = "expected_cr"
             ,label = "Expected CR"
-            ,min = 0
-            ,max = 30
-            ,value = 0
+            ,choice = c("Choose One" = "", cr_table)
           )
           ,selectizeInput(
             inputId = "size"

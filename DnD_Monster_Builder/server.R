@@ -988,6 +988,9 @@ shinyServer(
     output$offensive_cr <- renderText(paste("Offensive CR", offensive_cr()))
     
     ## Final CR ----------
-    final_cr <- reactive(round(mean(c(offensive_cr(), defensive_cr())), 0))
+    final_cr <- reactive({
+      final_cr <- mean(c(offensive_cr(), defensive_cr()))
+      cr_table$CR[which.min(abs(cr_table$CR - final_cr - 0.0000001))]
+    })
     output$final_cr <- renderText(paste("Final CR", final_cr()))
   })
