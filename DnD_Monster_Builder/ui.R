@@ -471,8 +471,12 @@ function(request) {
             ,choices = languages
             ,multiple = TRUE
           )
-          
-          
+          ,selectizeInput(
+            inputId = "weapon_type"
+            ,label = "Type of Weapon"
+            ,choices = weapon_type
+            ,multiple = TRUE
+          )
           ,sliderInput(
             inputId = "multiattack"
             ,label = "Number of Attacks"
@@ -480,12 +484,6 @@ function(request) {
             ,max = 5
             ,value = 1
             ,step = 1
-          )
-          ,selectizeInput(
-            inputId = "weapon_type"
-            ,label = "Type of Weapon"
-            ,choices = weapon_type
-            ,multiple = TRUE
           )
         )
       )
