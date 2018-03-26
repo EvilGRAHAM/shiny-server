@@ -10,7 +10,6 @@ function(request) {
   fluidPage(
     
     # Application title ----------
-    # theme = shinytheme("lumen")
     titlePanel(title = "Tomb of Annihilation Daily Tracker")
     ,fluidRow(
       # Inputs ----------
@@ -24,6 +23,7 @@ function(request) {
             ,label = "New Day"
           )
           ,bookmarkButton()
+          ,textOutput("num_days")
           ,selectizeInput(
             inputId = "region"
             ,label = "Select Region:"

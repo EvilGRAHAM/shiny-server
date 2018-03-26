@@ -309,6 +309,10 @@ shinyServer(
             )
             ,linetype = "dotted"
           ) +
+          geom_smooth(
+            method = "lm"
+            ,se = FALSE
+          ) +
           geom_line() +
           facet_wrap(
             ~ symbol

@@ -230,7 +230,6 @@ function(request) {
   fluidPage(
     
     # Application title ----------
-    # theme = shinytheme("lumen")
     titlePanel(title = "D&D Monster Builder")
     
     ,fluidRow(
@@ -244,6 +243,19 @@ function(request) {
           ,textInput(
             inputId = "name"
             ,label = "Name:"
+          )
+          ,fileInput(
+            inputId = "monster_image"
+            ,label = "Image of Monster"
+            ,multiple = FALSE
+            ,accept = 
+              c(
+                "image/gif"
+                ,"image/png"
+                ,"image/jpeg"
+                ,"image/bmp"
+                ,"image/webp"
+              )
           )
           ,selectizeInput(
             inputId = "expected_cr"
@@ -477,6 +489,10 @@ function(request) {
             ,choices = weapon_type
             ,multiple = TRUE
           )
+          ,textInput(
+            inputId = "natural_weapon_name"
+            ,label = "Natural Weapon Name"
+          )
           ,sliderInput(
             inputId = "multiattack"
             ,label = "Number of Attacks"
@@ -494,6 +510,7 @@ function(request) {
         width = 8
         ,offset = 0
         ,h3(textOutput("name"))
+        # ,imageOutput("monster_pic")
         ,em(textOutput("sub_name"))
         ,strong(textOutput("ac"))
         ,strong(textOutput("hp"))

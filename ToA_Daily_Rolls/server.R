@@ -129,6 +129,16 @@ weather_conditions <-
 # Server ----------
 shinyServer(
   function(input, output) {
+    # Days Counter
+    num_days <- reactiveValues(count = 0) # Defining & initializing the reactiveValues object
+    
+    observeEvent(
+      input$new_day
+      ,num_days$count <- num_days$count + 1
+    )
+    
+    output$num_days <- renderText(num_days$count)
+    
     # Regions Table ----------
     output$regions_tbl <- renderTable(
       region_checks %>% 

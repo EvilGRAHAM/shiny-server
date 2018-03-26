@@ -608,6 +608,8 @@ shinyServer(
     # Description ----------
     output$name <- renderText(input$name)
     
+    # output$monster_pic <- renderImage(input$monster_image)
+    
     output$sub_name <- renderText({
       size <- 
         ifelse(
