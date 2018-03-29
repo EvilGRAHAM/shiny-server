@@ -38,7 +38,7 @@ db_sidebar <- dashboardSidebar(
       ,end = today()
     )
     # Bookmark Button ----------
-    ,bookmarkButton()
+    # ,bookmarkButton()
   )
 )
 
