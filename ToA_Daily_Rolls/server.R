@@ -1,6 +1,5 @@
 # Libraries ----------
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
-library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 
 # Variables ----------
@@ -79,8 +78,8 @@ region_checks <-
     ,`Random Encounters` =
       c(
         rep(x = 16, times = 3, each = 1)
+        ,rep(x = 15, times = 1, each = 1)
         ,rep(x = 14, times = 1, each = 1)
-        ,rep(x = 12, times = 1, each = 1)
         ,rep(x = 16, times = 5, each = 1)
       )
     ,`Foraging DC` =
@@ -129,7 +128,7 @@ weather_conditions <-
 # Server ----------
 shinyServer(
   function(input, output) {
-    # Days Counter
+    # Days Counter ----------
     num_days <- reactiveValues(count = 0) # Defining & initializing the reactiveValues object
     
     observeEvent(
@@ -209,7 +208,9 @@ shinyServer(
       
       nav_result <- 
         cat(
-          " Nav Check Result:"
+          "Day"
+          ,max(input$day, num_days$count, na.rm = TRUE)
+          ,"\nNav Check Result:"
           ,nav_rolls
           ,nav_survival_sign
           ,abs(nav_survival_mod)
@@ -219,11 +220,9 @@ shinyServer(
           ,nav_check
           ,inequality
           ,nav_dc
-          ,"\n"
-          ,"Getting Lost Random Direction:"
+          ,"\nGetting Lost Random Direction:"
           ,sample(x = 1:6, size = 1 + nav_hex_mod, replace = TRUE)
-          ,"\n"
-          ,"Extra Hex Traveled:"
+          ,"\nExtra Hex Traveled:"
           ,nav_hex_mod
           ,"Hex"
         )
@@ -260,7 +259,7 @@ shinyServer(
             if_else(
               `Encounter Check` >= encounter_dc
               ,encounter_rolls
-              ,as.integer(0)
+              ,as.integer(NA)
             )
         )
       
@@ -320,59 +319,11 @@ shinyServer(
           ,`Encounter Check`
           ,`Encounter ID`
           ,Encounter
-        # ) %>% mutate(Encounter = "Explorers")
         )
     })
-    
-    output$random_encounter <- renderTable(random_encounter_gen())
-    
-    # Weather Check ----------
-    weather_gen <- reactive({
-      input$region
-      input$travel_speed
-      input$survival_mod
-      input$survival_roll_type
-      input$new_day
-      
-      weather_roll <- sample(1:20, size = 2, replace = TRUE)
-      precip <- 
-        weather_conditions %>% 
-        filter(d20 == weather_roll[1]) %>% 
-        select(Precipitation) %>% 
-        as.character()
-      
-      wind <- 
-        if_else(
-          precip != "Tropical Storm"
-          ,weather_conditions %>% 
-            filter(d20 == weather_roll[2]) %>% 
-            select(Wind) %>% 
-            as.character()
-          ,"Heavy"
-        )
-      
-      tibble(
-        `Precipitation Roll` = weather_roll[1]
-        ,Precipitation = 
-          weather_conditions %>% 
-          filter(d20 == weather_roll[1]) %>% 
-          select(Precipitation) %>% 
-          as.character()
-      ) %>% 
-        mutate(
-          `Wind Roll` = if_else(`Precipitation Roll` == 20, as.integer(20), weather_roll[2])
-          ,Wind =
-            weather_conditions %>% 
-            filter(d20 == `Wind Roll`) %>% 
-            select(Wind) %>% 
-            as.character()
-        )
-    })
-    
-    output$weather <- renderTable(weather_gen())
     
     # Cache Table ----------
-    output$cache_table <- renderTable({
+    cache_gen <- reactive({
       cache_check <- 
         random_encounter_gen() %>%
         select(
@@ -418,7 +369,7 @@ shinyServer(
     })
     
     # Treasure Table ----------
-    output$treasure_table <- renderTable({
+    treasure_gen <- reactive({
       treasure_check <- 
         random_encounter_gen() %>%
         select(
@@ -470,7 +421,7 @@ shinyServer(
     })
     
     # Dead Explorer Table ----------
-    output$dead_explorer_table <- renderTable({
+    dead_explorer_gen <- reactive({
       dead_explorer_check <- 
         random_encounter_gen() %>%
         select(
@@ -504,7 +455,7 @@ shinyServer(
     })
     
     # Explorers Table ----------
-    output$explorer_table <- renderTable({
+    explorer_gen <- reactive({
       explorer_check <- 
         random_encounter_gen() %>%
         select(
@@ -536,6 +487,75 @@ shinyServer(
           ,Explorers
         )
     })
+    
+    # Events Output ----------
+    events_table_gen <- reactive({
+      random_encounter_gen() %>% 
+        left_join(
+          cache_gen()
+          ,by = "Time of Day"
+        ) %>% 
+        left_join(
+          treasure_gen()
+          ,by = "Time of Day"
+        ) %>% 
+        left_join(
+          explorer_gen()
+          ,by = "Time of Day"
+        ) %>% 
+        left_join(
+          dead_explorer_gen()
+          ,by = "Time of Day"
+        ) %>% 
+        select_if(.predicate = funs(prod(is.na(.)) == 0))
+    })
+    
+    output$events_table <- renderTable(events_table_gen())
+    
+    # Weather Check ----------
+    weather_gen <- reactive({
+      input$region
+      input$travel_speed
+      input$survival_mod
+      input$survival_roll_type
+      input$new_day
+      
+      weather_roll <- sample(1:20, size = 2, replace = TRUE)
+      precip <- 
+        weather_conditions %>% 
+        filter(d20 == weather_roll[1]) %>% 
+        select(Precipitation) %>% 
+        as.character()
+      
+      wind <- 
+        if_else(
+          precip != "Tropical Storm"
+          ,weather_conditions %>% 
+            filter(d20 == weather_roll[2]) %>% 
+            select(Wind) %>% 
+            as.character()
+          ,"Heavy"
+        )
+      
+      tibble(
+        `Precipitation Roll` = weather_roll[1]
+        ,Precipitation = 
+          weather_conditions %>% 
+          filter(d20 == weather_roll[1]) %>% 
+          select(Precipitation) %>% 
+          as.character()
+      ) %>% 
+        mutate(
+          `Wind Roll` = if_else(`Precipitation Roll` == 20, as.integer(20), weather_roll[2])
+          ,Wind =
+            weather_conditions %>% 
+            filter(d20 == `Wind Roll`) %>% 
+            select(Wind) %>% 
+            as.character()
+        )
+    })
+    
+    output$weather <- renderTable(weather_gen())
     
   }
 )

@@ -1,7 +1,6 @@
 # Libraries ----------
 library(shiny, warn.conflicts = FALSE, quietly = TRUE)
-library(shinythemes, warn.conflicts = FALSE, quietly = TRUE)
-library(shinymaterial, warn.conflicts = FALSE, quietly = TRUE)
+# library(shinymaterial, warn.conflicts = FALSE, quietly = TRUE)
 library(tidyverse, warn.conflicts = FALSE, quietly = TRUE)
 
 
@@ -14,19 +13,25 @@ function(request) {
     ,fluidRow(
       # Inputs ----------
       column(
-        width = 3
+        width = 2
         ,offset = 0
         ,wellPanel(
-          # Region ----------
+          # Days ----------
           actionButton(
             inputId = "new_day"
             ,label = "New Day"
           )
           ,bookmarkButton()
-          ,textOutput("num_days")
+          ,numericInput(
+            inputId = "day"
+            ,label = "Day #"
+            ,value = 0
+            ,min = 0
+          )
+          # Region ----------
           ,selectizeInput(
             inputId = "region"
-            ,label = "Select Region:"
+            ,label = "Region:"
             ,choices = 
               c(
                 "Beach"
@@ -76,48 +81,22 @@ function(request) {
       ,column(
         width = 9
         ,offset = 0
-        ,tableOutput("regions_tbl")
-        ,tableOutput("pace_tbl")
+        ,fluidRow(
+          column(
+            width = 4
+            ,offset = 0
+            ,verbatimTextOutput("navigation_check")
+          )
+          ,column(
+            width = 8
+            ,offset = 0
+            ,tableOutput("weather")
+          )
+        )
+        ,fluidRow(tableOutput("regions_tbl"))
+        ,fluidRow(tableOutput("pace_tbl"))
       )
-      ,fluidRow(
-        column(
-          width = 4
-          ,offset = 0
-          ,verbatimTextOutput("navigation_check")
-        )
-        ,column(
-          width = 4
-          ,offset = 0
-          ,tableOutput("random_encounter")
-        )
-        ,column(
-          width = 4
-          ,offset = 0
-          ,tableOutput("weather")
-        )
-      )
-      ,fluidRow(
-        column(
-          width = 3
-          ,offset = 0
-          ,tableOutput("cache_table")
-        )
-        ,column(
-          width = 3 
-          ,offset = 0
-          ,tableOutput("treasure_table")
-        )
-        ,column(
-          width = 3
-          ,offset = 0
-          ,tableOutput("dead_explorer_table")
-        )
-        ,column(
-          width = 3
-          ,offset = 0
-          ,tableOutput("explorer_table")
-        )
-      )
+      ,fluidRow(tableOutput("events_table"))
       
       
     )
